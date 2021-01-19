@@ -3,7 +3,20 @@ const std = @import("std");
 const Builder = std.build.Builder;
 const Mode = builtin.Mode;
 
-const EXAMPLES = [_][]const u8{"image_example", "pdf_example", "svg_example", "xcb_example"};
+const EXAMPLES = [_][]const u8{
+    "arc",                "arc_negative",
+    "clip",               "clip_image",
+    "curve_rectangle",    "curve_to",
+    "dash",               "fill_and_stroke2",
+    "fill_style",         "gradient",
+    "image",              "image_pattern",
+    "multi_segment_caps", "rounded_rectangle",
+    "set_line_cap",       "set_line_join",
+    "text",               "text_align_center",
+    "text_extents",       "surface_image",
+    "surface_pdf",        "surface_svg",
+    "surface_xcb",
+};
 
 pub fn build(b: *Builder) void {
     const mode = b.standardReleaseOptions();
@@ -30,14 +43,14 @@ pub fn build(b: *Builder) void {
     inline for (EXAMPLES) |name| {
         const example = b.addExecutable(name, "examples" ++ std.fs.path.sep_str ++ name ++ ".zig");
         example.addPackage(.{ .name = "cairo", .path = "src/cairo.zig" });
-        if (std.mem.eql(u8, name, "xcb_example")) {
+        if (std.mem.eql(u8, name, "surface_xcb")) {
             example.addPackage(.{ .name = "xcb", .path = "src/xcb.zig" });
         }
         example.setBuildMode(mode);
         example.setTarget(target);
         example.linkLibC();
         example.linkSystemLibrary("cairo");
-        if (std.mem.eql(u8, name, "xcb_example")) {
+        if (std.mem.eql(u8, name, "surface_xcb")) {
             example.linkSystemLibrary("xcb");
         }
         example.install();

@@ -23,16 +23,6 @@ pub const RegionStatus = enum {
     NoMemory,
 };
 
-/// Possible return values for cairo_pattern_status ()
-/// https://www.cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-status
-pub const PatternStatus = enum {
-    Success,
-    NoMemory,
-    InvalidMatrix,
-    PatternTypeMismatch,
-    InvalidMeshConstruction,
-};
-
 /// Possible return values for cairo_scaled_font_status ()
 /// https://www.cairographics.org/manual/cairo-cairo-scaled-font-t.html#cairo-scaled-font-status
 pub const ScaledFontStatus = enum {
@@ -50,10 +40,11 @@ pub const FontFaceStatus = enum {
 // TODO: can I avoid repeating the same field for the enum and the error?
 
 /// https://www.cairographics.org/manual/cairo-Error-handling.html#cairo-status-t
+/// TODO: use c.CAIRO_STATUS_NO_MEMORY etc...
 pub const StatusEnum = enum {
-    Success,
-    NoMemory,
-    InvalidRestore,
+    Success = c.CAIRO_STATUS_SUCCESS,
+    NoMemory = c.CAIRO_STATUS_NO_MEMORY,
+    InvalidRestore = c.CAIRO_STATUS_INVALID_RESTORE,
     InvalidPopGroup,
     NoCurrentPoint,
     InvalidMatrix,
@@ -149,6 +140,9 @@ pub const Status = error{
 pub fn surfaceStatusAsEnum(cairo_surface: *c.struct__cairo_surface) SurfaceStatus {
     const c_enum = c.cairo_surface_status(cairo_surface);
     const c_integer = @enumToInt(c_enum);
+    // std.debug.print("=================================================\n", .{});
+    // std.debug.print("surfaceStatusAsEnum c_integer {}\n", .{c_integer});
+    // std.debug.print("=================================================\n", .{});
     return @intToEnum(SurfaceStatus, @intCast(u3, c_integer));
 }
 

@@ -45,11 +45,11 @@ const Point = struct {
 /// Render a line chart on a Cairo context.
 pub fn lineChart(cr: *cairo.Context, width: usize, height: usize) void {
     const points = [_]Point{
-        .{.x = 0, .y = 10},
-        .{.x = 1, .y = 15},
-        .{.x = 2, .y = 14},
-        .{.x = 3, .y = 18},
-        .{.x = 4, .y = 25},
+        .{ .x = 0, .y = 10 },
+        .{ .x = 1, .y = 15 },
+        .{ .x = 2, .y = 14 },
+        .{ .x = 3, .y = 18 },
+        .{ .x = 4, .y = 25 },
     };
     const max_height: f64 = 25;
 

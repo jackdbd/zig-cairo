@@ -6,7 +6,10 @@ const c = @import("../c.zig");
 const Status = @import("../status.zig").Status;
 
 /// https://www.cairographics.org/manual/cairo-PNG-Support.html#cairo-image-surface-create-from-png
-pub fn createFromPng(filename: [*]const u8) !*c.struct__cairo_surface {
+pub fn create(filename: [*]const u8) !*c.struct__cairo_surface {
+    comptime {
+        // TODO: filename must be writable
+    }
     var surface = c.cairo_image_surface_create_from_png(filename);
     // TODO: error handling:
     // CAIRO_STATUS_NO_MEMORY
