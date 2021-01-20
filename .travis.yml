@@ -1,4 +1,4 @@
-language: cpp
+language: minimal
 jobs:
   include:
     - os: linux
@@ -6,11 +6,12 @@ jobs:
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -y libcairo2-dev; fi
-  - sudo snap install zig --classic --edge
+  - wget https://ziglang.org/download/0.7.1/zig-linux-x86_64-0.7.1.tar.xz
+  - tar -xvf zig-linux-x86_64-0.7.1.tar.xz
+  - export PATH=$PATH:$PWD/zig-linux-x86_64-0.7.1/
   - zig version
   - wget https://github.com/marler8997/ziget/archive/master.zip
   - unzip ziget-master.zip
-  - ls -a
   - pushd ziget-master && zig build && popd
   - export PATH=$PATH:$PWD/zig-cache/bin/
   - wget https://github.com/marler8997/zigup/archive/master.zip
@@ -21,9 +22,6 @@ before_install:
 addons:
   apt:
     update: true
-
-services:
-  - docker
 
 before_script:
   - echo "Zig compiler version (zig) $(zig version)"
