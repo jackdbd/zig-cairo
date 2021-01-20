@@ -1,21 +1,21 @@
-#!/bin/sh
+#!/bin/bash
 # before_install script to use on Travis CI
 # https://docs.travis-ci.com/user/installing-dependencies/#installing-projects-from-source
 
-set -ex
+# https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
+set -euxo pipefail
 
 if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
     sudo apt-get install -y libcairo2-dev;
 fi
 
-if [[ "$ZIG_VERSION" == "0.8.0-dev.1032+8098b3f84" ]]; then
-    wget https://ziglang.org/builds/zig-linux-x86_64-${ZIG_VERSION}.tar.xz
+if [[ $ZIG_VERSION == 0.8.0-dev* ]]; then
+    echo https://ziglang.org/builds/zig-linux-x86_64-"$ZIG_VERSION".tar.xz
 else
-    wget https://ziglang.org/download/${ZIG_VERSION}/zig-linux-x86_64-${ZIG_VERSION}.tar.xz
+    echo https://ziglang.org/download/"$ZIG_VERSION"/zig-linux-x86_64-"$ZIG_VERSION".tar.xz
 fi
 
-tar -xvf zig-linux-x86_64-${ZIG_VERSION}.tar.xz
-
-# I think we need both the zig library and the binary available on the PATH
-export PATH=$PATH:$PWD/zig-linux-x86_64-${ZIG_VERSION}/
-mv ${PWD}/zig-linux-x86_64-${ZIG_VERSION}/zig ${HOME}/bin
+tar -xvf zig-linux-x86_64-"$ZIG_VERSION".tar.xz
+mv "$PWD"/zig-linux-x86_64-"$ZIG_VERSION" "$HOME"
+mv "$HOME"/zig-linux-x86_64-"$ZIG_VERSION" "$HOME"/zig
+export PATH=$PATH:$HOME/zig/
