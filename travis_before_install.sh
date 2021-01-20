@@ -15,8 +15,7 @@ else
     wget https://ziglang.org/download/"$ZIG_VERSION"/zig-linux-x86_64-"$ZIG_VERSION".tar.xz
 fi
 
-tar -xvf zig-linux-x86_64-"$ZIG_VERSION".tar.xz
-mv "$PWD"/zig-linux-x86_64-"$ZIG_VERSION" "$HOME"
-mv "$HOME"/zig-linux-x86_64-"$ZIG_VERSION" "$HOME"/zig
-export PATH=$PATH:$HOME/zig/
-mv "$HOME"/zig/zig ${HOME}/bin
+tar -xvf zig-linux-x86_64-"$ZIG_VERSION".tar.xz && rm zig-linux-x86_64-"$ZIG_VERSION".tar.xz
+mv "$PWD"/zig-linux-x86_64-"$ZIG_VERSION" "$PWD"/zig && mv "$PWD"/ "$HOME"/zig
+export PATH=$PATH:$HOME/zig
+# cp "$HOME"/zig/zig ${HOME}/bin
