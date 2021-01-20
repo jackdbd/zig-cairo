@@ -5,10 +5,6 @@
 # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -euxo pipefail
 
-if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    sudo apt-get install -y libcairo2-dev;
-fi
-
 if [[ $ZIG_VERSION == 0.8.0-dev* ]]; then
     wget https://ziglang.org/builds/zig-linux-x86_64-"$ZIG_VERSION".tar.xz -O /tmp/zig-linux-x86_64-"$ZIG_VERSION".tar.xz
 else

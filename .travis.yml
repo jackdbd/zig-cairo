@@ -24,9 +24,11 @@ before_install:
 addons:
   apt:
     update: true
+    packages:
+    - libcairo2-dev
 
 before_script:
-  - echo "Run tests with Zig compiler $(zig zen)"
+  - echo "Run tests with Zig compiler $(zig version)"
 
 script:
   - zig build test
