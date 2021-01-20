@@ -6,8 +6,6 @@ jobs:
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -y libcairo2-dev; fi
-  - mkdir $HOME/bin
-  - export PATH=$PATH:$HOME/bin/
   - wget https://ziglang.org/download/0.7.1/zig-linux-x86_64-0.7.1.tar.xz
   - tar -xvf zig-linux-x86_64-0.7.1.tar.xz
   - mv $PWD/zig-linux-x86_64-0.7.1/zig $HOME/bin
