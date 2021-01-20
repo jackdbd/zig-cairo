@@ -3,12 +3,12 @@
 //! multi-page vector surface backend.
 //! https://www.cairographics.org/manual/cairo-PDF-Surfaces.html
 const c = @import("../c.zig");
-const Status = @import("../status.zig").Status;
+const Error = @import("../errors.zig").Error;
 
 /// https://www.cairographics.org/manual/cairo-PDF-Surfaces.html#cairo-pdf-surface-create
 pub fn create(comptime filename: [*]const u8, comptime width_pt: f64, comptime height_pt: f64) !*c.struct__cairo_surface {
     var surface = c.cairo_pdf_surface_create(filename, width_pt, height_pt);
-    if (surface == null) return Status.NullPointer;
+    if (surface == null) return Error.NullPointer;
     return surface.?;
 }
 

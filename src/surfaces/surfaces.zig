@@ -24,33 +24,32 @@ pub const Status = enum {
     // SurfaceTypeMismatch, // I think this should be included, even if cairo does not mention it.
 };
 /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-type-t
-// TODO: finish
 pub const SurfaceType = enum {
     Image = c.CAIRO_SURFACE_TYPE_IMAGE,
     Pdf = c.CAIRO_SURFACE_TYPE_PDF,
-    Ps,
-    Xlib,
-    Xcb,
-    Glitz,
-    Quartz,
-    Win32,
-    BeOs,
-    DirectFb,
-    Svg,
-    Os2,
-    Win32Printing,
-    QuartzImage,
-    Script,
-    Qt,
-    Recording,
-    Vg,
-    Gl,
-    Drm,
-    Tee,
-    Xml,
-    Skia,
-    Subsurface,
-    Cogl,
+    Ps = c.CAIRO_SURFACE_TYPE_PS,
+    Xlib = c.CAIRO_SURFACE_TYPE_XLIB,
+    Xcb = c.CAIRO_SURFACE_TYPE_XCB,
+    Glitz = c.CAIRO_SURFACE_TYPE_GLITZ,
+    Quartz = c.CAIRO_SURFACE_TYPE_QUARTZ,
+    Win32 = c.CAIRO_SURFACE_TYPE_WIN32,
+    BeOs = c.CAIRO_SURFACE_TYPE_BEOS,
+    DirectFb = c.CAIRO_SURFACE_TYPE_DIRECTFB,
+    Svg = c.CAIRO_SURFACE_TYPE_SVG,
+    Os2 = c.CAIRO_SURFACE_TYPE_OS2,
+    Win32Printing = c.CAIRO_SURFACE_TYPE_WIN32_PRINTING,
+    QuartzImage = c.CAIRO_SURFACE_TYPE_QUARTZ_IMAGE,
+    Script = c.CAIRO_SURFACE_TYPE_SCRIPT,
+    Qt = c.CAIRO_SURFACE_TYPE_QT,
+    Recording = c.CAIRO_SURFACE_TYPE_RECORDING,
+    Vg = c.CAIRO_SURFACE_TYPE_VG,
+    Gl = c.CAIRO_SURFACE_TYPE_GL,
+    Drm = c.CAIRO_SURFACE_TYPE_DRM,
+    Tee = c.CAIRO_SURFACE_TYPE_TEE,
+    Xml = c.CAIRO_SURFACE_TYPE_XML,
+    Skia = c.CAIRO_SURFACE_TYPE_SKIA,
+    Subsurface = c.CAIRO_SURFACE_TYPE_SUBSURFACE,
+    Cogl = c.CAIRO_SURFACE_TYPE_COGL,
 };
 
 pub const Surface = struct {
@@ -68,10 +67,6 @@ pub const Surface = struct {
     pub fn image(comptime width: u16, comptime height: u16) !Surface {
         var surface = try image_surface.create(Format.Argb32, width, height);
         try checkStatus(surface);
-        // std.debug.assert(SurfaceStatus.Success == surfaceStatusAsEnum(surface));
-        // std.debug.assert(Format.Argb32 == image_surface.getFormat(surface));
-        // std.debug.assert(width == image_surface.getWidth(surface));
-        // std.debug.assert(height == image_surface.getHeight(surface));
         return Self{ .surface = surface };
     }
 
@@ -88,8 +83,7 @@ pub const Surface = struct {
     pub fn getDocumentUnit(self: *Self) !svg_surface.Unit {
         const st = self.getType();
         if (st != SurfaceType.Svg) {
-            // std.debug.print("`getDocumentUnit` not implemented for {}\n", .{st});
-            return Status.SurfaceTypeMismatch;
+            return Error.SurfaceTypeMismatch;
         } else {
             return svg_surface.getDocumentUnit(self.surface);
         }
@@ -112,7 +106,6 @@ pub const Surface = struct {
         const st = self.getType();
         if (st != SurfaceType.Image) {
             std.debug.print("`getWidth` not implemented for {}\n", .{st});
-            // return Status.SurfaceTypeMismatch;
             return Error.SurfaceTypeMismatch;
         } else {
             return @intCast(usize, c.cairo_image_surface_get_width(self.surface));
@@ -124,20 +117,10 @@ pub const Surface = struct {
         const st = self.getType();
         if (st != SurfaceType.Image) {
             std.debug.print("`getHeight` not implemented for {}\n", .{st});
-            // return Status.SurfaceTypeMismatch;
             return Error.SurfaceTypeMismatch;
         } else {
             return @intCast(usize, c.cairo_image_surface_get_height(self.surface));
         }
-    }
-
-    pub fn status(self: *Self) !bool {
-        return surfaceStatus(self.surface);
-    }
-
-    pub fn statusAsEnum(cairo_surface: *c.struct__cairo_surface) SurfaceStatus {
-        std.debug.print("Surface Status: {}\n", .{status.surfaceStatusAsString(cairo_surface)});
-        return surfaceStatusAsEnum(cairo_surface);
     }
 
     pub fn svg(comptime filename: [*]const u8, comptime width_pt: f64, comptime height_pt: f64) !Surface {
@@ -159,7 +142,6 @@ pub const Surface = struct {
         var surface = try xcb_surface.create(conn, drawable, visual, width, height);
         try checkStatus(surface);
         var device = try Surface.getDevice(surface);
-        // std.debug.assert(StatusEnum.Success == deviceStatusAsEnum(device));
         return Self{ .surface = surface };
     }
 
@@ -193,8 +175,6 @@ fn checkStatus(cairo_surface: ?*c.struct__cairo_surface) !void {
     } else {
         const c_enum = c.cairo_surface_status(cairo_surface);
         const c_integer = @enumToInt(c_enum);
-        // std.debug.print("c_enum: {}\n", .{c_enum});
-        // std.debug.print("c_integer: {}\n", .{c_integer});
         return switch (c_integer) {
             c.CAIRO_STATUS_SUCCESS => {},
             c.CAIRO_STATUS_NO_MEMORY => Error.NoMemory,
@@ -206,6 +186,12 @@ fn checkStatus(cairo_surface: ?*c.struct__cairo_surface) !void {
             else => unreachable,
         };
     }
+}
+
+/// https://github.com/freedesktop/cairo/blob/6a6ab2475906635fcc5ba0c73182fae73c4f7ee8/src/cairo-misc.c#L90
+pub fn statusAsString(cairo_surface: *c.struct__cairo_surface) [:0]const u8 {
+    const c_enum = c.cairo_surface_status(cairo_surface);
+    return std.mem.span(c.cairo_status_to_string(c_enum)); // or spanZ?
 }
 
 const testing = std.testing;
@@ -226,16 +212,14 @@ test "Surface.getType() returns the expected SurfaceType" {
     expectEqual(SurfaceType.Pdf, surface_pdf.getType());
 }
 
-test "surfaceStatusAsEnum() returns Success" {
+test "checkStatus() returns no error" {
     var surface_image = try Surface.image(320, 240);
     defer surface_image.destroy();
-    expectEqual(SurfaceStatus.Success, surfaceStatusAsEnum(surface_image.surface));
-}
-
-test "Surface.status() returns no error" {
-    var surface_image = try Surface.image(320, 240);
-    defer surface_image.destroy();
-    expectEqual(true, try surface_image.status());
+    var errored = false;
+    _ = checkStatus(surface_image.surface) catch |err| {
+        errored = true;
+    };
+    expectEqual(false, errored);
 }
 
 test "Surface.getDocumentUnit() returns expected unit for SVG surfaces" {
@@ -249,7 +233,7 @@ test "Surface.getDocumentUnit() returns SurfaceTypeMismatch for non-SVG surfaces
     var surface_image = try Surface.image(320, 240);
     defer surface_image.destroy();
     _ = surface_image.getDocumentUnit() catch |err| {
-        expectEqual(Status.SurfaceTypeMismatch, err);
+        expectEqual(Error.SurfaceTypeMismatch, err);
     };
 }
 
@@ -258,7 +242,7 @@ test "Surface.getDevice() returns NullPointer when the surface does not have an 
     defer surface_image.destroy();
     var caught = false;
     _ = Surface.getDevice(surface_image.surface) catch |err| {
-        expectEqual(Status.NullPointer, err);
+        expectEqual(Error.NullPointer, err);
         caught = true;
     };
     expectEqual(true, caught);

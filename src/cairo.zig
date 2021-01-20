@@ -1,12 +1,13 @@
 const std = @import("std");
 const c = @import("c.zig");
-const status = @import("status.zig");
+
+// Import enums and assign them to a variable for clarity in this file, but also
+// use `usingnamespace` for convenience when writing applications. This lets a
+// user write either cairo.FillRule and cairo.enums.FillRule
 const enums = @import("enums.zig");
-usingnamespace enums; // e.g. cairo.FillRule instead of cairo.enums.FillRule
+usingnamespace enums;
+
 usingnamespace @import("pattern.zig");
-const deviceStatusAsEnum = status.deviceStatusAsEnum;
-const surfaceStatus = status.surfaceStatus;
-const surfaceStatusAsEnum = status.surfaceStatusAsEnum;
 usingnamespace @import("utilities/matrix.zig");
 usingnamespace @import("surfaces/surfaces.zig");
 const Error = @import("errors.zig").Error;
@@ -20,7 +21,6 @@ pub const Context = struct {
 
     pub fn fromSurface(cs: *Surface) !Self {
         var cr: ?*c.cairo_t = c.cairo_create(cs.surface);
-        // if (cr == null) return Status.NullPointer;
         if (cr == null) return Error.NullPointer;
         return Self{ .cr = cr.? };
     }

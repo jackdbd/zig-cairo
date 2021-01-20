@@ -4,13 +4,13 @@
 //! The supported image formats are those defined in cairo_format_t.
 //! https://www.cairographics.org/manual/cairo-Image-Surfaces.html
 const c = @import("../c.zig");
-const Status = @import("../status.zig").Status;
+const Error = @import("../errors.zig").Error;
 
 /// https://www.cairographics.org/manual/cairo-Image-Surfaces.html#cairo-image-surface-create
 pub fn create(comptime format: Format, comptime width: u16, comptime height: u16) !*c.struct__cairo_surface {
     const c_enum = @intToEnum(c.enum__cairo_format, @enumToInt(format));
     var surface = c.cairo_image_surface_create(c_enum, width, height);
-    if (surface == null) return Status.NullPointer;
+    if (surface == null) return Error.NullPointer;
     return surface.?;
 }
 

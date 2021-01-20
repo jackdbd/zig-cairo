@@ -3,7 +3,7 @@
 //! multi-page vector surface backend.
 //! https://www.cairographics.org/manual/cairo-SVG-Surfaces.html
 const c = @import("../c.zig");
-const Status = @import("../status.zig").Status;
+const Error = @import("../errors.zig").Error;
 
 /// https://www.cairographics.org/manual/cairo-SVG-Surfaces.html#cairo-svg-surface-create
 pub fn create(comptime filename: [*]const u8, comptime width_pt: f64, comptime height_pt: f64) !*c.struct__cairo_surface {
@@ -17,7 +17,7 @@ pub fn create(comptime filename: [*]const u8, comptime width_pt: f64, comptime h
         // TODO: filename must be writable
     }
     var surface = c.cairo_svg_surface_create(filename, width_pt, height_pt);
-    if (surface == null) return Status.NullPointer;
+    if (surface == null) return Error.NullPointer;
     return surface.?;
 }
 
@@ -38,14 +38,14 @@ pub fn setDocumentUnit(surface: *c.struct__cairo_surface, unit: Unit) void {
 
 /// https://www.cairographics.org/manual/cairo-SVG-Surfaces.html#cairo-svg-unit-t
 pub const Unit = enum {
-    User,
-    Em,
-    Ex,
-    Px,
-    In,
-    Cm,
-    Mm,
-    Pt,
-    Pc,
-    Percent,
+    User = c.CAIRO_SVG_UNIT_USER,
+    Em = c.CAIRO_SVG_UNIT_EM,
+    Ex = c.CAIRO_SVG_UNIT_EX,
+    Px = c.CAIRO_SVG_UNIT_PX,
+    In = c.CAIRO_SVG_UNIT_IN,
+    Cm = c.CAIRO_SVG_UNIT_CM,
+    Mm = c.CAIRO_SVG_UNIT_MM,
+    Pt = c.CAIRO_SVG_UNIT_PT,
+    Pc = c.CAIRO_SVG_UNIT_PC,
+    Percent = c.CAIRO_SVG_UNIT_PERCENT,
 };
