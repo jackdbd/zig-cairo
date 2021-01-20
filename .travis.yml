@@ -11,13 +11,13 @@ before_install:
   - export PATH=$PATH:$PWD/zig-linux-x86_64-0.7.1/
   - zig version
   - wget https://github.com/marler8997/ziget/archive/master.zip -O /tmp/ziget-master.zip
-  - unzip /tmp/ziget-master.zip -d /tmp/ziget-master
+  - unzip /tmp/ziget-master.zip -d /tmp/
   - pushd /tmp/ziget-master && zig build && popd
-  - export PATH=$PATH:$PWD/zig-cache/bin/
+  - export PATH=$PATH:/tmp/ziget-master/zig-cache/bin/
   - wget https://github.com/marler8997/zigup/archive/master.zip -O /tmp/zigup-master.zip
-  - unzip /tmp/zigup-master.zip -d /tmp/zigup-master
-  - pushd zigup-master && zig build && popd
-  - export PATH=$PATH:$PWD/zig-cache/bin/
+  - unzip /tmp/zigup-master.zip -d /tmp/
+  - pushd /tmp/zigup-master && zig build && popd
+  - export PATH=$PATH:/tmp/zigup-master/zig-cache/bin/
   - zigup fetch 0.6.0
   - zigup fetch 0.8.0-dev.1032+8098b3f84
 
