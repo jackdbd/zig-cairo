@@ -7,12 +7,10 @@ env:
     - ZIG_VERSION=0.6.0
     - ZIG_VERSION=0.7.0
     - ZIG_VERSION=0.7.1
+    - ZIG_VERSION=0.8.0-dev.1032+8098b3f84
 
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -y libcairo2-dev; fi
-  - wget https://ziglang.org/download/${ZIG_VERSION}/zig-linux-x86_64-${ZIG_VERSION}.tar.xz
-  - tar -xvf zig-linux-x86_64-${ZIG_VERSION}.tar.xz
-  - export PATH=$PATH:$PWD/zig-linux-x86_64-${ZIG_VERSION}/
+  - ./travis_before_install.sh
 
 addons:
   apt:
