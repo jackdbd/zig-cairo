@@ -1,12 +1,8 @@
 language: shell
-jobs:
-  include:
-    - os: linux
-      dist: bionic
+os: linux
+dist: bionic
 
 env:
-  global:
-    - PRINT_ZEN=1
   jobs:
     - ZIG_VERSION=0.6.0
     - ZIG_VERSION=0.7.0
@@ -23,7 +19,7 @@ addons:
     update: true
 
 before_script:
-  - if [[ -z ${PRINT_ZEN} ]]; then zig zen; fi
+  - zig zen
 
 script:
   - zig build test
