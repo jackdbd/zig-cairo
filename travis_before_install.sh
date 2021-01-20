@@ -18,4 +18,5 @@ fi
 tar -xvf zig-linux-x86_64-"$ZIG_VERSION".tar.xz && rm zig-linux-x86_64-"$ZIG_VERSION".tar.xz
 mv "$PWD"/zig-linux-x86_64-"$ZIG_VERSION" "$PWD"/zig && mv "$PWD"/ "$HOME"/zig
 export PATH=$PATH:$HOME/zig
-# cp "$HOME"/zig/zig ${HOME}/bin
+# export PATH=$PATH:$HOME/zig/zig
+cp "$HOME"/zig/zig ${HOME}/bin
