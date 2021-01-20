@@ -12,6 +12,7 @@ if [[ "$ZIG_VERSION" == "0.8.0-dev.1032+8098b3f84" ]]; then
     wget https://ziglang.org/builds/zig-linux-x86_64-${ZIG_VERSION}.tar.xz
 else
     wget https://ziglang.org/download/${ZIG_VERSION}/zig-linux-x86_64-${ZIG_VERSION}.tar.xz
+fi
 
 tar -xvf zig-linux-x86_64-${ZIG_VERSION}.tar.xz
 export PATH=$PATH:$PWD/zig-linux-x86_64-${ZIG_VERSION}/
