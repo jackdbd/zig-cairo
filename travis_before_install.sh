@@ -17,6 +17,8 @@ fi
 
 tar -xvf /tmp/zig-linux-x86_64-"$ZIG_VERSION".tar.xz -C "$HOME"
 rm /tmp/zig-linux-x86_64-"$ZIG_VERSION".tar.xz
-mv "$HOME"/zig-linux-x86_64-"$ZIG_VERSION" "$HOME"/zig
-export PATH=$PATH:$HOME/zig
-cp $HOME/zig/zig $HOME/bin/zig
+mv "$HOME"/zig-linux-x86_64-"$ZIG_VERSION" "$ZIG_DIR"
+
+# The $PATH environment variable can't be updated in this shell script, as it
+# will only update the variable for the sub-process that’s running the script.
+# https://docs.travis-ci.com/user/installing-dependencies/#installing-projects-from-source

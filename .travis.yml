@@ -3,6 +3,8 @@ os: linux
 dist: bionic
 
 env:
+  global:
+    - ZIG_DIR=$HOME/zig
   jobs:
     - ZIG_VERSION=0.6.0
     - ZIG_VERSION=0.7.0
@@ -11,6 +13,7 @@ env:
 
 before_install:
   - ./travis_before_install.sh
+  - export PATH=$PATH:$ZIG_DIR
 
 addons:
   apt:
