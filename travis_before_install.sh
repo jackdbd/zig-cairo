@@ -10,9 +10,9 @@ if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
 fi
 
 if [[ $ZIG_VERSION == 0.8.0-dev* ]]; then
-    echo https://ziglang.org/builds/zig-linux-x86_64-"$ZIG_VERSION".tar.xz
+    wget https://ziglang.org/builds/zig-linux-x86_64-"$ZIG_VERSION".tar.xz
 else
-    echo https://ziglang.org/download/"$ZIG_VERSION"/zig-linux-x86_64-"$ZIG_VERSION".tar.xz
+    wget https://ziglang.org/download/"$ZIG_VERSION"/zig-linux-x86_64-"$ZIG_VERSION".tar.xz
 fi
 
 tar -xvf zig-linux-x86_64-"$ZIG_VERSION".tar.xz
