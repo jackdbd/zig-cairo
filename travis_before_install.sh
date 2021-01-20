@@ -19,3 +19,4 @@ tar -xvf zig-linux-x86_64-"$ZIG_VERSION".tar.xz
 mv "$PWD"/zig-linux-x86_64-"$ZIG_VERSION" "$HOME"
 mv "$HOME"/zig-linux-x86_64-"$ZIG_VERSION" "$HOME"/zig
 export PATH=$PATH:$HOME/zig/
+mv "$HOME"/zig/zig ${HOME}/bin
