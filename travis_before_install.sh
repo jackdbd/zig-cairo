@@ -15,4 +15,6 @@ else
 fi
 
 tar -xvf zig-linux-x86_64-${ZIG_VERSION}.tar.xz
-export PATH=$PATH:$PWD/zig-linux-x86_64-${ZIG_VERSION}/
+
+# No need to alter the PATH. Just move zig to the existing HOME/bin directory.
+mv ${PWD}/zig-linux-x86_64-${ZIG_VERSION}/zig ${HOME}/
