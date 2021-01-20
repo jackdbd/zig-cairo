@@ -5,19 +5,29 @@ jobs:
       dist: bionic
 
 before_install:
+  - echo $PWD
+  - ls -a
+  - echo "Install cairo"
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -y libcairo2-dev; fi
+  - echo "Install zig"
   - wget https://ziglang.org/download/0.7.1/zig-linux-x86_64-0.7.1.tar.xz
   - tar -xvf zig-linux-x86_64-0.7.1.tar.xz
   - export PATH=$PATH:$PWD/zig-linux-x86_64-0.7.1/
-  - zig version
+  - echo "Install ziget"
   - wget https://github.com/marler8997/ziget/archive/master.zip -O /tmp/ziget-master.zip
   - unzip /tmp/ziget-master.zip -d /tmp/
-  - pushd /tmp/ziget-master && zig build && popd
-  - export PATH=$PATH:/tmp/ziget-master/zig-cache/bin/
+  - mv /tmp/ziget-master /tmp/ziget
+  - pushd /tmp/ziget && zig build && popd
+  - export PATH=$PATH:/tmp/ziget/zig-cache/bin/
+  - ziget
+  - echo $PWD
+  - echo "Install zigup"
   - wget https://github.com/marler8997/zigup/archive/master.zip -O /tmp/zigup-master.zip
   - unzip /tmp/zigup-master.zip -d /tmp/
-  - pushd /tmp/zigup-master && zig build && popd
-  - export PATH=$PATH:/tmp/zigup-master/zig-cache/bin/
+  - mv /tmp/zigup-master /tmp/zigup
+  - pushd /tmp/zigup && zig build && popd
+  - export PATH=$PATH:/tmp/zigup/zig-cache/bin/
+  - echo "Install several zig versions"
   - zigup fetch 0.6.0
   - zigup fetch 0.8.0-dev.1032+8098b3f84
 
@@ -26,8 +36,6 @@ addons:
     update: true
 
 before_script:
-  - echo "Zig compiler version (zig) $(zig version)"
-  - echo "Zig compiler version (zigup) $(zigup default)"
   - zigup list
 
 script:
