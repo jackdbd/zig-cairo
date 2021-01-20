@@ -1,4 +1,4 @@
-language: minimal
+language: shell
 jobs:
   include:
     - os: linux
@@ -10,14 +10,16 @@ before_install:
   - tar -xvf zig-linux-x86_64-0.7.1.tar.xz
   - export PATH=$PATH:$PWD/zig-linux-x86_64-0.7.1/
   - zig version
-  - wget https://github.com/marler8997/ziget/archive/master.zip
-  - unzip ziget-master.zip
-  - pushd ziget-master && zig build && popd
+  - wget https://github.com/marler8997/ziget/archive/master.zip -O /tmp/ziget-master.zip
+  - unzip /tmp/ziget-master.zip -d /tmp/ziget-master
+  - pushd /tmp/ziget-master && zig build && popd
   - export PATH=$PATH:$PWD/zig-cache/bin/
-  - wget https://github.com/marler8997/zigup/archive/master.zip
-  - unzip zigup-master.zip
+  - wget https://github.com/marler8997/zigup/archive/master.zip -O /tmp/zigup-master.zip
+  - unzip /tmp/zigup-master.zip -d /tmp/zigup-master
   - pushd zigup-master && zig build && popd
   - export PATH=$PATH:$PWD/zig-cache/bin/
+  - zigup fetch 0.6.0
+  - zigup fetch 0.8.0-dev.1032+8098b3f84
 
 addons:
   apt:
@@ -26,6 +28,12 @@ addons:
 before_script:
   - echo "Zig compiler version (zig) $(zig version)"
   - echo "Zig compiler version (zigup) $(zigup default)"
+  - zigup list
 
 script:
+  - zigup default 0.6.0
+  - zig build test
+  - zigup default 0.7.1
+  - zig build test
+  - zig default 0.8.0-dev.1032+8098b3f84
   - zig build test
