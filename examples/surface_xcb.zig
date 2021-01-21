@@ -32,7 +32,7 @@ pub fn main() !void {
     var surface = try cairo.Surface.xcb(conn.conn, window_id, vis, window_width, window_height);
     defer surface.destroy();
 
-    var cr = try cairo.Context.fromSurface(&surface);
+    var cr = try cairo.Context.create(&surface);
     defer cr.destroy();
 
     render.testImage(&cr, window_width, window_height);

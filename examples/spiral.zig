@@ -41,7 +41,7 @@ pub fn main() !void {
     var surface = try cairo.Surface.image(width, height);
     defer surface.destroy();
 
-    var cr = try cairo.Context.fromSurface(&surface);
+    var cr = try cairo.Context.create(&surface);
     defer cr.destroy();
 
     setBackground(&cr);

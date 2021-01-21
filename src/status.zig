@@ -1,6 +1,3 @@
-//! Errors that can occurr when using Cairo
-// TODO: move these ones to their respective modules
-const std = @import("std");
 const c = @import("c.zig");
 
 /// Possible return values for cairo_region_status ()

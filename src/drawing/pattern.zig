@@ -1,12 +1,12 @@
 //! Cairo Patterns
 //! https://cairographics.org/manual/cairo-cairo-pattern-t.html
 const std = @import("std");
-const c = @import("c.zig");
-const enums = @import("enums.zig");
-const Error = @import("errors.zig").Error;
-const Surface = @import("surfaces/surfaces.zig").Surface;
-const Matrix = @import("utilities/matrix.zig").Matrix;
-const MatrixT = @import("utilities/matrix.zig").MatrixT;
+const c = @import("../c.zig");
+const enums = @import("../enums.zig");
+const Error = @import("../errors.zig").Error;
+const Surface = @import("../surfaces/surface.zig").Surface;
+const Matrix = @import("../utilities/matrix.zig").Matrix;
+const MatrixT = @import("../utilities/matrix.zig").MatrixT;
 
 /// Possible return values for cairo_pattern_status ()
 /// https://www.cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-status
@@ -103,8 +103,6 @@ fn checkStatus(cairo_pattern: ?*c.struct__cairo_pattern) !void {
     } else {
         const c_enum = c.cairo_pattern_status(cairo_pattern);
         const c_integer = @enumToInt(c_enum);
-        // std.debug.print("c_enum: {}\n", .{c_enum});
-        // std.debug.print("c_integer: {}\n", .{c_integer});
         return switch (c_integer) {
             c.CAIRO_STATUS_SUCCESS => {},
             c.CAIRO_STATUS_NO_MEMORY => Error.NoMemory,
@@ -114,4 +112,19 @@ fn checkStatus(cairo_pattern: ?*c.struct__cairo_pattern) !void {
             else => unreachable,
         };
     }
+}
+
+const testing = std.testing;
+const expect = testing.expect;
+const expectEqual = testing.expectEqual;
+
+test "checkStatus() returns no error" {
+    var pat = try Pattern.createRgb(1, 0, 0);
+    defer pat.destroy();
+
+    var errored = false;
+    _ = checkStatus(pat.pattern) catch |err| {
+        errored = true;
+    };
+    expectEqual(false, errored);
 }

@@ -167,7 +167,7 @@ pub const Surface = struct {
     }
 };
 
-/// Check whether an error has previously occurred for this surface.
+/// Check whether an error has previously occurred for this Cairo surface.
 /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-status
 fn checkStatus(cairo_surface: ?*c.struct__cairo_surface) !void {
     if (cairo_surface == null) {

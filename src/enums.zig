@@ -48,3 +48,17 @@ pub const LineJoin = enum {
         return @intToEnum(c.enum__cairo_line_join, @intCast(u2, c_integer));
     }
 };
+
+// https://github.com/freedesktop/cairo/blob/6a6ab2475906635fcc5ba0c73182fae73c4f7ee8/src/cairoint.h#L691
+// https://github.com/freedesktop/cairo/blob/577477207a300fd75c93da93dbb233256d8b48d8/util/cairo-trace/trace.c#L2925
+pub const FontSlant = enum {
+    Normal = c.CAIRO_FONT_SLANT_NORMAL,
+    Italic = c.CAIRO_FONT_SLANT_ITALIC,
+    Oblique = c.CAIRO_FONT_SLANT_OBLIQUE,
+};
+
+// https://github.com/freedesktop/cairo/blob/577477207a300fd75c93da93dbb233256d8b48d8/util/cairo-trace/trace.c#L2938
+pub const FontWeight = enum {
+    Normal = c.CAIRO_FONT_WEIGHT_NORMAL,
+    Bold = c.CAIRO_FONT_WEIGHT_BOLD,
+};

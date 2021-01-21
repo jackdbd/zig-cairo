@@ -10,7 +10,7 @@ pub fn main() !void {
     var surface = try cairo.Surface.pdf("examples/generated/test-image.pdf", width_pt, height_pt);
     defer surface.destroy();
 
-    var cr = try cairo.Context.fromSurface(&surface);
+    var cr = try cairo.Context.create(&surface);
     defer cr.destroy();
 
     render.testImage(&cr, width_pt, height_pt);
@@ -18,7 +18,7 @@ pub fn main() !void {
     var surface2 = try cairo.Surface.pdf("examples/generated/line-chart.pdf", width_pt, height_pt);
     defer surface2.destroy();
 
-    var cr2 = try cairo.Context.fromSurface(&surface2);
+    var cr2 = try cairo.Context.create(&surface2);
     defer cr2.destroy();
 
     render.lineChart(&cr2, width_pt, height_pt);
