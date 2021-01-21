@@ -1,4 +1,4 @@
-//! Genric matrix operations
+//! Generic matrix operations
 //! https://cairographics.org/manual/cairo-cairo-matrix-t.html
 const std = @import("std");
 const c = @import("../c.zig");

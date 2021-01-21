@@ -8,6 +8,10 @@ const enums = @import("enums.zig");
 usingnamespace enums;
 
 usingnamespace @import("pattern.zig");
+
+const text = @import("drawing/text.zig");
+usingnamespace text;
+
 usingnamespace @import("utilities/matrix.zig");
 usingnamespace @import("surfaces/surfaces.zig");
 const Error = @import("errors.zig").Error;
@@ -18,34 +22,41 @@ pub const Context = struct {
     cr: *c.struct__cairo,
 
     const Self = @This();
-
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-create
+    // TODO: keep original cairo API name?
     pub fn fromSurface(cs: *Surface) !Self {
         var cr: ?*c.cairo_t = c.cairo_create(cs.surface);
         if (cr == null) return Error.NullPointer;
         return Self{ .cr = cr.? };
     }
 
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-destroy
     pub fn destroy(self: *Self) void {
         c.cairo_destroy(self.cr);
         // std.debug.print("cairo.Context {} destroyed\n", .{self});
     }
 
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-source-rgb
     pub fn setSourceRgb(self: *Self, r: f64, g: f64, b: f64) void {
         c.cairo_set_source_rgb(self.cr, r, g, b);
     }
 
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-source-rgba
     pub fn setSourceRgba(self: *Self, r: f64, g: f64, b: f64, alpha: f64) void {
         c.cairo_set_source_rgba(self.cr, r, g, b, alpha);
     }
 
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-paint
     pub fn paint(self: *Self) void {
         c.cairo_paint(self.cr);
     }
 
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-paint-with-alpha
     pub fn paintWithAlpha(self: *Self, alpha: f64) void {
         c.cairo_paint_with_alpha(self.cr, alpha);
     }
 
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-line-width
     pub fn setLineWidth(self: *Self, w: f64) void {
         c.cairo_set_line_width(self.cr, w);
     }
@@ -125,6 +136,22 @@ pub const Context = struct {
         c.cairo_fill_preserve(self.cr);
     }
 
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-mask
+    pub fn mask(self: *Self, pattern: *Pattern) void {
+        c.cairo_mask(self.cr, pattern.pattern);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-pop-group-to-source
+    pub fn popGroupToSource(self: *Self) void {
+        c.cairo_pop_group_to_source(self.cr);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-push-group
+    pub fn pushGroup(self: *Self) void {
+        c.cairo_push_group(self.cr);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-fill-rule
     pub fn setFillRule(self: *Self, fill_rule: enums.FillRule) void {
         c.cairo_set_fill_rule(self.cr, fill_rule.toCairoEnum());
     }
@@ -143,19 +170,25 @@ pub const Context = struct {
     pub fn rectangle(self: *Self, x: f64, y: f64, w: f64, h: f64) void {
         c.cairo_rectangle(self.cr, x, y, w, h);
     }
-    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-dash
-    // pub fn setDash(self: *Self, dashes: [*]const f64, num_dashes: usize, offset: f64) void {
-    //     c.cairo_set_dash(self.cr, dashes, @intCast(c_int, num_dashes), offset);
-    // }
+
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-dash
     pub fn setDash(self: *Self, dashes: []f64, offset: f64) void {
-        // std.debug.print("setDash {}\n", .{@typeInfo(@TypeOf(dashes))});
         c.cairo_set_dash(self.cr, dashes.ptr, @intCast(c_int, dashes.len), offset);
     }
 
     /// https://cairographics.org/manual/cairo-Paths.html#cairo-close-path
     pub fn closePath(self: *Self) void {
         c.cairo_close_path(self.cr);
+    }
+
+    /// https://cairographics.org/manual/cairo-Paths.html#cairo-restore
+    pub fn restore(self: *Self) void {
+        c.cairo_restore(self.cr);
+    }
+
+    /// https://cairographics.org/manual/cairo-Paths.html#cairo-save
+    pub fn save(self: *Self) void {
+        c.cairo_save(self.cr);
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-source-surface

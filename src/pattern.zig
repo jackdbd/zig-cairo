@@ -18,6 +18,16 @@ const Status = enum {
     InvalidMeshConstruction = c.CAIRO_STATUS_INVALID_MESH_CONSTRUCTION, // 36
 };
 
+/// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-type-t
+const PatternType = enum {
+    Solid = c.CAIRO_PATTERN_TYPE_SOLID,
+    Surface = c.CAIRO_PATTERN_TYPE_SURFACE,
+    Linear = c.CAIRO_PATTERN_TYPE_LINEAR,
+    Radial = c.CAIRO_PATTERN_TYPE_RADIAL,
+    Mesh = c.CAIRO_PATTERN_TYPE_MESH,
+    RasterSource = c.CAIRO_PATTERN_TYPE_RASTER_SOURCE,
+};
+
 pub const Pattern = struct {
     pattern: *c.struct__cairo_pattern,
 
@@ -33,6 +43,20 @@ pub const Pattern = struct {
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-create-radial
     pub fn createRadial(cx0: f64, cy0: f64, radius0: f64, cx1: f64, cy1: f64, radius1: f64) !Self {
         var pattern = c.cairo_pattern_create_radial(cx0, cy0, radius0, cx1, cy1, radius1);
+        try checkStatus(pattern);
+        return Self{ .pattern = pattern.? };
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-create-rgb
+    pub fn createRgb(r: f64, g: f64, b: f64) !Self {
+        var pattern = c.cairo_pattern_create_rgb(r, g, b);
+        try checkStatus(pattern);
+        return Self{ .pattern = pattern.? };
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-create-rgba
+    pub fn createRgba(r: f64, g: f64, b: f64, alpha: f64) !Self {
+        var pattern = c.cairo_pattern_create_rgba(r, g, b, alpha);
         try checkStatus(pattern);
         return Self{ .pattern = pattern.? };
     }
@@ -60,6 +84,12 @@ pub const Pattern = struct {
         // std.debug.print("cairo.Pattern {} destroyed\n", .{self});
     }
 
+    /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-add-color-stop-rgb
+    pub fn addColorStopRgb(self: *Self, offset: f64, r: f64, g: f64, b: f64) void {
+        c.cairo_pattern_add_color_stop_rgb(self.pattern, offset, r, g, b);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-add-color-stop-rgba
     pub fn addColorStopRgba(self: *Self, offset: f64, r: f64, g: f64, b: f64, alpha: f64) void {
         c.cairo_pattern_add_color_stop_rgba(self.pattern, offset, r, g, b, alpha);
     }
