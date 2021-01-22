@@ -426,6 +426,11 @@ pub const Context = struct {
         c.cairo_restore(self.c_ptr);
     }
 
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-stroke-preserve
+    pub fn strokePreserve(self: *Self) void {
+        c.cairo_stroke_preserve(self.cr);
+    }
+
     /// https://cairographics.org/manual/cairo-Transformations.html#cairo-rotate
     pub fn rotate(self: *Self, radians: f64) void {
         c.cairo_rotate(self.c_ptr, radians);

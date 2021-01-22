@@ -23,6 +23,7 @@ const EXAMPLES = [_][]const u8{
     "group",
     "image",
     "image_pattern",
+    "line_chart",
     "mask",
     "multi_segment_caps",
     "pango_simple",
