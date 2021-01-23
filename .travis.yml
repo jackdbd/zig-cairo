@@ -32,3 +32,6 @@ before_script:
 
 script:
   - zig build test
+  - zig build arc
+  - zig build surface_xcb
+  - zig build surface_pdf
