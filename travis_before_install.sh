@@ -6,7 +6,9 @@
 set -euxo pipefail
 
 if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    sudo apt-get install -y xvfb;
+    sudo apt-get install -y xvfb \
+      libpango1.0-dev \
+      libpangocairo-1.0-0;
 fi
 
 if [[ $ZIG_VERSION == 0.8.0-dev* ]]; then

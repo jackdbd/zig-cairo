@@ -4,21 +4,22 @@ const Builder = std.build.Builder;
 const Mode = builtin.Mode;
 
 const EXAMPLES = [_][]const u8{
-    "arc",                "arc_negative",
-    "clip",               "clip_image",
-    "curve_rectangle",    "curve_to",
-    "dash",               "ellipse",
-    "fill_and_stroke2",   "fill_style",
-    "glyphs",             "gradient",
-    "group",              "image",
-    "image_pattern",      "mask",
-    "multi_segment_caps", "rounded_rectangle",
-    "save_and_restore",   "set_line_cap",
-    "set_line_join",      "spiral",
-    "spirograph",         "surface_image",
-    "surface_pdf",        "surface_svg",
-    "surface_xcb",        "text",
-    "text_align_center",  "text_extents",
+    "pango_simple",
+    // "arc",                "arc_negative",
+    // "clip",               "clip_image",
+    // "curve_rectangle",    "curve_to",
+    // "dash",               "ellipse",
+    // "fill_and_stroke2",   "fill_style",
+    // "glyphs",             "gradient",
+    // "group",              "image",
+    // "image_pattern",      "mask",
+    // "multi_segment_caps", "rounded_rectangle",
+    // "save_and_restore",   "set_line_cap",
+    // "set_line_join",      "spiral",
+    // "spirograph",         "surface_image",
+    // "surface_pdf",        "surface_svg",
+    // "surface_xcb",        "text",
+    // "text_align_center",  "text_extents",
 };
 
 pub fn build(b: *Builder) void {
@@ -30,13 +31,14 @@ pub fn build(b: *Builder) void {
         const mode_str = comptime modeToString(test_mode);
         const name = "test-" ++ mode_str;
         const desc = "Run all tests in " ++ mode_str ++ " mode.";
-        const tests = b.addTest("src/cairo.zig");
+        const tests = b.addTest("src/pangocairo.zig");
         tests.setBuildMode(test_mode);
         tests.setTarget(target);
         tests.setNamePrefix(mode_str ++ " ");
         tests.linkLibC();
         tests.linkSystemLibrary("xcb");
         tests.linkSystemLibrary("cairo");
+        tests.linkSystemLibrary("pangocairo");
         const test_step = b.step(name, desc);
         test_step.dependOn(&tests.step);
         test_all_modes_step.dependOn(test_step);
@@ -49,6 +51,9 @@ pub fn build(b: *Builder) void {
         if (std.mem.eql(u8, name, "surface_xcb")) {
             example.addPackage(.{ .name = "xcb", .path = "src/xcb.zig" });
         }
+        if (std.mem.eql(u8, name[0..6], "pango_")) {
+            example.addPackage(.{ .name = "pangocairo", .path = "src/pangocairo.zig" });
+        }
         example.setBuildMode(mode);
         example.setTarget(target);
         example.linkLibC();
@@ -56,6 +61,7 @@ pub fn build(b: *Builder) void {
         if (std.mem.eql(u8, name, "surface_xcb")) {
             example.linkSystemLibrary("xcb");
         }
+        example.linkSystemLibrary("pangocairo");
         example.install();
         examples_step.dependOn(&example.step);
 
