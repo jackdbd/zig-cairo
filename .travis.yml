@@ -2,6 +2,9 @@ language: shell
 os: linux
 dist: bionic
 
+services:
+  - xvfb # for tests / examples that involve an XCB surface
+
 env:
   global:
     - ZIG_DIR=$HOME/zig
@@ -33,5 +36,5 @@ before_script:
 script:
   - zig build test
   - zig build arc
-  - zig build surface_xcb
+  - xvfb-run --server-args="-screen 0 1024x768x24" zig build surface_xcb
   - zig build surface_pdf

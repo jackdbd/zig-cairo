@@ -4,7 +4,7 @@ const xcb = @import("xcb");
 const render = @import("render.zig");
 
 pub fn main() !void {
-    std.debug.print("Example with the Cairo surface XCB backend\n", .{});
+    // std.debug.print("Example with the Cairo surface XCB backend\n", .{});
 
     var display: ?[*]const u8 = null;
     var screen: ?[*]c_int = null;

@@ -3,7 +3,7 @@ const cairo = @import("cairo");
 const render = @import("render.zig");
 
 pub fn main() !void {
-    std.debug.print("Example with the Cairo surface PDF backend\n", .{});
+    // std.debug.print("Example with the Cairo surface PDF backend\n", .{});
     const width_pt: f64 = 640;
     const height_pt: f64 = 480;
 
