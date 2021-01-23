@@ -3,11 +3,12 @@
 //! allocated by cairo or by the calling code.
 //! The supported image formats are those defined in cairo_format_t.
 //! https://www.cairographics.org/manual/cairo-Image-Surfaces.html
+const std = @import("std");
 const c = @import("../c.zig");
 const Error = @import("../errors.zig").Error;
 
 /// https://www.cairographics.org/manual/cairo-Image-Surfaces.html#cairo-image-surface-create
-pub fn create(comptime format: Format, comptime width: u16, comptime height: u16) !*c.struct__cairo_surface {
+pub fn create(format: Format, width: u16, height: u16) !*c.struct__cairo_surface {
     const c_enum = @intToEnum(c.enum__cairo_format, @enumToInt(format));
     var surface = c.cairo_image_surface_create(c_enum, width, height);
     if (surface == null) return Error.NullPointer;
@@ -31,13 +32,29 @@ pub fn getHeight(surface: *c.struct__cairo_surface) u16 {
     return @intCast(u16, c.cairo_image_surface_get_height(surface));
 }
 
+/// https://www.cairographics.org/manual/cairo-Image-Surfaces.html#cairo-image-surface-get-data
+pub fn getData(surface: *c.struct__cairo_surface) ![*c]u8 {
+    const char = c.cairo_image_surface_get_data(surface);
+    if (char == null) return Error.NullPointer;
+    // use @ptrCast?
+    return char;
+}
+
+/// https://www.cairographics.org/manual/cairo-Image-Surfaces.html#cairo-image-surface-get-stride
+pub fn getStride(surface: *c.struct__cairo_surface) u16 {
+    return @intCast(u16, c.cairo_image_surface_get_stride(surface));
+}
+
 /// https://www.cairographics.org/manual/cairo-Image-Surfaces.html#cairo-format-t
+/// https://github.com/freedesktop/cairo/blob/6a6ab2475906635fcc5ba0c73182fae73c4f7ee8/src/cairo.h#L418
 pub const Format = enum {
-    Invalid,
-    Argb32,
-    Rgb24,
-    A8,
-    A1,
-    Rgb16_565,
-    Rgb30,
+    // Invalid = c.CAIRO_FORMAT_INVALID, // -1
+    Argb32 = c.CAIRO_FORMAT_ARGB32, // 0
+    Rgb24 = c.CAIRO_FORMAT_RGB24, // 1
+    A8 = c.CAIRO_FORMAT_A8, // 2
+    A1 = c.CAIRO_FORMAT_A1, // 3
+    Rgb16_565 = c.CAIRO_FORMAT_RGB16_565, // 4
+    Rgb30 = c.CAIRO_FORMAT_RGB30, // 5
+    // Rgb96f = c.CAIRO_FORMAT_RGB96F, // 6
+    // Rgba128f = c.CAIRO_FORMAT_RGBA128F, // 7
 };

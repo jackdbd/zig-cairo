@@ -102,24 +102,24 @@ pub const Surface = struct {
     }
 
     /// https://cairographics.org/manual/cairo-Image-Surfaces.html#cairo-image-surface-get-width
-    pub fn getWidth(self: *Self) !usize {
+    pub fn getWidth(self: *Self) !u16 {
         const st = self.getType();
         if (st != SurfaceType.Image) {
             std.debug.print("`getWidth` not implemented for {}\n", .{st});
             return Error.SurfaceTypeMismatch;
         } else {
-            return @intCast(usize, c.cairo_image_surface_get_width(self.surface));
+            return @intCast(u16, c.cairo_image_surface_get_width(self.surface));
         }
     }
 
     /// https://cairographics.org/manual/cairo-Image-Surfaces.html#cairo-image-surface-get-height
-    pub fn getHeight(self: *Self) !usize {
+    pub fn getHeight(self: *Self) !u16 {
         const st = self.getType();
         if (st != SurfaceType.Image) {
             std.debug.print("`getHeight` not implemented for {}\n", .{st});
             return Error.SurfaceTypeMismatch;
         } else {
-            return @intCast(usize, c.cairo_image_surface_get_height(self.surface));
+            return @intCast(u16, c.cairo_image_surface_get_height(self.surface));
         }
     }
 
@@ -156,6 +156,11 @@ pub const Surface = struct {
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-flush/
     pub fn flush(self: *Self) void {
         c.cairo_surface_flush(self.surface);
+    }
+
+    /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-mark-dirty
+    pub fn markDirty(self: *Self) void {
+        c.cairo_surface_mark_dirty(self.surface);
     }
 
     /// Write the contents of surface to a new file filename as a PNG image.
