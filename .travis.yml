@@ -37,5 +37,10 @@ before_script:
 script:
   - zig build test
   - zig build arc
+  - zig build pango_simple
+  - zig build spiral
+  - zig build spirograph
+  - zig build surface_image
   - xvfb-run --server-args="-screen 0 1024x768x24" zig build surface_xcb
   - zig build surface_pdf
+  - zig build surface_svg
