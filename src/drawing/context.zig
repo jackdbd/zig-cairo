@@ -60,8 +60,8 @@ pub const Context = struct {
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-create
-    pub fn create(cs: *Surface) !Self {
-        var c_ptr = c.cairo_create(cs.surface);
+    pub fn create(surface: *Surface) !Self {
+        var c_ptr = c.cairo_create(surface.c_ptr);
         if (c_ptr == null) return Error.NullPointer;
         try checkStatus(c_ptr);
         return Self{ .c_ptr = c_ptr.? };
@@ -99,7 +99,7 @@ pub const Context = struct {
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-mask
     pub fn mask(self: *Self, pattern: *Pattern) void {
-        c.cairo_mask(self.c_ptr, pattern.pattern);
+        c.cairo_mask(self.c_ptr, pattern.c_ptr);
     }
 
     /// https://cairographics.org/manual/cairo-Paths.html#cairo-move-to
@@ -216,7 +216,7 @@ pub const Context = struct {
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-source
     pub fn setSource(self: *Self, source: *Pattern) void {
-        c.cairo_set_source(self.c_ptr, source.pattern);
+        c.cairo_set_source(self.c_ptr, source.c_ptr);
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-source-rgb
@@ -230,8 +230,8 @@ pub const Context = struct {
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-source-surface
-    pub fn setSourceSurface(self: *Self, cs: *Surface, x: f64, y: f64) void {
-        c.cairo_set_source_surface(self.c_ptr, cs.surface, x, y);
+    pub fn setSourceSurface(self: *Self, surface: *Surface, x: f64, y: f64) void {
+        c.cairo_set_source_surface(self.c_ptr, surface.c_ptr, x, y);
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-tolerance

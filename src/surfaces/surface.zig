@@ -53,28 +53,28 @@ pub const SurfaceType = enum {
 };
 
 pub const Surface = struct {
-    surface: *c.struct__cairo_surface,
+    c_ptr: *c.struct__cairo_surface,
 
     const Self = @This();
 
     pub fn getType(self: *Self) SurfaceType {
-        const c_enum = c.cairo_surface_get_type(self.surface);
+        const c_enum = c.cairo_surface_get_type(self.c_ptr);
         const c_integer = @enumToInt(c_enum);
         return @intToEnum(SurfaceType, @intCast(u5, c_integer));
     }
 
     /// https://cairographics.org/manual/cairo-Image-Surfaces.html#cairo-image-surface-create
     pub fn image(width: u16, height: u16) !Surface {
-        var surface = try image_surface.create(Format.Argb32, width, height);
-        try checkStatus(surface);
-        return Self{ .surface = surface };
+        var c_ptr = try image_surface.create(Format.Argb32, width, height);
+        try checkStatus(c_ptr);
+        return Self{ .c_ptr = c_ptr };
     }
 
     pub fn setSize(self: *Self, width: f64, height: f64) void {
         const st = self.getType();
         switch (st) {
-            SurfaceType.Xcb => xcb_surface.setSize(self.surface, @floatToInt(u16, width), @floatToInt(u16, height)),
-            SurfaceType.Pdf => pdf_surface.setSize(self.surface, width, height),
+            SurfaceType.Xcb => xcb_surface.setSize(self.c_ptr, @floatToInt(u16, width), @floatToInt(u16, height)),
+            SurfaceType.Pdf => pdf_surface.setSize(self.c_ptr, width, height),
             else => std.debug.print("`setSize` not implemented for {}\n", .{st}),
         }
     }
@@ -85,20 +85,20 @@ pub const Surface = struct {
         if (st != SurfaceType.Svg) {
             return Error.SurfaceTypeMismatch;
         } else {
-            return svg_surface.getDocumentUnit(self.surface);
+            return svg_surface.getDocumentUnit(self.c_ptr);
         }
     }
 
     pub fn pdf(comptime filename: [*]const u8, width_pt: f64, height_pt: f64) !Surface {
-        var surface = try pdf_surface.create(filename, width_pt, height_pt);
-        try checkStatus(surface);
-        return Self{ .surface = surface };
+        var c_ptr = try pdf_surface.create(filename, width_pt, height_pt);
+        try checkStatus(c_ptr);
+        return Self{ .c_ptr = c_ptr };
     }
 
     pub fn createFromPng(filename: [*]const u8) !Surface {
-        var surface = try png_surface.create(filename);
-        try checkStatus(surface);
-        return Self{ .surface = surface };
+        var c_ptr = try png_surface.create(filename);
+        try checkStatus(c_ptr);
+        return Self{ .c_ptr = c_ptr };
     }
 
     /// https://cairographics.org/manual/cairo-Image-Surfaces.html#cairo-image-surface-get-width
@@ -108,7 +108,7 @@ pub const Surface = struct {
             std.debug.print("`getWidth` not implemented for {}\n", .{st});
             return Error.SurfaceTypeMismatch;
         } else {
-            return @intCast(u16, c.cairo_image_surface_get_width(self.surface));
+            return @intCast(u16, c.cairo_image_surface_get_width(self.c_ptr));
         }
     }
 
@@ -119,15 +119,14 @@ pub const Surface = struct {
             std.debug.print("`getHeight` not implemented for {}\n", .{st});
             return Error.SurfaceTypeMismatch;
         } else {
-            return @intCast(u16, c.cairo_image_surface_get_height(self.surface));
+            return @intCast(u16, c.cairo_image_surface_get_height(self.c_ptr));
         }
     }
 
     pub fn svg(comptime filename: [*]const u8, width_pt: f64, height_pt: f64) !Surface {
-        var surface = try svg_surface.create(filename, width_pt, height_pt);
-        try checkStatus(surface);
-        // std.debug.assert(SurfaceStatus.Success == surfaceStatusAsEnum(surface));
-        return Self{ .surface = surface };
+        var c_ptr = try svg_surface.create(filename, width_pt, height_pt);
+        try checkStatus(c_ptr);
+        return Self{ .c_ptr = c_ptr };
     }
 
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-get-device
@@ -139,35 +138,34 @@ pub const Surface = struct {
     }
 
     pub fn xcb(conn: ?*c.struct_xcb_connection_t, drawable: u32, visual: ?*c.struct_xcb_visualtype_t, width: u16, height: u16) !Surface {
-        var surface = try xcb_surface.create(conn, drawable, visual, width, height);
-        try checkStatus(surface);
-        var device = try Surface.getDevice(surface);
-        return Self{ .surface = surface };
+        var c_ptr = try xcb_surface.create(conn, drawable, visual, width, height);
+        try checkStatus(c_ptr);
+        var device = try Surface.getDevice(c_ptr);
+        return Self{ .c_ptr = c_ptr };
     }
 
     /// Decrease the reference count on surface by one.
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-destroy
     pub fn destroy(self: *Self) void {
-        c.cairo_surface_destroy(self.surface);
-        // std.debug.print("cairo.Surface {} destroyed\n", .{self});
+        c.cairo_surface_destroy(self.c_ptr);
     }
 
     /// Do any pending drawing for the surface and also restore any temporary modifications cairo has made to the surface's state.
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-flush/
     pub fn flush(self: *Self) void {
-        c.cairo_surface_flush(self.surface);
+        c.cairo_surface_flush(self.c_ptr);
     }
 
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-mark-dirty
     pub fn markDirty(self: *Self) void {
-        c.cairo_surface_mark_dirty(self.surface);
+        c.cairo_surface_mark_dirty(self.c_ptr);
     }
 
     /// Write the contents of surface to a new file filename as a PNG image.
     /// https://cairographics.org/manual/cairo-PNG-Support.html#cairo-surface-write-to-png
     /// TODO: cast C string
     pub fn writeToPng(self: *Self, filename: [*]const u8) c.enum__cairo_status {
-        const s = c.cairo_surface_write_to_png(self.surface, filename);
+        const s = c.cairo_surface_write_to_png(self.c_ptr, filename);
         return s;
     }
 };
@@ -221,7 +219,7 @@ test "checkStatus() returns no error" {
     var surface_image = try Surface.image(320, 240);
     defer surface_image.destroy();
     var errored = false;
-    _ = checkStatus(surface_image.surface) catch |err| {
+    _ = checkStatus(surface_image.c_ptr) catch |err| {
         errored = true;
     };
     expectEqual(false, errored);
@@ -246,7 +244,7 @@ test "Surface.getDevice() returns NullPointer when the surface does not have an 
     var surface_image = try Surface.image(320, 240);
     defer surface_image.destroy();
     var caught = false;
-    _ = Surface.getDevice(surface_image.surface) catch |err| {
+    _ = Surface.getDevice(surface_image.c_ptr) catch |err| {
         expectEqual(Error.NullPointer, err);
         caught = true;
     };

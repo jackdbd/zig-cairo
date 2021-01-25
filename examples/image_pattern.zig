@@ -4,7 +4,7 @@ const cairo = @import("cairo");
 const setBackground = @import("utils.zig").setBackground;
 
 /// https://www.cairographics.org/samples/imagepattern/
-fn imagePattern(cr: *cairo.Context) !void {
+fn imagePattern(allocator: *std.mem.Allocator, cr: *cairo.Context) !void {
     var image = try cairo.Surface.createFromPng("data/romedalen.png");
     defer image.destroy();
 
@@ -26,7 +26,9 @@ fn imagePattern(cr: *cairo.Context) !void {
 
     const sx = @intToFloat(f64, w) / 256.0 * 5.0;
     const sy = @intToFloat(f64, h) / 256.0 * 5.0;
-    var matrix = try cairo.Matrix.initScale(&arena.allocator, sx, sy);
+
+    var matrix = try cairo.Matrix.initScale(allocator, sx, sy);
+    defer matrix.destroy();
 
     pattern.setMatrix(&matrix);
 
@@ -47,6 +49,6 @@ pub fn main() !void {
     defer cr.destroy();
 
     setBackground(&cr);
-    try imagePattern(&cr);
+    try imagePattern(std.testing.allocator, &cr);
     _ = surface.writeToPng("examples/generated/image_pattern.png");
 }
