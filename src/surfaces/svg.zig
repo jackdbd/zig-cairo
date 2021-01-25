@@ -6,16 +6,7 @@ const c = @import("../c.zig");
 const Error = @import("../errors.zig").Error;
 
 /// https://www.cairographics.org/manual/cairo-SVG-Surfaces.html#cairo-svg-surface-create
-pub fn create(comptime filename: [*]const u8, comptime width_pt: f64, comptime height_pt: f64) !*c.struct__cairo_surface {
-    comptime {
-        if (width_pt < 0) {
-            @compileError("`width_pt` must be positive");
-        }
-        if (height_pt < 0) {
-            @compileError("`height_pt` must be positive");
-        }
-        // TODO: filename must be writable
-    }
+pub fn create(comptime filename: [*]const u8, width_pt: f64, height_pt: f64) !*c.struct__cairo_surface {
     var surface = c.cairo_svg_surface_create(filename, width_pt, height_pt);
     if (surface == null) return Error.NullPointer;
     return surface.?;

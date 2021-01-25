@@ -64,7 +64,7 @@ pub const Surface = struct {
     }
 
     /// https://cairographics.org/manual/cairo-Image-Surfaces.html#cairo-image-surface-create
-    pub fn image(comptime width: u16, comptime height: u16) !Surface {
+    pub fn image(width: u16, height: u16) !Surface {
         var surface = try image_surface.create(Format.Argb32, width, height);
         try checkStatus(surface);
         return Self{ .surface = surface };
@@ -89,7 +89,7 @@ pub const Surface = struct {
         }
     }
 
-    pub fn pdf(comptime filename: [*]const u8, comptime width_pt: f64, comptime height_pt: f64) !Surface {
+    pub fn pdf(comptime filename: [*]const u8, width_pt: f64, height_pt: f64) !Surface {
         var surface = try pdf_surface.create(filename, width_pt, height_pt);
         try checkStatus(surface);
         return Self{ .surface = surface };
@@ -123,7 +123,7 @@ pub const Surface = struct {
         }
     }
 
-    pub fn svg(comptime filename: [*]const u8, comptime width_pt: f64, comptime height_pt: f64) !Surface {
+    pub fn svg(comptime filename: [*]const u8, width_pt: f64, height_pt: f64) !Surface {
         var surface = try svg_surface.create(filename, width_pt, height_pt);
         try checkStatus(surface);
         // std.debug.assert(SurfaceStatus.Success == surfaceStatusAsEnum(surface));

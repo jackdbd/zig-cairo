@@ -5,4 +5,5 @@ pub usingnamespace @cImport({
     @cInclude("cairo/cairo-svg.h");
     @cInclude("cairo/cairo-xcb.h");
     @cInclude("cairo/cairo.h");
+    @cInclude("pango/pangocairo.h");
 });

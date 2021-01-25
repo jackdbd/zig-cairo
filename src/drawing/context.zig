@@ -1,194 +1,175 @@
 //! The cairo drawing context
 //! https://cairographics.org/manual/cairo-cairo-t.html
 const std = @import("std");
+const log = std.log;
 const c = @import("../c.zig");
 const enums = @import("../enums.zig");
 const Surface = @import("../surfaces/surface.zig").Surface;
+const FontOptions = @import("../fonts/font_options.zig").FontOptions;
 const Pattern = @import("./pattern.zig").Pattern;
+const Path = @import("./path.zig").Path;
 const scaled_font = @import("../fonts/scaled_font.zig");
 const Error = @import("../errors.zig").Error;
 
+pub const CContext = *c.struct__cairo;
+
 pub const Context = struct {
-    cr: *c.struct__cairo,
+    c_ptr: *c.struct__cairo,
 
     const Self = @This();
 
-    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-create
-    pub fn create(cs: *Surface) !Self {
-        var cr: ?*c.cairo_t = c.cairo_create(cs.surface);
-        if (cr == null) return Error.NullPointer;
-        try checkStatus(cr);
-        return Self{ .cr = cr.? };
-    }
-
-    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-destroy
-    pub fn destroy(self: *Self) void {
-        c.cairo_destroy(self.cr);
-    }
-
-    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-source-rgb
-    pub fn setSourceRgb(self: *Self, r: f64, g: f64, b: f64) void {
-        c.cairo_set_source_rgb(self.cr, r, g, b);
-    }
-
-    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-source-rgba
-    pub fn setSourceRgba(self: *Self, r: f64, g: f64, b: f64, alpha: f64) void {
-        c.cairo_set_source_rgba(self.cr, r, g, b, alpha);
-    }
-
-    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-paint
-    pub fn paint(self: *Self) void {
-        c.cairo_paint(self.cr);
-    }
-
-    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-paint-with-alpha
-    pub fn paintWithAlpha(self: *Self, alpha: f64) void {
-        c.cairo_paint_with_alpha(self.cr, alpha);
-    }
-
-    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-line-width
-    pub fn setLineWidth(self: *Self, w: f64) void {
-        c.cairo_set_line_width(self.cr, w);
-    }
-
-    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-line-cap
-    pub fn setLineCap(self: *Self, line_cap: enums.LineCap) void {
-        c.cairo_set_line_cap(self.cr, line_cap.toCairoEnum());
-    }
-
-    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-line-join
-    pub fn setLineJoin(self: *Self, line_join: enums.LineJoin) void {
-        c.cairo_set_line_join(self.cr, line_join.toCairoEnum());
-    }
-
-    /// https://cairographics.org/manual/cairo-Paths.html#cairo-new-path
-    pub fn newPath(self: *Self) void {
-        c.cairo_new_path(self.cr);
-    }
-
-    /// https://cairographics.org/manual/cairo-Paths.html#cairo-new-sub-path
-    pub fn newSubPath(self: *Self) void {
-        c.cairo_new_sub_path(self.cr);
-    }
-
-    /// https://cairographics.org/manual/cairo-Paths.html#cairo-move-to
-    pub fn moveTo(self: *Self, x: f64, y: f64) void {
-        c.cairo_move_to(self.cr, x, y);
-    }
-
-    /// https://cairographics.org/manual/cairo-Paths.html#cairo-line-to
-    pub fn lineTo(self: *Self, x: f64, y: f64) void {
-        c.cairo_line_to(self.cr, x, y);
-    }
-
-    /// https://cairographics.org/manual/cairo-Paths.html#cairo-rel-line-to
-    pub fn relLineTo(self: *Self, dx: f64, dy: f64) void {
-        c.cairo_rel_line_to(self.cr, dx, dy);
-    }
-
-    /// https://cairographics.org/manual/cairo-Paths.html#cairo-curve-to
-    pub fn curveTo(self: *Self, x1: f64, y1: f64, x2: f64, y2: f64, x3: f64, y3: f64) void {
-        c.cairo_curve_to(self.cr, x1, y1, x2, y2, x3, y3);
-    }
-
-    /// https://cairographics.org/manual/cairo-Transformations.html#cairo-translate
-    pub fn translate(self: *Self, tx: f64, ty: f64) void {
-        c.cairo_translate(self.cr, tx, ty);
-    }
-
-    /// https://cairographics.org/manual/cairo-Transformations.html#cairo-scale
-    pub fn scale(self: *Self, sx: f64, sy: f64) void {
-        c.cairo_scale(self.cr, sx, sy);
-    }
-
-    /// https://cairographics.org/manual/cairo-Transformations.html#cairo-rotate
-    pub fn rotate(self: *Self, radians: f64) void {
-        c.cairo_rotate(self.cr, radians);
-    }
-
-    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-stroke
-    pub fn stroke(self: *Self) void {
-        c.cairo_stroke(self.cr);
-    }
-
-    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-clip
-    pub fn clip(self: *Self) void {
-        c.cairo_clip(self.cr);
-    }
-
-    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-fill
-    pub fn fill(self: *Self) void {
-        c.cairo_fill(self.cr);
-    }
-
-    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-fill-preserve
-    pub fn fillPreserve(self: *Self) void {
-        c.cairo_fill_preserve(self.cr);
-    }
-
-    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-mask
-    pub fn mask(self: *Self, pattern: *Pattern) void {
-        c.cairo_mask(self.cr, pattern.pattern);
-    }
-
-    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-pop-group-to-source
-    pub fn popGroupToSource(self: *Self) void {
-        c.cairo_pop_group_to_source(self.cr);
-    }
-
-    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-push-group
-    pub fn pushGroup(self: *Self) void {
-        c.cairo_push_group(self.cr);
-    }
-
-    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-fill-rule
-    pub fn setFillRule(self: *Self, fill_rule: enums.FillRule) void {
-        c.cairo_set_fill_rule(self.cr, fill_rule.toCairoEnum());
+    /// https://cairographics.org/manual/cairo-Paths.html#cairo-append-path
+    pub fn appendPath(self: *Self, path: Path) void {
+        c.cairo_append_path(self.c_ptr, path.c_ptr);
     }
 
     /// https://cairographics.org/manual/cairo-Paths.html#cairo-arc
     pub fn arc(self: *Self, xc: f64, yc: f64, radius: f64, angle1: f64, angle2: f64) void {
-        c.cairo_arc(self.cr, xc, yc, radius, angle1, angle2);
+        c.cairo_arc(self.c_ptr, xc, yc, radius, angle1, angle2);
     }
 
     /// https://cairographics.org/manual/cairo-Paths.html#cairo-arc-negative
     pub fn arcNegative(self: *Self, xc: f64, yc: f64, radius: f64, angle1: f64, angle2: f64) void {
-        c.cairo_arc_negative(self.cr, xc, yc, radius, angle1, angle2);
+        c.cairo_arc_negative(self.c_ptr, xc, yc, radius, angle1, angle2);
     }
 
-    /// https://cairographics.org/manual/cairo-Paths.html#cairo-rectangle
-    pub fn rectangle(self: *Self, x: f64, y: f64, w: f64, h: f64) void {
-        c.cairo_rectangle(self.cr, x, y, w, h);
-    }
-
-    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-dash
-    pub fn setDash(self: *Self, dashes: []f64, offset: f64) void {
-        c.cairo_set_dash(self.cr, dashes.ptr, @intCast(c_int, dashes.len), offset);
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-clip
+    pub fn clip(self: *Self) void {
+        c.cairo_clip(self.c_ptr);
     }
 
     /// https://cairographics.org/manual/cairo-Paths.html#cairo-close-path
     pub fn closePath(self: *Self) void {
-        c.cairo_close_path(self.cr);
+        c.cairo_close_path(self.c_ptr);
+    }
+
+    /// https://cairographics.org/manual/cairo-Paths.html#cairo-copy-path
+    pub fn copyPath(self: *Self) !Path {
+        const c_ptr = c.cairo_copy_path(self.c_ptr);
+        // log.debug("copyPath c_ptr {}", .{@typeInfo(@TypeOf(c_ptr))});
+        if (c_ptr == null) return Error.NoMemory; // or NullPointer?
+        return Path{ .c_ptr = c_ptr };
+    }
+
+    /// https://cairographics.org/manual/cairo-Paths.html#cairo-copy-path-flat
+    pub fn copyPathFlat(self: *Self) !Path {
+        const c_ptr = c.cairo_copy_path_flat(self.c_ptr);
+        // log.debug("copyPathFlat c_ptr {}", .{@typeInfo(@TypeOf(c_ptr))});
+        if (c_ptr == null) return Error.NoMemory; // or NullPointer?
+        return Path{ .c_ptr = c_ptr };
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-create
+    pub fn create(cs: *Surface) !Self {
+        var c_ptr = c.cairo_create(cs.surface);
+        if (c_ptr == null) return Error.NullPointer;
+        try checkStatus(c_ptr);
+        return Self{ .c_ptr = c_ptr.? };
+    }
+
+    /// https://cairographics.org/manual/cairo-Paths.html#cairo-curve-to
+    pub fn curveTo(self: *Self, x1: f64, y1: f64, x2: f64, y2: f64, x3: f64, y3: f64) void {
+        c.cairo_curve_to(self.c_ptr, x1, y1, x2, y2, x3, y3);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-destroy
+    pub fn destroy(self: *Self) void {
+        c.cairo_destroy(self.c_ptr);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-fill
+    pub fn fill(self: *Self) void {
+        c.cairo_fill(self.c_ptr);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-fill-preserve
+    pub fn fillPreserve(self: *Self) void {
+        c.cairo_fill_preserve(self.c_ptr);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-line-width
+    pub fn getLineWidth(self: *Self) f64 {
+        return c.cairo_get_line_width(self.c_ptr);
+    }
+
+    /// https://cairographics.org/manual/cairo-Paths.html#cairo-line-to
+    pub fn lineTo(self: *Self, x: f64, y: f64) void {
+        c.cairo_line_to(self.c_ptr, x, y);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-mask
+    pub fn mask(self: *Self, pattern: *Pattern) void {
+        c.cairo_mask(self.c_ptr, pattern.pattern);
+    }
+
+    /// https://cairographics.org/manual/cairo-Paths.html#cairo-move-to
+    pub fn moveTo(self: *Self, x: f64, y: f64) void {
+        c.cairo_move_to(self.c_ptr, x, y);
+    }
+
+    /// https://cairographics.org/manual/cairo-Paths.html#cairo-new-path
+    pub fn newPath(self: *Self) void {
+        c.cairo_new_path(self.c_ptr);
+    }
+
+    /// https://cairographics.org/manual/cairo-Paths.html#cairo-new-sub-path
+    pub fn newSubPath(self: *Self) void {
+        c.cairo_new_sub_path(self.c_ptr);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-paint
+    pub fn paint(self: *Self) void {
+        c.cairo_paint(self.c_ptr);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-paint-with-alpha
+    pub fn paintWithAlpha(self: *Self, alpha: f64) void {
+        c.cairo_paint_with_alpha(self.c_ptr, alpha);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-pop-group-to-source
+    pub fn popGroupToSource(self: *Self) void {
+        c.cairo_pop_group_to_source(self.c_ptr);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-push-group
+    pub fn pushGroup(self: *Self) void {
+        c.cairo_push_group(self.c_ptr);
+    }
+
+    /// https://cairographics.org/manual/cairo-Paths.html#cairo-rectangle
+    pub fn rectangle(self: *Self, x: f64, y: f64, w: f64, h: f64) void {
+        c.cairo_rectangle(self.c_ptr, x, y, w, h);
+    }
+
+    /// https://cairographics.org/manual/cairo-Paths.html#cairo-rel-curve-to
+    pub fn relCurveTo(self: *Self, dx1: f64, dy1: f64, dx2: f64, dy2: f64, dx3: f64, dy3: f64) void {
+        c.cairo_rel_curve_to(self.c_ptr, dx1, dy1, dx2, dy2, dx3, dy3);
+    }
+
+    /// https://cairographics.org/manual/cairo-Paths.html#cairo-rel-line-to
+    pub fn relLineTo(self: *Self, dx: f64, dy: f64) void {
+        c.cairo_rel_line_to(self.c_ptr, dx, dy);
     }
 
     /// https://cairographics.org/manual/cairo-Paths.html#cairo-restore
     pub fn restore(self: *Self) void {
-        c.cairo_restore(self.cr);
+        c.cairo_restore(self.c_ptr);
+    }
+
+    /// https://cairographics.org/manual/cairo-Transformations.html#cairo-rotate
+    pub fn rotate(self: *Self, radians: f64) void {
+        c.cairo_rotate(self.c_ptr, radians);
     }
 
     /// https://cairographics.org/manual/cairo-Paths.html#cairo-save
     pub fn save(self: *Self) void {
-        c.cairo_save(self.cr);
+        c.cairo_save(self.c_ptr);
     }
 
-    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-source-surface
-    pub fn setSourceSurface(self: *Self, cs: *Surface, x: f64, y: f64) void {
-        c.cairo_set_source_surface(self.cr, cs.surface, x, y);
-    }
-
-    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-source
-    pub fn setSource(self: *Self, source: *Pattern) void {
-        c.cairo_set_source(self.cr, source.pattern);
+    /// https://cairographics.org/manual/cairo-Transformations.html#cairo-scale
+    pub fn scale(self: *Self, sx: f64, sy: f64) void {
+        c.cairo_scale(self.c_ptr, sx, sy);
     }
 
     /// https://cairographics.org/manual/cairo-text.html#cairo-select-font-face
@@ -196,17 +177,81 @@ pub const Context = struct {
     pub fn selectFontFace(self: *Self, family: [*]const u8, slant: enums.FontSlant, weight: enums.FontWeight) void {
         const font_slant = @intToEnum(c.enum__cairo_font_slant, @enumToInt(slant));
         const font_weight = @intToEnum(c.enum__cairo_font_weight, @enumToInt(weight));
-        c.cairo_select_font_face(self.cr, family, font_slant, font_weight);
+        c.cairo_select_font_face(self.c_ptr, family, font_slant, font_weight);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-dash
+    pub fn setDash(self: *Self, dashes: []f64, offset: f64) void {
+        c.cairo_set_dash(self.c_ptr, dashes.ptr, @intCast(c_int, dashes.len), offset);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-fill-rule
+    pub fn setFillRule(self: *Self, fill_rule: enums.FillRule) void {
+        c.cairo_set_fill_rule(self.c_ptr, fill_rule.toCairoEnum());
     }
 
     /// https://cairographics.org/manual/cairo-text.html#cairo-set-font-size
     pub fn setFontSize(self: *Self, size: f64) void {
-        c.cairo_set_font_size(self.cr, size);
+        c.cairo_set_font_size(self.c_ptr, size);
+    }
+
+    pub fn setFontOptions(self: *Self, font_options: FontOptions) void {
+        c.cairo_set_font_options(self.c_ptr, font_options.c_ptr);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-line-cap
+    pub fn setLineCap(self: *Self, line_cap: enums.LineCap) void {
+        c.cairo_set_line_cap(self.c_ptr, line_cap.toCairoEnum());
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-line-join
+    pub fn setLineJoin(self: *Self, line_join: enums.LineJoin) void {
+        c.cairo_set_line_join(self.c_ptr, line_join.toCairoEnum());
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-line-width
+    pub fn setLineWidth(self: *Self, w: f64) void {
+        c.cairo_set_line_width(self.c_ptr, w);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-source
+    pub fn setSource(self: *Self, source: *Pattern) void {
+        c.cairo_set_source(self.c_ptr, source.pattern);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-source-rgb
+    pub fn setSourceRgb(self: *Self, r: f64, g: f64, b: f64) void {
+        c.cairo_set_source_rgb(self.c_ptr, r, g, b);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-source-rgba
+    pub fn setSourceRgba(self: *Self, r: f64, g: f64, b: f64, alpha: f64) void {
+        c.cairo_set_source_rgba(self.c_ptr, r, g, b, alpha);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-source-surface
+    pub fn setSourceSurface(self: *Self, cs: *Surface, x: f64, y: f64) void {
+        c.cairo_set_source_surface(self.c_ptr, cs.surface, x, y);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-tolerance
+    pub fn setTolerance(self: *Self, tolerance: f64) void {
+        c.cairo_set_tolerance(self.c_ptr, tolerance);
+    }
+
+    /// https://cairographics.org/manual/cairo-text.html#cairo-show-text
+    pub fn showText(self: *Self, char: [*]const u8) void {
+        c.cairo_show_text(self.c_ptr, char);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-stroke
+    pub fn stroke(self: *Self) void {
+        c.cairo_stroke(self.c_ptr);
     }
 
     /// https://cairographics.org/manual/cairo-text.html#cairo-text-extents
     pub fn textExtents(self: *Self, char: [*]const u8) scaled_font.TextExtents {
-        c.cairo_text_extents(self.cr, char, &scaled_font.te);
+        c.cairo_text_extents(self.c_ptr, char, &scaled_font.te);
         return scaled_font.TextExtents{
             .x_bearing = scaled_font.te.x_bearing,
             .x_advance = scaled_font.te.x_advance,
@@ -217,19 +262,19 @@ pub const Context = struct {
         };
     }
 
-    /// https://cairographics.org/manual/cairo-text.html#cairo-show-text
-    pub fn showText(self: *Self, char: [*]const u8) void {
-        c.cairo_show_text(self.cr, char);
+    /// https://cairographics.org/manual/cairo-Paths.html#cairo-text-path
+    pub fn textPath(self: *Self, utf8: []const u8) void {
+        c.cairo_text_path(self.c_ptr, utf8.ptr);
     }
 
-    /// https://cairographics.org/manual/cairo-Paths.html#cairo-text-path
-    pub fn textPath(self: *Self, char: [*]const u8) void {
-        c.cairo_text_path(self.cr, char);
+    /// https://cairographics.org/manual/cairo-Transformations.html#cairo-translate
+    pub fn translate(self: *Self, tx: f64, ty: f64) void {
+        c.cairo_translate(self.c_ptr, tx, ty);
     }
 };
-
 /// Check whether an error has previously occurred for this Cairo context.
 /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-status
+// TODO: move to Context? (but keep using c.struct__cairo, not Context)
 fn checkStatus(cairo_context: ?*c.struct__cairo) !void {
     if (cairo_context == null) {
         return Error.NullPointer;
@@ -298,7 +343,7 @@ test "checkStatus() returns no error" {
     defer cr.destroy();
 
     var errored = false;
-    _ = checkStatus(cr.cr) catch |err| {
+    _ = checkStatus(cr.c_ptr) catch |err| {
         errored = true;
     };
     expectEqual(false, errored);
