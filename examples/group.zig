@@ -25,7 +25,7 @@ fn groupExample(cr: *cairo.Context) !void {
     cr.setLineWidth(8.0);
     cr.setSource(&black_pattern);
     cr.stroke();
-    cr.popGroupToSource();
+    try cr.popGroupToSource();
     // paint the entire group with a semi-transparent alpha channel
     cr.paintWithAlpha(0.5);
 }

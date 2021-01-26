@@ -12,19 +12,19 @@ fn setLineJoin(cr: *cairo.Context) void {
     cr.moveTo(76.8, 84.48);
     cr.relLineTo(51.2, -51.2);
     cr.relLineTo(51.2, 51.2);
-    cr.setLineJoin(cairo.LineJoin.Miter); // default
+    cr.setLineJoin(cairo.LineJoin.miter); // default
     cr.stroke();
 
     cr.moveTo(76.8, 161.28);
     cr.relLineTo(51.2, -51.2);
     cr.relLineTo(51.2, 51.2);
-    cr.setLineJoin(cairo.LineJoin.Bevel);
+    cr.setLineJoin(cairo.LineJoin.bevel);
     cr.stroke();
 
     cr.moveTo(76.8, 238.08);
     cr.relLineTo(51.2, -51.2);
     cr.relLineTo(51.2, 51.2);
-    cr.setLineJoin(cairo.LineJoin.Round);
+    cr.setLineJoin(cairo.LineJoin.round);
     cr.stroke();
 }
 

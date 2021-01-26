@@ -15,7 +15,7 @@ fn fillStyle(cr: *cairo.Context) void {
     cr.newSubPath();
     cr.arcNegative(192, 64, 40, 0, -2 * pi);
 
-    cr.setFillRule(cairo.FillRule.EvenOdd);
+    cr.setFillRule(cairo.FillRule.even_odd);
     cr.setSourceRgb(0, 0.7, 0);
     cr.fillPreserve();
     cr.setSourceRgb(0, 0, 0);
@@ -28,7 +28,7 @@ fn fillStyle(cr: *cairo.Context) void {
     cr.newSubPath();
     cr.arcNegative(192, 64, 40, 0, -2 * pi);
 
-    cr.setFillRule(cairo.FillRule.Winding);
+    cr.setFillRule(cairo.FillRule.winding);
     cr.setSourceRgb(0, 0, 0.9);
     cr.fillPreserve();
     cr.setSourceRgb(0, 0, 0);

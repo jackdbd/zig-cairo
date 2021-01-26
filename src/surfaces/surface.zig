@@ -66,7 +66,7 @@ pub const Surface = struct {
     /// https://cairographics.org/manual/cairo-Image-Surfaces.html#cairo-image-surface-create
     pub fn image(width: u16, height: u16) !Surface {
         var c_ptr = try image_surface.create(Format.Argb32, width, height);
-        try checkStatus(c_ptr);
+        try Surface.status(c_ptr);
         return Self{ .c_ptr = c_ptr };
     }
 
@@ -91,13 +91,13 @@ pub const Surface = struct {
 
     pub fn pdf(comptime filename: [*]const u8, width_pt: f64, height_pt: f64) !Surface {
         var c_ptr = try pdf_surface.create(filename, width_pt, height_pt);
-        try checkStatus(c_ptr);
+        try Surface.status(c_ptr);
         return Self{ .c_ptr = c_ptr };
     }
 
     pub fn createFromPng(filename: [*]const u8) !Surface {
         var c_ptr = try png_surface.create(filename);
-        try checkStatus(c_ptr);
+        try Surface.status(c_ptr);
         return Self{ .c_ptr = c_ptr };
     }
 
@@ -123,9 +123,25 @@ pub const Surface = struct {
         }
     }
 
+    /// Check whether an error has previously occurred for this surface.
+    /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-status
+    pub fn status(c_ptr: ?*c.struct__cairo_surface) !void {
+        const c_integer = @enumToInt(c.cairo_surface_status(c_ptr));
+        return switch (c_integer) {
+            c.CAIRO_STATUS_SUCCESS => {}, // nothing to do if successful
+            c.CAIRO_STATUS_NO_MEMORY => Error.NoMemory,
+            c.CAIRO_STATUS_NULL_POINTER => Error.NullPointer,
+            c.CAIRO_STATUS_READ_ERROR => Error.ReadError,
+            c.CAIRO_STATUS_INVALID_CONTENT => Error.InvalidContent,
+            c.CAIRO_STATUS_INVALID_FORMAT => Error.InvalidFormat,
+            c.CAIRO_STATUS_INVALID_VISUAL => Error.InvalidVisual,
+            else => std.debug.panic("cairo_status_t member {} not handled.", .{c_integer}),
+        };
+    }
+
     pub fn svg(comptime filename: [*]const u8, width_pt: f64, height_pt: f64) !Surface {
         var c_ptr = try svg_surface.create(filename, width_pt, height_pt);
-        try checkStatus(c_ptr);
+        try Surface.status(c_ptr);
         return Self{ .c_ptr = c_ptr };
     }
 
@@ -139,7 +155,7 @@ pub const Surface = struct {
 
     pub fn xcb(conn: ?*c.struct_xcb_connection_t, drawable: u32, visual: ?*c.struct_xcb_visualtype_t, width: u16, height: u16) !Surface {
         var c_ptr = try xcb_surface.create(conn, drawable, visual, width, height);
-        try checkStatus(c_ptr);
+        try Surface.status(c_ptr);
         var device = try Surface.getDevice(c_ptr);
         return Self{ .c_ptr = c_ptr };
     }
@@ -170,32 +186,28 @@ pub const Surface = struct {
     }
 };
 
-/// Check whether an error has previously occurred for this Cairo surface.
-/// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-status
-fn checkStatus(cairo_surface: ?*c.struct__cairo_surface) !void {
-    if (cairo_surface == null) {
-        return Error.NullPointer;
-    } else {
-        const c_enum = c.cairo_surface_status(cairo_surface);
-        const c_integer = @enumToInt(c_enum);
-        return switch (c_integer) {
-            c.CAIRO_STATUS_SUCCESS => {},
-            c.CAIRO_STATUS_NO_MEMORY => Error.NoMemory,
-            c.CAIRO_STATUS_NULL_POINTER => Error.NullPointer, // is this still possible?
-            c.CAIRO_STATUS_READ_ERROR => Error.ReadError,
-            c.CAIRO_STATUS_INVALID_CONTENT => Error.InvalidContent,
-            c.CAIRO_STATUS_INVALID_FORMAT => Error.InvalidFormat,
-            c.CAIRO_STATUS_INVALID_VISUAL => Error.InvalidVisual,
-            else => unreachable,
-        };
-    }
-}
-
 /// https://github.com/freedesktop/cairo/blob/6a6ab2475906635fcc5ba0c73182fae73c4f7ee8/src/cairo-misc.c#L90
 pub fn statusAsString(cairo_surface: *c.struct__cairo_surface) [:0]const u8 {
     const c_enum = c.cairo_surface_status(cairo_surface);
     return std.mem.span(c.cairo_status_to_string(c_enum)); // or spanZ?
 }
+
+/// https://cairographics.org/manual/cairo-cairo-surface-t.html#cairo-content-t
+/// https://gitlab.freedesktop.org/cairo/cairo/-/blob/master/src/cairo.h#L379
+pub const Content = enum {
+    color, // in Cairo is 0x1000 i.e. 4096
+    alpha, // in Cairo is0x2000 i.e. 8192
+    color_alpha, // in Cairo is 0x3000 i.e. 12288
+
+    /// Convert the Zig enum(u2) into the C enum that Cairo expects.
+    pub fn toCairoEnum(self: Content) c.enum__cairo_content {
+        return switch (self) {
+            .color => @intToEnum(c.enum__cairo_content, c.CAIRO_CONTENT_COLOR),
+            .alpha => @intToEnum(c.enum__cairo_content, c.CAIRO_CONTENT_ALPHA),
+            .color_alpha => @intToEnum(c.enum__cairo_content, c.CAIRO_CONTENT_COLOR_ALPHA),
+        };
+    }
+};
 
 const testing = std.testing;
 const expect = testing.expect;
@@ -215,11 +227,11 @@ test "Surface.getType() returns the expected SurfaceType" {
     expectEqual(SurfaceType.Pdf, surface_pdf.getType());
 }
 
-test "checkStatus() returns no error" {
+test "Surface.status() returns no error" {
     var surface_image = try Surface.image(320, 240);
     defer surface_image.destroy();
     var errored = false;
-    _ = checkStatus(surface_image.c_ptr) catch |err| {
+    _ = Surface.status(surface_image.c_ptr) catch |err| {
         errored = true;
     };
     expectEqual(false, errored);

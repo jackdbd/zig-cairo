@@ -17,7 +17,7 @@ fn multiSegmentCaps(cr: *cairo.Context) void {
     cr.lineTo(200.0, 175.0);
 
     cr.setLineWidth(30.0);
-    cr.setLineCap(cairo.LineCap.Round);
+    cr.setLineCap(cairo.LineCap.round);
     cr.stroke();
 }
 

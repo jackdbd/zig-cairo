@@ -9,17 +9,17 @@ fn setLineCap(cr: *cairo.Context) void {
 
     cr.setLineWidth(30.0);
 
-    cr.setLineCap(cairo.LineCap.Butt); // default
+    cr.setLineCap(cairo.LineCap.butt); // default
     cr.moveTo(64.0, 50.0);
     cr.lineTo(64.0, 200.0);
     cr.stroke();
 
-    cr.setLineCap(cairo.LineCap.Round);
+    cr.setLineCap(cairo.LineCap.round);
     cr.moveTo(128.0, 50.0);
     cr.lineTo(128.0, 200.0);
     cr.stroke();
 
-    cr.setLineCap(cairo.LineCap.Square);
+    cr.setLineCap(cairo.LineCap.square);
     cr.moveTo(192.0, 50.0);
     cr.lineTo(192.0, 200.0);
     cr.stroke();

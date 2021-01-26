@@ -1,5 +1,4 @@
 //! Cairo Patterns
-//! https://cairographics.org/manual/cairo-cairo-pattern-t.html
 const std = @import("std");
 const c = @import("../c.zig");
 const enums = @import("../enums.zig");
@@ -28,6 +27,7 @@ const PatternType = enum {
 };
 
 pub const Pattern = struct {
+    /// https://cairographics.org/manual/cairo-cairo-pattern-t.html
     c_ptr: *c.struct__cairo_pattern,
 
     const Self = @This();
@@ -35,36 +35,41 @@ pub const Pattern = struct {
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-create-linear
     pub fn createLinear(x0: f64, y0: f64, x1: f64, y1: f64) !Self {
         var c_ptr = c.cairo_pattern_create_linear(x0, y0, x1, y1);
-        try checkStatus(c_ptr);
+        _ = try Pattern.status(c_ptr);
         return Self{ .c_ptr = c_ptr.? };
     }
 
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-create-radial
     pub fn createRadial(cx0: f64, cy0: f64, radius0: f64, cx1: f64, cy1: f64, radius1: f64) !Self {
         var c_ptr = c.cairo_pattern_create_radial(cx0, cy0, radius0, cx1, cy1, radius1);
-        try checkStatus(c_ptr);
+        _ = try Pattern.status(c_ptr);
         return Self{ .c_ptr = c_ptr.? };
     }
 
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-create-rgb
     pub fn createRgb(r: f64, g: f64, b: f64) !Self {
         var c_ptr = c.cairo_pattern_create_rgb(r, g, b);
-        try checkStatus(c_ptr);
+        _ = try Pattern.status(c_ptr);
         return Self{ .c_ptr = c_ptr.? };
     }
 
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-create-rgba
     pub fn createRgba(r: f64, g: f64, b: f64, alpha: f64) !Self {
         var c_ptr = c.cairo_pattern_create_rgba(r, g, b, alpha);
-        try checkStatus(c_ptr);
+        _ = try Pattern.status(c_ptr);
         return Self{ .c_ptr = c_ptr.? };
     }
 
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-create-for-surface
     pub fn createForSurface(surface: *Surface) !Self {
         var c_ptr = c.cairo_pattern_create_for_surface(surface.c_ptr);
-        try checkStatus(c_ptr);
+        _ = try Pattern.status(c_ptr);
         return Self{ .c_ptr = c_ptr.? };
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-get-reference-count
+    pub fn getReferenceCount(self: *Self) c_uint {
+        return c.cairo_pattern_get_reference_count(self.c_ptr);
     }
 
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-set-extend
@@ -91,37 +96,32 @@ pub const Pattern = struct {
     pub fn addColorStopRgba(self: *Self, offset: f64, r: f64, g: f64, b: f64, alpha: f64) void {
         c.cairo_pattern_add_color_stop_rgba(self.c_ptr, offset, r, g, b, alpha);
     }
-};
 
-/// Check whether an error has previously occurred for this pattern.
-/// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-status
-fn checkStatus(c_ptr: ?*c.struct__cairo_pattern) !void {
-    if (c_ptr == null) {
-        return Error.NoMemory;
-    } else {
-        const c_enum = c.cairo_pattern_status(c_ptr);
-        const c_integer = @enumToInt(c_enum);
+    /// Check whether an error has previously occurred for this pattern.
+    /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-status
+    pub fn status(c_ptr: ?*c.struct__cairo_pattern) !void {
+        const c_integer = @enumToInt(c.cairo_pattern_status(c_ptr));
         return switch (c_integer) {
-            c.CAIRO_STATUS_SUCCESS => {},
+            c.CAIRO_STATUS_SUCCESS => {}, // nothing to do if successful
             c.CAIRO_STATUS_NO_MEMORY => Error.NoMemory,
             c.CAIRO_STATUS_INVALID_MATRIX => Error.InvalidMatrix,
             c.CAIRO_STATUS_PATTERN_TYPE_MISMATCH => Error.PatternTypeMismatch,
             c.CAIRO_STATUS_INVALID_MESH_CONSTRUCTION => Error.InvalidMeshConstruction,
-            else => unreachable,
+            else => std.debug.panic("cairo_status_t member {} not handled.", .{c_integer}),
         };
     }
-}
+};
 
 const testing = std.testing;
 const expect = testing.expect;
 const expectEqual = testing.expectEqual;
 
-test "checkStatus() returns no error" {
-    var pat = try Pattern.createRgb(1, 0, 0);
-    defer pat.destroy();
+test "Pattern.status() returns no error" {
+    var pattern = try Pattern.createRgb(1, 0, 0);
+    defer pattern.destroy();
 
     var errored = false;
-    _ = checkStatus(pat.c_ptr) catch |err| {
+    _ = Pattern.status(pattern.c_ptr) catch |err| {
         errored = true;
     };
     expectEqual(false, errored);

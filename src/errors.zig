@@ -1,6 +1,7 @@
 //! Errors used in Cairo.
-const c = @import("c.zig");
-
+/// Errors that can occur when using Cairo. This error set matches the original
+/// cairo_status_t C enum, except for CAIRO_STATUS_SUCCESS (which of course is
+// not an error).
 /// https://www.cairographics.org/manual/cairo-Error-handling.html#cairo-status-t
 pub const Error = error{
     NoMemory,

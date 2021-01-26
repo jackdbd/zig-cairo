@@ -1,19 +1,22 @@
-//! The cairo drawing context
-//! https://cairographics.org/manual/cairo-cairo-t.html
+//! The Cairo drawing context
 const std = @import("std");
-const log = std.log;
 const c = @import("../c.zig");
 const enums = @import("../enums.zig");
-const Surface = @import("../surfaces/surface.zig").Surface;
+const cairo_surface = @import("../surfaces/surface.zig");
+const Surface = cairo_surface.Surface;
+const Content = cairo_surface.Content;
 const FontOptions = @import("../fonts/font_options.zig").FontOptions;
 const Pattern = @import("./pattern.zig").Pattern;
 const Path = @import("./path.zig").Path;
 const scaled_font = @import("../fonts/scaled_font.zig");
 const Error = @import("../errors.zig").Error;
 
-pub const CContext = *c.struct__cairo;
-
+/// Wrapper for the Cairo drawing context.
 pub const Context = struct {
+    /// The original cairo_t C struct.
+    /// Memory management of cairo_t is done with cairo_reference() and
+    /// cairo_destroy().
+    /// https://cairographics.org/manual/cairo-cairo-t.html
     c_ptr: *c.struct__cairo,
 
     const Self = @This();
@@ -38,15 +41,34 @@ pub const Context = struct {
         c.cairo_clip(self.c_ptr);
     }
 
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-clip-extents
+    pub fn clipExtents(self: *Self, x1: *f64, y1: *f64, x2: *f64, y2: *f64) void {
+        c.cairo_clip_extents(self.c_ptr, x1, y1, x2, y2);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-clip-preserve
+    pub fn clipPreserve(self: *Self) void {
+        c.cairo_clip_preserve(self.c_ptr);
+    }
+
     /// https://cairographics.org/manual/cairo-Paths.html#cairo-close-path
     pub fn closePath(self: *Self) void {
         c.cairo_close_path(self.c_ptr);
     }
 
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-copy-clip-rectangle-list
+    pub fn copyClipRectangleList(self: *Self) void {
+        @panic("TODO: to be implemented");
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-copy-page
+    pub fn copyPage(self: *Self) void {
+        c.cairo_copy_page(self.c_ptr);
+    }
+
     /// https://cairographics.org/manual/cairo-Paths.html#cairo-copy-path
     pub fn copyPath(self: *Self) !Path {
         const c_ptr = c.cairo_copy_path(self.c_ptr);
-        // log.debug("copyPath c_ptr {}", .{@typeInfo(@TypeOf(c_ptr))});
         if (c_ptr == null) return Error.NoMemory; // or NullPointer?
         return Path{ .c_ptr = c_ptr };
     }
@@ -54,16 +76,23 @@ pub const Context = struct {
     /// https://cairographics.org/manual/cairo-Paths.html#cairo-copy-path-flat
     pub fn copyPathFlat(self: *Self) !Path {
         const c_ptr = c.cairo_copy_path_flat(self.c_ptr);
-        // log.debug("copyPathFlat c_ptr {}", .{@typeInfo(@TypeOf(c_ptr))});
         if (c_ptr == null) return Error.NoMemory; // or NullPointer?
         return Path{ .c_ptr = c_ptr };
     }
 
+    /// Create a new Context with all graphics state parameters set to default
+    /// values and with target as a target Surface.
+    /// The newly allocated cairo_t (wrapped by the Context struct) will have a
+    /// reference count of 1. When you are done using the returned Context,
+    /// release the reference count by calling destroy on it.
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-create
-    pub fn create(surface: *Surface) !Self {
-        var c_ptr = c.cairo_create(surface.c_ptr);
-        if (c_ptr == null) return Error.NullPointer;
-        try checkStatus(c_ptr);
+    pub fn create(target: *Surface) !Self {
+        var c_ptr = c.cairo_create(target.c_ptr);
+        // cairo_create performs a memory allocation, so it might fail. We know
+        // it didn't fail if Context.status(c_ptr) returns no error.
+        _ = try Context.status(c_ptr);
+        // cairo_create never returns NULL, but Zig doesn't know it, so we have
+        // to unwrap the optional value.
         return Self{ .c_ptr = c_ptr.? };
     }
 
@@ -72,6 +101,7 @@ pub const Context = struct {
         c.cairo_curve_to(self.c_ptr, x1, y1, x2, y2, x3, y3);
     }
 
+    /// Decrease the reference count on the C cairo_t struct by one.
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-destroy
     pub fn destroy(self: *Self) void {
         c.cairo_destroy(self.c_ptr);
@@ -82,14 +112,132 @@ pub const Context = struct {
         c.cairo_fill(self.c_ptr);
     }
 
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-fill-extents
+    pub fn fillExtents(self: *Self, x1: *f64, y1: *f64, x2: *f64, y2: *f64) void {
+        c.cairo_fill_extents(self.c_ptr, x1, y1, x2, y2);
+    }
+
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-fill-preserve
     pub fn fillPreserve(self: *Self) void {
         c.cairo_fill_preserve(self.c_ptr);
     }
 
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-antialias
+    pub fn getAntialias(self: *Self) enums.Antialias {
+        return enums.Antialias.fromCairoEnum(c.cairo_get_antialias(self.c_ptr));
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-dash
+    pub fn getDash(self: *Self, dashes: []f64, offset: [*c]f64) void {
+        c.cairo_get_dash(self.c_ptr, dashes.ptr, offset);
+    }
+
+    // TODO: why is this function leaking memory? Isn't list.toOwnedSlice() enough?
+    pub fn getDashAlternative(self: *Self, comptime T: type, allocator: *std.mem.Allocator) !DashResult(T) {
+        const n = self.getDashCount();
+        var offset_ptr = try allocator.create(T);
+        defer allocator.destroy(offset_ptr);
+
+        var list = std.ArrayList(T).init(allocator);
+        defer list.deinit();
+        var i: usize = 0;
+        while (i < n) : (i += 1) {
+            try list.append(0.0);
+        }
+
+        // defer allocator.free(slice);
+        // var list = std.ArrayList(T).fromOwnedSlice(allocator, slice);
+        c.cairo_get_dash(self.c_ptr, list.items[0..].ptr, offset_ptr);
+        return DashResult(T){ .dash = list.toOwnedSlice(), .offset = offset_ptr.* };
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-dash-count
+    pub fn getDashCount(self: *Self) usize {
+        return @intCast(usize, c.cairo_get_dash_count(self.c_ptr));
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-fill-rule
+    pub fn getFillRule(self: *Self) enums.FillRule {
+        return enums.FillRule.fromCairoEnum(c.cairo_get_fill_rule(self.c_ptr));
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-group-target
+    pub fn getGroupTarget(self: *Self) !Surface {
+        const c_ptr = c.cairo_get_group_target(self.c_ptr);
+        // cairo_get_group_target always return a valid pointer, but the result
+        // can be a "nil" surface. That's why we check the surface status.
+        _ = try Surface.status(c_ptr);
+        return Surface{ .c_ptr = c_ptr.? };
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-line-cap
+    pub fn getLineCap(self: *Self) enums.LineCap {
+        return enums.LineCap.fromCairoEnum(c.cairo_get_line_cap(self.c_ptr));
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-line-join
+    pub fn getLineJoin(self: *Self) enums.LineJoin {
+        return enums.LineJoin.fromCairoEnum(c.cairo_get_line_join(self.c_ptr));
+    }
+
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-line-width
     pub fn getLineWidth(self: *Self) f64 {
         return c.cairo_get_line_width(self.c_ptr);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-miter-limit
+    pub fn getMiterLimit(self: *Self) f64 {
+        return c.cairo_get_miter_limit(self.c_ptr);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-operator
+    pub fn getOperator(self: *Self) enums.Operator {
+        return enums.Operator.fromCairoEnum(c.cairo_get_operator(self.c_ptr));
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-reference-count
+    pub fn getReferenceCount(self: *Self) c_uint {
+        return c.cairo_get_reference_count(self.c_ptr);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-source-surface
+    pub fn getSource(self: *Self) Pattern {
+        const c_ptr = c.cairo_get_source(self.c_ptr);
+        return Pattern{ .c_ptr = c_ptr.? };
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-target
+    pub fn getTarget(self: *Self) !Surface {
+        const c_ptr = c.cairo_get_target(self.c_ptr);
+        // cairo_get_target always return a valid pointer, but the result can be
+        // a "nil" surface. That's why we check the surface status.
+        _ = try Surface.status(c_ptr);
+        return Surface{ .c_ptr = c_ptr.? };
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-tolerance
+    pub fn getTolerance(self: *Self) f64 {
+        return c.cairo_get_tolerance(self.c_ptr);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-user-data
+    pub fn getUserData(self: *Self) void {
+        @panic("TODO: to be implemented");
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-in-clip
+    pub fn inClip(self: *Self, x: f64, y: f64) bool {
+        return if (c.cairo_in_clip(self.c_ptr, x, y) == 1) true else false;
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-in-fill
+    pub fn inFill(self: *Self, x: f64, y: f64) bool {
+        return if (c.cairo_in_fill(self.c_ptr, x, y) == 1) true else false;
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-in-stroke
+    pub fn inStroke(self: *Self, x: f64, y: f64) bool {
+        return if (c.cairo_in_stroke(self.c_ptr, x, y) == 1) true else false;
     }
 
     /// https://cairographics.org/manual/cairo-Paths.html#cairo-line-to
@@ -100,6 +248,11 @@ pub const Context = struct {
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-mask
     pub fn mask(self: *Self, pattern: *Pattern) void {
         c.cairo_mask(self.c_ptr, pattern.c_ptr);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-mask-surface
+    pub fn maskSurface(self: *Self, surface: *Surface, surface_x: f64, surface_y: f64) void {
+        c.cairo_mask(self.c_ptr, surface.c_ptr, surface_x, surface_y);
     }
 
     /// https://cairographics.org/manual/cairo-Paths.html#cairo-move-to
@@ -127,9 +280,21 @@ pub const Context = struct {
         c.cairo_paint_with_alpha(self.c_ptr, alpha);
     }
 
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-pop-group
+    pub fn popGroup(self: *Self) !Pattern {
+        const c_ptr = c.cairo_pop_group(self.c_ptr);
+        // we check the status because the caller might have called popGroup
+        // without a matching pushGroup(). If that's the case, it's an error.
+        _ = try Context.status(self.c_ptr);
+        return Pattern{ .c_ptr = c_ptr.? };
+    }
+
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-pop-group-to-source
-    pub fn popGroupToSource(self: *Self) void {
+    pub fn popGroupToSource(self: *Self) !void {
         c.cairo_pop_group_to_source(self.c_ptr);
+        // we check the status because the caller might have called
+        // popGroupToSource without a matching pushGroup().
+        _ = try Context.status(self.c_ptr);
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-push-group
@@ -137,9 +302,28 @@ pub const Context = struct {
         c.cairo_push_group(self.c_ptr);
     }
 
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-push-group-with-content
+    pub fn pushGroupWithContent(self: *Self, content: Content) void {
+        c.cairo_push_group_with_content(self.c_ptr, content.toCairoEnum());
+    }
+
     /// https://cairographics.org/manual/cairo-Paths.html#cairo-rectangle
     pub fn rectangle(self: *Self, x: f64, y: f64, w: f64, h: f64) void {
         c.cairo_rectangle(self.c_ptr, x, y, w, h);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-rectangle-list-destroy
+    pub fn rectangleListDestroy(self: *Self) void {
+        @panic("TODO: to be implemented");
+    }
+
+    // TODO: should we return the original C pointer? Wrap it? Cast it? Should
+    // we call Context.status?
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-reference
+    pub fn reference(self: *Self) *c.struct__cairo {
+        const c_ptr = c.cairo_reference(self.c_ptr);
+        // _ = try = Context.status();
+        return c_ptr.?; // not sure if this should be optional or not
     }
 
     /// https://cairographics.org/manual/cairo-Paths.html#cairo-rel-curve-to
@@ -150,6 +334,11 @@ pub const Context = struct {
     /// https://cairographics.org/manual/cairo-Paths.html#cairo-rel-line-to
     pub fn relLineTo(self: *Self, dx: f64, dy: f64) void {
         c.cairo_rel_line_to(self.c_ptr, dx, dy);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-reset-clip
+    pub fn resetClip(self: *Self) void {
+        c.cairo_reset_clip(self.c_ptr);
     }
 
     /// https://cairographics.org/manual/cairo-Paths.html#cairo-restore
@@ -178,6 +367,11 @@ pub const Context = struct {
         const font_slant = @intToEnum(c.enum__cairo_font_slant, @enumToInt(slant));
         const font_weight = @intToEnum(c.enum__cairo_font_weight, @enumToInt(weight));
         c.cairo_select_font_face(self.c_ptr, family, font_slant, font_weight);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-antialias
+    pub fn setAntialias(self: *Self, antialias: enums.Antialias) void {
+        c.cairo_set_antialias(self.c_ptr, antialias.toCairoEnum());
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-dash
@@ -214,6 +408,16 @@ pub const Context = struct {
         c.cairo_set_line_width(self.c_ptr, w);
     }
 
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-miter-limit
+    pub fn setMiterLimit(self: *Self, limit: f64) void {
+        c.cairo_set_miter_limit(self.c_ptr, limit);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-operator
+    pub fn setOperator(self: *Self, operator: enums.Operator) void {
+        c.cairo_set_operator(self.c_ptr, operator.toCairoEnum());
+    }
+
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-source
     pub fn setSource(self: *Self, source: *Pattern) void {
         c.cairo_set_source(self.c_ptr, source.c_ptr);
@@ -239,57 +443,34 @@ pub const Context = struct {
         c.cairo_set_tolerance(self.c_ptr, tolerance);
     }
 
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-user-data
+    pub fn setUserData(self: *Self) void {
+        @panic("TODO: to be implemented");
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-show-page
+    pub fn showPage(self: *Self) void {
+        c.cairo_show_page(self.c_ptr);
+    }
+
     /// https://cairographics.org/manual/cairo-text.html#cairo-show-text
     pub fn showText(self: *Self, char: [*]const u8) void {
         c.cairo_show_text(self.c_ptr, char);
     }
 
-    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-stroke
-    pub fn stroke(self: *Self) void {
-        c.cairo_stroke(self.c_ptr);
-    }
-
-    /// https://cairographics.org/manual/cairo-text.html#cairo-text-extents
-    pub fn textExtents(self: *Self, char: [*]const u8) scaled_font.TextExtents {
-        c.cairo_text_extents(self.c_ptr, char, &scaled_font.te);
-        return scaled_font.TextExtents{
-            .x_bearing = scaled_font.te.x_bearing,
-            .x_advance = scaled_font.te.x_advance,
-            .y_bearing = scaled_font.te.y_bearing,
-            .y_advance = scaled_font.te.y_advance,
-            .width = scaled_font.te.width,
-            .height = scaled_font.te.height,
-        };
-    }
-
-    /// https://cairographics.org/manual/cairo-Paths.html#cairo-text-path
-    pub fn textPath(self: *Self, utf8: []const u8) void {
-        c.cairo_text_path(self.c_ptr, utf8.ptr);
-    }
-
-    /// https://cairographics.org/manual/cairo-Transformations.html#cairo-translate
-    pub fn translate(self: *Self, tx: f64, ty: f64) void {
-        c.cairo_translate(self.c_ptr, tx, ty);
-    }
-};
-/// Check whether an error has previously occurred for this Cairo context.
-/// https://cairographics.org/manual/cairo-cairo-t.html#cairo-status
-// TODO: move to Context? (but keep using c.struct__cairo, not Context)
-fn checkStatus(cairo_context: ?*c.struct__cairo) !void {
-    if (cairo_context == null) {
-        return Error.NullPointer;
-    } else {
-        const c_enum = c.cairo_status(cairo_context);
-        const c_integer = @enumToInt(c_enum);
+    /// Check whether an error has previously occurred for this context.
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-status
+    fn status(c_ptr: ?*c.struct__cairo) !void {
+        const c_integer = @enumToInt(c.cairo_status(c_ptr));
         return switch (c_integer) {
-            c.CAIRO_STATUS_SUCCESS => {},
+            c.CAIRO_STATUS_SUCCESS => {}, // nothing to do if successful
             c.CAIRO_STATUS_NO_MEMORY => Error.NoMemory,
             c.CAIRO_STATUS_INVALID_RESTORE => Error.InvalidRestore,
             c.CAIRO_STATUS_INVALID_POP_GROUP => Error.InvalidPopGroup,
             c.CAIRO_STATUS_NO_CURRENT_POINT => Error.NoCurrentPoint,
             c.CAIRO_STATUS_INVALID_MATRIX => Error.InvalidMatrix,
             c.CAIRO_STATUS_INVALID_STATUS => Error.InvalidStatus,
-            c.CAIRO_STATUS_NULL_POINTER => Error.NullPointer, // is this still possible?
+            c.CAIRO_STATUS_NULL_POINTER => Error.NullPointer,
             c.CAIRO_STATUS_INVALID_STRING => Error.InvalidString,
             c.CAIRO_STATUS_INVALID_PATH_DATA => Error.InvalidPathData,
             c.CAIRO_STATUS_READ_ERROR => Error.ReadError,
@@ -326,24 +507,428 @@ fn checkStatus(cairo_context: ?*c.struct__cairo) !void {
             c.CAIRO_STATUS_WIN32_GDI_ERROR => Error.Win32GdiError,
             c.CAIRO_STATUS_TAG_ERROR => Error.TagError,
             c.CAIRO_STATUS_LAST_STATUS => Error.LastStatus,
-            else => unreachable,
+            else => std.debug.panic("cairo_status_t member {} not handled.", .{c_integer}),
         };
     }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-stroke
+    pub fn stroke(self: *Self) void {
+        c.cairo_stroke(self.c_ptr);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-stroke-preserve
+    pub fn strokePreserve(self: *Self) void {
+        c.cairo_stroke_preserve(self.c_ptr);
+    }
+
+    /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-stroke-extents
+    pub fn strokeExtents(self: *Self, x1: *f64, y1: *f64, x2: *f64, y2: *f64) void {
+        c.cairo_stroke_extents(self.c_ptr, x1, y1, x2, y2);
+    }
+
+    /// https://cairographics.org/manual/cairo-text.html#cairo-text-extents
+    pub fn textExtents(self: *Self, char: [*]const u8) scaled_font.TextExtents {
+        c.cairo_text_extents(self.c_ptr, char, &scaled_font.te);
+        return scaled_font.TextExtents{
+            .x_bearing = scaled_font.te.x_bearing,
+            .x_advance = scaled_font.te.x_advance,
+            .y_bearing = scaled_font.te.y_bearing,
+            .y_advance = scaled_font.te.y_advance,
+            .width = scaled_font.te.width,
+            .height = scaled_font.te.height,
+        };
+    }
+
+    /// https://cairographics.org/manual/cairo-Paths.html#cairo-text-path
+    pub fn textPath(self: *Self, utf8: []const u8) void {
+        c.cairo_text_path(self.c_ptr, utf8.ptr);
+    }
+
+    /// https://cairographics.org/manual/cairo-Transformations.html#cairo-translate
+    pub fn translate(self: *Self, tx: f64, ty: f64) void {
+        c.cairo_translate(self.c_ptr, tx, ty);
+    }
+};
+
+pub fn DashResult(comptime T: type) type {
+    return struct {
+        dash: []T,
+        offset: T,
+    };
 }
 
 const testing = std.testing;
 const expect = testing.expect;
 const expectEqual = testing.expectEqual;
+const expectError = testing.expectError;
 
-test "checkStatus() returns no error" {
+fn testContext() !Context {
+    var surface = try Surface.image(320, 240);
+    defer surface.destroy();
+
+    var cr = try Context.create(&surface);
+    return cr;
+}
+
+test "reference() and destroy() modify the reference count as expected" {
+    var cr = try testContext();
+
+    expectEqual(@as(c_uint, 1), cr.getReferenceCount());
+    _ = cr.reference();
+    expectEqual(@as(c_uint, 2), cr.getReferenceCount());
+    cr.destroy();
+    expectEqual(@as(c_uint, 1), cr.getReferenceCount());
+    cr.destroy();
+    expectEqual(@as(c_uint, 0), cr.getReferenceCount());
+}
+
+test "clip() and clipExtents() behave as expected" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    var x1: f64 = 0.0;
+    var y1: f64 = 0.0;
+    var x2: f64 = 0.0;
+    var y2: f64 = 0.0;
+
+    const width: f64 = 100;
+    const height: f64 = 200;
+    cr.rectangle(10.0, 20.0, width, height);
+    cr.clip();
+    cr.clipExtents(&x1, &y1, &x2, &y2);
+
+    expectEqual(@as(f64, 10.0), x1);
+    expectEqual(@as(f64, 20.0), y1);
+    expectEqual(width + 10.0, x2);
+    expectEqual(height + 20.0, y2);
+}
+
+test "fillExtents() behaves as expected" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    var x1: f64 = 0.0;
+    var y1: f64 = 0.0;
+    var x2: f64 = 0.0;
+    var y2: f64 = 0.0;
+
+    const x0_rect_a: f64 = -10.0;
+    const y0_rect_a: f64 = 20;
+    const width_rect_a: f64 = 100;
+    const height_rect_a: f64 = 205;
+    cr.rectangle(x0_rect_a, y0_rect_a, width_rect_a, height_rect_a);
+    const x0_rect_b: f64 = 80;
+    const y0_rect_b: f64 = 150;
+    const width_rect_b: f64 = 40;
+    const height_rect_b: f64 = 30;
+    cr.rectangle(x0_rect_b, y0_rect_b, width_rect_b, height_rect_b);
+
+    cr.fillExtents(&x1, &y1, &x2, &y2);
+
+    expectEqual(x0_rect_a, x1);
+    expectEqual(y0_rect_a, y1);
+    expectEqual(@as(f64, 120.0), x2);
+    expectEqual(@as(f64, 225.0), y2);
+}
+
+test "getAntialias() returns the expected antialias" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    const A = enums.Antialias;
+    expectEqual(A.default, cr.getAntialias());
+    cr.setAntialias(A.fast);
+    expectEqual(A.fast, cr.getAntialias());
+    cr.setAntialias(A.good);
+    expectEqual(A.good, cr.getAntialias());
+    cr.setAntialias(A.best);
+    expectEqual(A.best, cr.getAntialias());
+}
+
+test "getDash() returns the expected dashes" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    var dash_expected = [_]f64{ 20.0, 15.0, 10.0, 5.0 }; // ink, skip, ink, skip
+    const offset_expected: f64 = 3.0;
+    cr.setDash(dash_expected[0..], offset_expected);
+
+    var dash_actual = [_]f64{ 20.0, 15.0, 10.0, 5.0 };
+    var offset_actual = [_]f64{3.0};
+    cr.getDash(dash_actual[0..], offset_actual[0..]);
+    expectEqual(@as(f64, dash_expected[0]), dash_actual[0]);
+    expectEqual(@as(f64, dash_expected[1]), dash_actual[1]);
+    expectEqual(@as(f64, dash_expected[2]), dash_actual[2]);
+    expectEqual(@as(f64, dash_expected[3]), dash_actual[3]);
+    expectEqual(@as(f64, offset_expected), offset_actual[0]);
+}
+
+test "getDashAlternative() returns the expected dashes" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    var dash_expected = [_]f64{ 20.0, 15.0, 10.0, 5.0 }; // ink, skip, ink, skip
+    const offset_expected: f64 = 3.0;
+    cr.setDash(dash_expected[0..], offset_expected);
+
+    var allocator = std.heap.page_allocator;
+    // var allocator = std.testing.allocator; // TODO: this shows that the function leaks
+    const result = try cr.getDashAlternative(f64, allocator);
+    expectEqual(@as(usize, 4), result.dash.len);
+    expectEqual(dash_expected[0], result.dash[0]);
+    expectEqual(dash_expected[1], result.dash[1]);
+    expectEqual(dash_expected[2], result.dash[2]);
+    expectEqual(dash_expected[3], result.dash[3]);
+    expectEqual(offset_expected, result.offset);
+}
+
+test "getDashCount() returns the expected dashes count" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    expectEqual(@as(usize, 0), cr.getDashCount());
+    var dash = [_]f64{ 10.0, 10.0, 10.0, 10.0 }; // ink, skip, ink, skip
+    const offset = 0.0;
+    cr.setDash(dash[0..], offset);
+    expectEqual(@as(usize, 4), cr.getDashCount());
+    cr.setDash(dash[0..2], offset);
+    expectEqual(@as(usize, 2), cr.getDashCount());
+}
+
+test "getFillRule() returns the expected fill rule" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    expectEqual(enums.FillRule.winding, cr.getFillRule());
+    cr.setFillRule(enums.FillRule.even_odd);
+    expectEqual(enums.FillRule.even_odd, cr.getFillRule());
+}
+
+test "getLineCap() returns the expected line cap" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    const L = enums.LineCap;
+    expectEqual(L.butt, cr.getLineCap());
+    cr.setLineCap(L.round);
+    expectEqual(L.round, cr.getLineCap());
+    cr.setLineCap(L.square);
+    expectEqual(L.square, cr.getLineCap());
+}
+
+test "getLineJoin() returns the expected line join" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    const L = enums.LineJoin;
+    expectEqual(L.miter, cr.getLineJoin());
+    cr.setLineJoin(L.round);
+    expectEqual(L.round, cr.getLineJoin());
+    cr.setLineJoin(L.bevel);
+    expectEqual(L.bevel, cr.getLineJoin());
+}
+
+test "getTarget() returns the expected Surface" {
     var surface = try Surface.image(320, 240);
     defer surface.destroy();
 
     var cr = try Context.create(&surface);
     defer cr.destroy();
 
+    var target = try cr.getTarget();
+    // surface and target are just containers for the same C pointer.
+    const addr_1 = @ptrToInt(surface.c_ptr);
+    const addr_2 = @ptrToInt(target.c_ptr);
+    expectEqual(addr_1, addr_2);
+}
+
+test "getGroupTarget() returns different Surfaces before and after pushGroup()" {
+    var surface = try Surface.image(320, 240);
+    defer surface.destroy();
+
+    var cr = try Context.create(&surface);
+    defer cr.destroy();
+
+    var target = try cr.getGroupTarget();
+    const addr_1 = @ptrToInt(surface.c_ptr);
+    const addr_2 = @ptrToInt(target.c_ptr);
+    expectEqual(addr_1, addr_2);
+
+    cr.pushGroup();
+    var target_after = try cr.getGroupTarget();
+    const addr_3 = @ptrToInt(target_after.c_ptr);
+    expect(addr_3 != addr_2);
+}
+
+test "getLineWidth() returns the expected line width" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    expectEqual(@as(f64, 2.0), cr.getLineWidth());
+    cr.setLineWidth(4.0);
+    expectEqual(@as(f64, 4.0), cr.getLineWidth());
+}
+
+test "getMiterLimit() returns the expected miter limit" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    expectEqual(@as(f64, 10.0), cr.getMiterLimit());
+    cr.setMiterLimit(12.3);
+    expectEqual(@as(f64, 12.3), cr.getMiterLimit());
+}
+
+test "getOperator() returns the expected operator" {
+    var cr = try testContext();
+
+    const Op = enums.Operator;
+    expectEqual(Op.over, cr.getOperator());
+    cr.setOperator(Op.clear);
+    expectEqual(Op.clear, cr.getOperator());
+}
+
+test "getSource() returns a pattern" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    var pattern = cr.getSource();
+    expectEqual(@as(c_uint, 1), pattern.getReferenceCount());
+}
+
+test "getTolerance() returns the expected tolerance" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    expectEqual(@as(f64, 0.1), cr.getTolerance());
+    cr.setTolerance(0.01);
+    expectEqual(@as(f64, 0.01), cr.getTolerance());
+}
+
+test "inClip() behave as expected" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    const x0: f64 = 10.0;
+    const y0: f64 = 20.0;
+    const width: f64 = 100;
+    const height: f64 = 200;
+    cr.rectangle(x0, y0, width, height);
+    cr.clip();
+
+    // note the difference with inFill()
+    expectEqual(true, cr.inClip(x0 + width - 1.0, y0 + height - 1.0));
+    expectEqual(false, cr.inClip(x0 + width, y0 + height - 1.0));
+    expectEqual(false, cr.inClip(x0 + width - 1.0, y0 + height));
+    expectEqual(false, cr.inClip(x0 + width, y0 + height));
+    expectEqual(false, cr.inClip(x0 + width + 1.0, y0 + height + 1.0));
+}
+
+test "inFill() behave as expected" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    const x0: f64 = 10.0;
+    const y0: f64 = 20.0;
+    const width: f64 = 100;
+    const height: f64 = 200;
+    cr.rectangle(x0, y0, width, height);
+
+    // note the difference with inClip()
+    expectEqual(true, cr.inFill(x0 + width - 1.0, y0 + height - 1.0));
+    expectEqual(true, cr.inFill(x0 + width, y0 + height - 1.0));
+    expectEqual(true, cr.inFill(x0 + width - 1.0, y0 + height));
+    expectEqual(true, cr.inFill(x0 + width, y0 + height));
+    expectEqual(false, cr.inFill(x0 + width + 1.0, y0 + height + 1.0));
+}
+
+test "inStroke() behave as expected" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    const x0: f64 = 10.0;
+    const y0: f64 = 20.0;
+    const width: f64 = 100;
+    const height: f64 = 200;
+    cr.rectangle(x0, y0, width, height);
+    const lw = cr.getLineWidth();
+
+    expectEqual(false, cr.inStroke(x0 + width - lw, y0 + height - lw));
+    expectEqual(true, cr.inStroke(x0 + width, y0 + height - lw));
+    expectEqual(true, cr.inStroke(x0 + width - lw, y0 + height));
+    expectEqual(true, cr.inStroke(x0 + width, y0 + height));
+    expectEqual(false, cr.inStroke(x0 + width + lw, y0 + height + lw));
+}
+
+test "popGroup() returns a pattern" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    cr.pushGroupWithContent(Content.color);
+    var pattern = try cr.popGroup();
+    expectEqual(@as(c_uint, 1), pattern.getReferenceCount());
+}
+
+test "popGroup() returns the expected error if we don't call pushGroup() first" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    expectError(error.InvalidPopGroup, cr.popGroup());
+}
+
+test "popGroupToSource() returns the expected error if we don't call pushGroup() first" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    expectError(error.InvalidPopGroup, cr.popGroupToSource());
+}
+
+test "resetClip() reset the current clip region to its original, unrestricted state" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    cr.rectangle(0, 0, 100, 200);
+    cr.clip();
+
+    expectEqual(false, cr.inClip(10000, 10000));
+    cr.resetClip();
+    expectEqual(true, cr.inClip(10000, 10000));
+}
+
+test "strokeExtents() behaves as expected" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    var x1: f64 = 0.0;
+    var y1: f64 = 0.0;
+    var x2: f64 = 0.0;
+    var y2: f64 = 0.0;
+
+    const x0_rect_a: f64 = -10.0;
+    const y0_rect_a: f64 = 20;
+    const width_rect_a: f64 = 100;
+    const height_rect_a: f64 = 205;
+    cr.rectangle(x0_rect_a, y0_rect_a, width_rect_a, height_rect_a);
+    const x0_rect_b: f64 = 80;
+    const y0_rect_b: f64 = 150;
+    const width_rect_b: f64 = 40;
+    const height_rect_b: f64 = 30;
+    cr.rectangle(x0_rect_b, y0_rect_b, width_rect_b, height_rect_b);
+
+    cr.strokeExtents(&x1, &y1, &x2, &y2);
+    const lw = cr.getLineWidth();
+
+    expectEqual(x0_rect_a - (lw / 2.0), x1);
+    expectEqual(y0_rect_a - (lw / 2.0), y1);
+    expectEqual(@as(f64, 120.0 + (lw / 2.0)), x2);
+    expectEqual(@as(f64, 225.0 + (lw / 2.0)), y2);
+}
+
+test "Context.status() returns no error" {
+    var cr = try testContext();
+    defer cr.destroy();
+
     var errored = false;
-    _ = checkStatus(cr.c_ptr) catch |err| {
+    _ = Context.status(cr.c_ptr) catch |err| {
         errored = true;
     };
     expectEqual(false, errored);
