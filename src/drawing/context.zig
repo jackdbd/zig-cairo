@@ -1,4 +1,4 @@
-//! The Cairo drawing context
+//! The Cairo drawing context.
 const std = @import("std");
 const c = @import("../c.zig");
 const enums = @import("../enums.zig");
@@ -21,8 +21,10 @@ pub const Context = struct {
 
     const Self = @This();
 
+    // TODO: this should be *const Path, not *Path
     /// https://cairographics.org/manual/cairo-Paths.html#cairo-append-path
-    pub fn appendPath(self: *Self, path: Path) void {
+    pub fn appendPath(self: *Self, path: *const Path) !void {
+        _ = try Path.status(path.c_ptr);
         c.cairo_append_path(self.c_ptr, path.c_ptr);
     }
 
@@ -66,18 +68,37 @@ pub const Context = struct {
         c.cairo_copy_page(self.c_ptr);
     }
 
+    /// Create a copy of the current Cairo path, check that it is valid, then
+    /// wrap it in a Path struct and return it. The caller owns the returned
+    /// object and should call destroy on it when he no longer needs it.
     /// https://cairographics.org/manual/cairo-Paths.html#cairo-copy-path
     pub fn copyPath(self: *Self) !Path {
         const c_ptr = c.cairo_copy_path(self.c_ptr);
-        if (c_ptr == null) return Error.NoMemory; // or NullPointer?
-        return Path{ .c_ptr = c_ptr };
+        // It seems that Cairo allows us to copy an empty path. But what for?
+        // Wouldn't be better to return Error.InvalidPathData?
+        if (c_ptr.*.num_data == 0) {
+            std.log.warn("you are copying an empty path!", .{});
+            // return Error.InvalidPathData;
+        }
+        // cairo_copy_path always return a valid pointer, but the result can be
+        // a Cairo path with no data if either of the following conditions hold:
+        // 1. if there is insufficient memory to copy the path.
+        // 2. If the wrapped cairo_t is already in an error state.
+        _ = try Path.status(c_ptr.?); // check condition 1
+        _ = try Context.status(self.c_ptr); // check condition 2
+        return Path{ .c_ptr = c_ptr.? };
     }
 
     /// https://cairographics.org/manual/cairo-Paths.html#cairo-copy-path-flat
     pub fn copyPathFlat(self: *Self) !Path {
         const c_ptr = c.cairo_copy_path_flat(self.c_ptr);
-        if (c_ptr == null) return Error.NoMemory; // or NullPointer?
-        return Path{ .c_ptr = c_ptr };
+        if (c_ptr.*.num_data == 0) {
+            std.log.warn("you are copying an empty path!", .{});
+            // return Error.InvalidPathData;
+        }
+        _ = try Path.status(c_ptr.?);
+        _ = try Context.status(self.c_ptr);
+        return Path{ .c_ptr = c_ptr.? };
     }
 
     /// Create a new Context with all graphics state parameters set to default
@@ -125,6 +146,11 @@ pub const Context = struct {
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-antialias
     pub fn getAntialias(self: *Self) enums.Antialias {
         return enums.Antialias.fromCairoEnum(c.cairo_get_antialias(self.c_ptr));
+    }
+
+    /// https://cairographics.org/manual/cairo-Paths.html#cairo-get-current-point
+    pub fn getCurrentPoint(self: *Self, x: *f64, y: *f64) void {
+        c.cairo_get_current_point(self.c_ptr, x, y);
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-dash
@@ -225,6 +251,16 @@ pub const Context = struct {
         @panic("TODO: to be implemented");
     }
 
+    /// https://cairographics.org/manual/cairo-Paths.html#cairo-glyph-path
+    pub fn glyphPath(self: *Self) void {
+        @panic("TODO: to be implemented");
+    }
+
+    /// https://cairographics.org/manual/cairo-Paths.html#cairo-has-current-point
+    pub fn hasCurrentPoint(self: *Self) bool {
+        return if (c.cairo_has_current_point(self.c_ptr) == 1) true else false;
+    }
+
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-in-clip
     pub fn inClip(self: *Self, x: f64, y: f64) bool {
         return if (c.cairo_in_clip(self.c_ptr, x, y) == 1) true else false;
@@ -280,6 +316,11 @@ pub const Context = struct {
         c.cairo_paint_with_alpha(self.c_ptr, alpha);
     }
 
+    /// https://cairographics.org/manual/cairo-Paths.html#cairo-path-extents
+    pub fn pathExtents(self: *Self, x1: *f64, y1: *f64, x2: *f64, y2: *f64) void {
+        c.cairo_path_extents(self.c_ptr, x1, y1, x2, y2);
+    }
+
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-pop-group
     pub fn popGroup(self: *Self) !Pattern {
         const c_ptr = c.cairo_pop_group(self.c_ptr);
@@ -326,14 +367,34 @@ pub const Context = struct {
         return c_ptr.?; // not sure if this should be optional or not
     }
 
+    /// Relative-coordinate version of curveTo().
+    /// It's an error to call this function with no current point.
     /// https://cairographics.org/manual/cairo-Paths.html#cairo-rel-curve-to
-    pub fn relCurveTo(self: *Self, dx1: f64, dy1: f64, dx2: f64, dy2: f64, dx3: f64, dy3: f64) void {
+    pub fn relCurveTo(self: *Self, dx1: f64, dy1: f64, dx2: f64, dy2: f64, dx3: f64, dy3: f64) !void {
         c.cairo_rel_curve_to(self.c_ptr, dx1, dy1, dx2, dy2, dx3, dy3);
+        // If cairo_rel_curve_to was called with no current point, cairo_t will
+        // have a status of CAIRO_STATUS_NO_CURRENT_POINT.
+        _ = try Context.status(self.c_ptr);
     }
 
+    /// Relative-coordinate version of lineTo().
+    /// It's an error to call this function with no current point.
     /// https://cairographics.org/manual/cairo-Paths.html#cairo-rel-line-to
-    pub fn relLineTo(self: *Self, dx: f64, dy: f64) void {
+    pub fn relLineTo(self: *Self, dx: f64, dy: f64) !void {
         c.cairo_rel_line_to(self.c_ptr, dx, dy);
+        // If cairo_rel_line_to was called with no current point, cairo_t will
+        // have a status of CAIRO_STATUS_NO_CURRENT_POINT.
+        _ = try Context.status(self.c_ptr);
+    }
+
+    /// Relative-coordinate version of moveTo().
+    /// It's an error to call this function with no current point.
+    /// https://cairographics.org/manual/cairo-Paths.html#cairo-rel-move-to
+    pub fn relMoveTo(self: *Self, dx: f64, dy: f64) !void {
+        c.cairo_rel_move_to(self.c_ptr, dx, dy);
+        // If cairo_rel_move_to was called with no current point, cairo_t will
+        // have a status of CAIRO_STATUS_NO_CURRENT_POINT.
+        _ = try Context.status(self.c_ptr);
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-reset-clip
@@ -582,6 +643,62 @@ test "reference() and destroy() modify the reference count as expected" {
     expectEqual(@as(c_uint, 0), cr.getReferenceCount());
 }
 
+test "appendPath() behaves as expected" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    var x1: f64 = 0.0;
+    var y1: f64 = 0.0;
+    var x2: f64 = 0.0;
+    var y2: f64 = 0.0;
+    cr.pathExtents(&x1, &y1, &x2, &y2);
+
+    expectEqual(@as(f64, 0.0), x1);
+    expectEqual(@as(f64, 0.0), y1);
+    expectEqual(@as(f64, 0.0), x2);
+    expectEqual(@as(f64, 0.0), y2);
+
+    cr.rectangle(1, 2, 20, 30); // adds a path
+    cr.pathExtents(&x1, &y1, &x2, &y2);
+
+    expectEqual(@as(f64, 1.0), x1);
+    expectEqual(@as(f64, 2.0), y1);
+    expectEqual(@as(f64, 21.0), x2);
+    expectEqual(@as(f64, 32.0), y2);
+
+    var path = try cr.copyPath();
+    defer path.destroy();
+
+    cr.newPath(); // clears the current path
+    cr.pathExtents(&x1, &y1, &x2, &y2);
+
+    expectEqual(@as(f64, 0.0), x1);
+    expectEqual(@as(f64, 0.0), y1);
+    expectEqual(@as(f64, 0.0), x2);
+    expectEqual(@as(f64, 0.0), y2);
+
+    try cr.appendPath(&path);
+    cr.pathExtents(&x1, &y1, &x2, &y2);
+
+    expectEqual(@as(f64, 1.0), x1);
+    expectEqual(@as(f64, 2.0), y1);
+    expectEqual(@as(f64, 21.0), x2);
+    expectEqual(@as(f64, 32.0), y2);
+}
+
+test "appendPath() returns the expected error when path.status is not success" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    var path = try cr.copyPath();
+    defer path.destroy();
+
+    path.c_ptr.status = @intToEnum(c.enum__cairo_status, c.CAIRO_STATUS_NO_MEMORY);
+    expectError(error.NoMemory, cr.appendPath(&path));
+    path.c_ptr.status = @intToEnum(c.enum__cairo_status, c.CAIRO_STATUS_INVALID_PATH_DATA);
+    expectError(error.InvalidPathData, cr.appendPath(&path));
+}
+
 test "clip() and clipExtents() behave as expected" {
     var cr = try testContext();
     defer cr.destroy();
@@ -643,6 +760,29 @@ test "getAntialias() returns the expected antialias" {
     expectEqual(A.good, cr.getAntialias());
     cr.setAntialias(A.best);
     expectEqual(A.best, cr.getAntialias());
+}
+
+test "hasCurrentPoint() and getCurrentPoint() behave as expected" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    // there is no current path, so no current point
+    expectEqual(false, cr.hasCurrentPoint());
+
+    // we add a path, so there will be a current point
+    const x0: f64 = -10.0;
+    const y0: f64 = 20;
+    const width: f64 = 100;
+    const height: f64 = 205;
+    cr.rectangle(x0, y0, width, height);
+    expectEqual(true, cr.hasCurrentPoint());
+
+    // the current point is the final point reached by the path so far
+    var x: f64 = 0.0;
+    var y: f64 = 0.0;
+    cr.getCurrentPoint(&x, &y);
+    expectEqual(x0, x);
+    expectEqual(y0, y);
 }
 
 test "getDash() returns the expected dashes" {
@@ -859,6 +999,92 @@ test "inStroke() behave as expected" {
     expectEqual(false, cr.inStroke(x0 + width + lw, y0 + height + lw));
 }
 
+test "newPath() clears the current path and the current point" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    var x1: f64 = 0.0;
+    var y1: f64 = 0.0;
+    var x2: f64 = 0.0;
+    var y2: f64 = 0.0;
+
+    const x0: f64 = 10.0;
+    const y0: f64 = 20.0;
+    const width: f64 = 100;
+    const height: f64 = 200;
+    cr.rectangle(x0, y0, width, height);
+    cr.pathExtents(&x1, &y1, &x2, &y2);
+
+    expectEqual(true, cr.hasCurrentPoint());
+    expectEqual(x0, x1);
+    expectEqual(y0, y1);
+    expectEqual(x0 + width, x2);
+    expectEqual(y0 + height, y2);
+
+    cr.newPath();
+    cr.pathExtents(&x1, &y1, &x2, &y2);
+
+    expectEqual(false, cr.hasCurrentPoint());
+    expectEqual(@as(f64, 0.0), x1);
+    expectEqual(@as(f64, 0.0), y1);
+    expectEqual(@as(f64, 0.0), x2);
+    expectEqual(@as(f64, 0.0), y2);
+}
+
+test "Path.iterator() returns the expected num_data" {
+    var cr = try testContext();
+    defer cr.destroy();
+    var path = try cr.copyPath();
+    defer path.destroy();
+
+    var iter = path.iterator();
+    expectEqual(@as(c_int, 0.0), iter.num_data);
+
+    cr.rectangle(0, 0, 100, 200);
+    path = try cr.copyPath();
+    iter = path.iterator();
+    expectEqual(@as(c_int, 11.0), iter.num_data);
+
+    cr.lineTo(150, 250);
+    path = try cr.copyPath();
+    iter = path.iterator();
+    expectEqual(@as(c_int, 13.0), iter.num_data);
+
+    cr.newPath();
+    cr.lineTo(150, 250);
+    path = try cr.copyPath();
+    iter = path.iterator();
+    expectEqual(@as(c_int, 2.0), iter.num_data);
+}
+
+test "pathExtents() behaves as expected" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    var x1: f64 = 0.0;
+    var y1: f64 = 0.0;
+    var x2: f64 = 0.0;
+    var y2: f64 = 0.0;
+
+    const x0_rect_a: f64 = -10.0;
+    const y0_rect_a: f64 = 20;
+    const width_rect_a: f64 = 100;
+    const height_rect_a: f64 = 205;
+    cr.rectangle(x0_rect_a, y0_rect_a, width_rect_a, height_rect_a);
+    const x0_rect_b: f64 = 80;
+    const y0_rect_b: f64 = 150;
+    const width_rect_b: f64 = 40;
+    const height_rect_b: f64 = 30;
+    cr.rectangle(x0_rect_b, y0_rect_b, width_rect_b, height_rect_b);
+
+    cr.pathExtents(&x1, &y1, &x2, &y2);
+
+    expectEqual(x0_rect_a, x1);
+    expectEqual(y0_rect_a, y1);
+    expectEqual(@as(f64, 120.0), x2);
+    expectEqual(@as(f64, 225.0), y2);
+}
+
 test "popGroup() returns a pattern" {
     var cr = try testContext();
     defer cr.destroy();
@@ -880,6 +1106,30 @@ test "popGroupToSource() returns the expected error if we don't call pushGroup()
     defer cr.destroy();
 
     expectError(error.InvalidPopGroup, cr.popGroupToSource());
+}
+
+test "relCurveTo() returns the expected error when there is no current point" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    expectEqual(false, cr.hasCurrentPoint());
+    expectError(error.NoCurrentPoint, cr.relCurveTo(1, 2, 3, 4, 5, 6));
+}
+
+test "relLineTo() returns the expected error when there is no current point" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    expectEqual(false, cr.hasCurrentPoint());
+    expectError(error.NoCurrentPoint, cr.relLineTo(1, 2));
+}
+
+test "relMoveTo() returns the expected error when there is no current point" {
+    var cr = try testContext();
+    defer cr.destroy();
+
+    expectEqual(false, cr.hasCurrentPoint());
+    expectError(error.NoCurrentPoint, cr.relMoveTo(1, 2));
 }
 
 test "resetClip() reset the current clip region to its original, unrestricted state" {

@@ -31,7 +31,7 @@ fn dash(cr: *cairo.Context) !void {
 
     cr.moveTo(128.0, 25.6);
     cr.lineTo(230.4, 230.4);
-    cr.relLineTo(-102.4, 0.0);
+    try cr.relLineTo(-102.4, 0.0);
     cr.curveTo(51.2, 230.4, 51.2, 128.0, 128.0, 128.0);
 
     cr.stroke();

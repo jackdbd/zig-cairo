@@ -4,26 +4,26 @@ const cairo = @import("cairo");
 const setBackground = @import("utils.zig").setBackground;
 
 /// https://www.cairographics.org/samples/set_line_join/
-fn setLineJoin(cr: *cairo.Context) void {
+fn setLineJoin(cr: *cairo.Context) !void {
     cr.setSourceRgb(0.0, 0.0, 0.0); // black
 
     cr.setLineWidth(40.96);
 
     cr.moveTo(76.8, 84.48);
-    cr.relLineTo(51.2, -51.2);
-    cr.relLineTo(51.2, 51.2);
+    try cr.relLineTo(51.2, -51.2);
+    try cr.relLineTo(51.2, 51.2);
     cr.setLineJoin(cairo.LineJoin.miter); // default
     cr.stroke();
 
     cr.moveTo(76.8, 161.28);
-    cr.relLineTo(51.2, -51.2);
-    cr.relLineTo(51.2, 51.2);
+    try cr.relLineTo(51.2, -51.2);
+    try cr.relLineTo(51.2, 51.2);
     cr.setLineJoin(cairo.LineJoin.bevel);
     cr.stroke();
 
     cr.moveTo(76.8, 238.08);
-    cr.relLineTo(51.2, -51.2);
-    cr.relLineTo(51.2, 51.2);
+    try cr.relLineTo(51.2, -51.2);
+    try cr.relLineTo(51.2, 51.2);
     cr.setLineJoin(cairo.LineJoin.round);
     cr.stroke();
 }
@@ -40,6 +40,6 @@ pub fn main() !void {
     defer cr.destroy();
 
     setBackground(&cr);
-    setLineJoin(&cr);
+    try setLineJoin(&cr);
     _ = surface.writeToPng("examples/generated/set_line_join.png");
 }

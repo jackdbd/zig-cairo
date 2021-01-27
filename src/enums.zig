@@ -217,6 +217,34 @@ pub const Operator = enum {
     }
 };
 
+/// https://cairographics.org/manual/cairo-Paths.html#cairo-path-data-type-t
+pub const PathDataType = enum {
+    move_to = c.CAIRO_PATH_MOVE_TO,
+    line_to = c.CAIRO_PATH_LINE_TO,
+    curve_to = c.CAIRO_PATH_CURVE_TO,
+    close_path = c.CAIRO_PATH_CLOSE_PATH,
+
+    pub fn fromCairoEnum(c_enum: c.enum__cairo_path_data_type) PathDataType {
+        const c_integer = @enumToInt(c_enum);
+        return switch (c_integer) {
+            c.CAIRO_PATH_MOVE_TO => PathDataType.move_to,
+            c.CAIRO_PATH_LINE_TO => PathDataType.line_to,
+            c.CAIRO_PATH_CURVE_TO => PathDataType.curve_to,
+            c.CAIRO_PATH_CLOSE_PATH => PathDataType.close_path,
+            else => std.debug.panic("cairo_path_data_type_t member {} not handled.", .{c_integer}),
+        };
+    }
+
+    pub fn toCairoEnum(self: PathDataType) c.enum__cairo_path_data_type {
+        return switch (self) {
+            .move_to => @intToEnum(c.enum__cairo_path_data_type, c.CAIRO_PATH_MOVE_TO),
+            .line_to => @intToEnum(c.enum__cairo_path_data_type, c.CAIRO_PATH_LINE_TO),
+            .curve_to => @intToEnum(c.enum__cairo_path_data_type, c.CAIRO_PATH_CURVE_TO),
+            .close_path => @intToEnum(c.enum__cairo_path_data_type, c.CAIRO_PATH_CLOSE_PATH),
+        };
+    }
+};
+
 /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-extend-t
 pub const Extend = enum {
     None = c.CAIRO_EXTEND_NONE, // 0

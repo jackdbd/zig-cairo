@@ -6,7 +6,7 @@ const setBackground = @import("utils.zig").setBackground;
 /// https://github.com/pygobject/pycairo/blob/master/examples/pycairo_examples.ipynb
 /// https://github.com/pygobject/pycairo/blob/master/examples/cairo_snippets/snippets/hering.py
 /// https://gitlab.com/cairo/cairo-demos/-/blob/master/png/hering.c
-fn saveAndRestore(cr: *cairo.Context, width: f64, height: f64) void {
+fn saveAndRestore(cr: *cairo.Context, width: f64, height: f64) !void {
     const LINES: usize = 32;
     const MAX_THETA = 0.80 * pi * 2.0;
     const THETA_INC = 2.0 * MAX_THETA / @intToFloat(f64, LINES - 1);
@@ -33,11 +33,11 @@ fn saveAndRestore(cr: *cairo.Context, width: f64, height: f64) void {
     cr.setLineWidth(9.0);
 
     cr.moveTo(width / 4.0, 0);
-    cr.relLineTo(0, height);
+    try cr.relLineTo(0, height);
     cr.stroke();
 
     cr.moveTo(3 * width / 4.0, 0);
-    cr.relLineTo(0, height);
+    try cr.relLineTo(0, height);
     cr.stroke();
 }
 
@@ -53,6 +53,6 @@ pub fn main() !void {
     defer cr.destroy();
 
     setBackground(&cr);
-    saveAndRestore(&cr, @intToFloat(f64, width), @intToFloat(f64, height));
+    try saveAndRestore(&cr, @intToFloat(f64, width), @intToFloat(f64, height));
     _ = surface.writeToPng("examples/generated/save_and_restore.png");
 }

@@ -4,7 +4,7 @@ const cairo = @import("cairo");
 const setBackground = @import("utils.zig").setBackground;
 
 /// https://www.cairographics.org/samples/text_align_center/
-fn textAlignCenter(cr: *cairo.Context) void {
+fn textAlignCenter(cr: *cairo.Context) !void {
     cr.selectFontFace("Sans", cairo.FontSlant.Normal, cairo.FontWeight.Normal);
     cr.setFontSize(52.0);
     const some_text = "cairo"; // TODO: check that text is UTF8-encoded
@@ -22,9 +22,9 @@ fn textAlignCenter(cr: *cairo.Context) void {
     cr.arc(x, y, 10.0, 0, 2 * pi);
     cr.fill();
     cr.moveTo(128.0, 0.0);
-    cr.relLineTo(0, 256);
+    try cr.relLineTo(0, 256);
     cr.moveTo(0.0, 128.0);
-    cr.relLineTo(256, 0);
+    try cr.relLineTo(256, 0);
     cr.stroke();
 }
 
@@ -40,6 +40,6 @@ pub fn main() !void {
     defer cr.destroy();
 
     setBackground(&cr);
-    textAlignCenter(&cr);
+    try textAlignCenter(&cr);
     _ = surface.writeToPng("examples/generated/text_align_center.png");
 }

@@ -4,7 +4,7 @@ const cairo = @import("cairo");
 const setBackground = @import("utils.zig").setBackground;
 
 /// https://www.cairographics.org/samples/text_extents/
-fn textExtents(cr: *cairo.Context) void {
+fn textExtents(cr: *cairo.Context) !void {
     cr.selectFontFace("Sans", cairo.FontSlant.Normal, cairo.FontWeight.Normal);
     cr.setFontSize(100.0);
     const some_text = "cairo"; // TODO: check that text is UTF8-encoded
@@ -22,9 +22,9 @@ fn textExtents(cr: *cairo.Context) void {
     cr.arc(x, y, 10.0, 0, 2 * pi);
     cr.fill();
     cr.moveTo(x, y);
-    cr.relLineTo(0, -te.height);
-    cr.relLineTo(te.width, 0);
-    cr.relLineTo(te.x_bearing, -te.y_bearing);
+    try cr.relLineTo(0, -te.height);
+    try cr.relLineTo(te.width, 0);
+    try cr.relLineTo(te.x_bearing, -te.y_bearing);
     cr.stroke();
 }
 
@@ -40,6 +40,6 @@ pub fn main() !void {
     defer cr.destroy();
 
     setBackground(&cr);
-    textExtents(&cr);
+    try textExtents(&cr);
     _ = surface.writeToPng("examples/generated/text_extents.png");
 }

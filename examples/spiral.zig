@@ -5,7 +5,7 @@ const setBackground = @import("utils.zig").setBackground;
 
 /// https://github.com/pygobject/pycairo/blob/master/examples/pycairo_examples.ipynb
 /// https://gitlab.com/cairo/cairo-demos/-/blob/master/png/spiral.c
-fn spiral(cr: *cairo.Context, width: f64, height: f64) void {
+fn spiral(cr: *cairo.Context, width: f64, height: f64) !void {
     cr.setSourceRgb(0, 0, 1); // blue
 
     const line_width: f64 = 4.0;
@@ -25,10 +25,10 @@ fn spiral(cr: *cairo.Context, width: f64, height: f64) void {
     const num_windings: f64 = 12;
     var i: f64 = 0;
     while (i < num_windings) : (i += 1) {
-        cr.relLineTo(0, h - hd * (2 * i - 1)); // go down
-        cr.relLineTo(-(w - wd * (2 * i)), 0); // go left
-        cr.relLineTo(0, -(h - hd * (2 * i))); // go up
-        cr.relLineTo(w - wd * (2 * i + 1), 0); // go right
+        try cr.relLineTo(0, h - hd * (2 * i - 1)); // go down
+        try cr.relLineTo(-(w - wd * (2 * i)), 0); // go left
+        try cr.relLineTo(0, -(h - hd * (2 * i))); // go up
+        try cr.relLineTo(w - wd * (2 * i + 1), 0); // go right
     }
     cr.stroke();
 }
@@ -45,6 +45,6 @@ pub fn main() !void {
     defer cr.destroy();
 
     setBackground(&cr);
-    spiral(&cr, @intToFloat(f64, width), @intToFloat(f64, height));
+    try spiral(&cr, @intToFloat(f64, width), @intToFloat(f64, height));
     _ = surface.writeToPng("examples/generated/spiral.png");
 }

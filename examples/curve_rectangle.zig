@@ -15,7 +15,7 @@ fn curveRectangle(cr: *cairo.Context, width: usize, height: usize) void {
     if (rect_width / 2 < radius) {
         if (rect_height / 2 < radius) {
             cr.moveTo(x0, (y0 + y1) / 2);
-            cr.curve_to(x0, y0, x0, y0, (x0 + x1) / 2, y0);
+            cr.curveTo(x0, y0, x0, y0, (x0 + x1) / 2, y0);
             cr.curveTo(x1, y0, x1, y0, x1, (y0 + y1) / 2);
             cr.curveTo(x1, y1, x1, y1, (x1 + x0) / 2, y1);
             cr.curveTo(x0, y1, x0, y1, x0, (y0 + y1) / 2);
