@@ -29,7 +29,7 @@ pub fn testImage(cr: *cairo.Context, width: usize, height: usize) void {
 
     // some text
     const zig_motto = "all your codebase are belong to us";
-    cr.selectFontFace("Georgia", cairo.FontSlant.Normal, cairo.FontWeight.Bold);
+    cr.selectFontFace("Georgia", cairo.FontSlant.normal, cairo.FontWeight.bold);
     cr.setFontSize(24.0);
     var te = cr.textExtents(zig_motto);
     cr.moveTo(w / 2 - te.width / 2 - te.x_bearing, h / 2 - te.height / 2 - te.y_bearing);

@@ -8,16 +8,16 @@ fn gradient(cr: *cairo.Context) !void {
     var pattern = try cairo.Pattern.createLinear(0.0, 0.0, 0.0, 256.0);
     defer pattern.destroy();
 
-    pattern.addColorStopRgba(1, 0, 0, 0, 1);
-    pattern.addColorStopRgba(0, 1, 1, 1, 1);
+    try pattern.addColorStopRgba(1, 0, 0, 0, 1);
+    try pattern.addColorStopRgba(0, 1, 1, 1, 1);
     cr.rectangle(0, 0, 256, 256);
     cr.setSource(&pattern);
     cr.fill();
 
     pattern = try cairo.Pattern.createRadial(115.2, 102.4, 25.6, 102.4, 102.4, 128.0);
 
-    pattern.addColorStopRgba(0, 1, 1, 1, 1);
-    pattern.addColorStopRgba(1, 0, 0, 0, 1);
+    try pattern.addColorStopRgba(0, 1, 1, 1, 1);
+    try pattern.addColorStopRgba(1, 0, 0, 0, 1);
     cr.setSource(&pattern);
     cr.arc(128.0, 128.0, 76.8, 0, 2 * pi);
     cr.fill();

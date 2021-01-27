@@ -8,14 +8,14 @@ fn maskExample(cr: *cairo.Context) !void {
     var pattern = try cairo.Pattern.createLinear(0, 0, 256, 256);
     defer pattern.destroy();
 
-    pattern.addColorStopRgb(0, 0, 0.3, 0.8);
-    pattern.addColorStopRgb(1, 0, 0.8, 0.3);
+    try pattern.addColorStopRgb(0, 0, 0.3, 0.8);
+    try pattern.addColorStopRgb(1, 0, 0.8, 0.3);
 
     var mask = try cairo.Pattern.createRadial(128, 128, 64, 128, 128, 128);
     defer mask.destroy();
 
-    mask.addColorStopRgba(0, 0, 0, 0, 1);
-    mask.addColorStopRgba(0.5, 0, 0, 0, 0);
+    try mask.addColorStopRgba(0, 0, 0, 0, 1);
+    try mask.addColorStopRgba(0.5, 0, 0, 0, 0);
 
     cr.setSource(&pattern);
     cr.mask(&mask);

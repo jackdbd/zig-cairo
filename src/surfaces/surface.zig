@@ -184,6 +184,11 @@ pub const Surface = struct {
         const s = c.cairo_surface_write_to_png(self.c_ptr, filename);
         return s;
     }
+
+    /// https://cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-get-reference-count
+    pub fn getReferenceCount(self: *Self) c_uint {
+        return c.cairo_surface_get_reference_count(self.c_ptr);
+    }
 };
 
 /// https://github.com/freedesktop/cairo/blob/6a6ab2475906635fcc5ba0c73182fae73c4f7ee8/src/cairo-misc.c#L90

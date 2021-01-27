@@ -14,7 +14,7 @@ fn imagePattern(allocator: *std.mem.Allocator, cr: *cairo.Context) !void {
     var pattern = try cairo.Pattern.createForSurface(&image);
     defer pattern.destroy();
 
-    pattern.setExtend(cairo.Extend.Repeat);
+    pattern.setExtend(cairo.Extend.repeat);
 
     cr.translate(128.0, 128.0);
     cr.rotate(pi / 4.0);

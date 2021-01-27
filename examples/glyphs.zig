@@ -9,7 +9,7 @@ const setBackground = @import("utils.zig").setBackground;
 
 /// https://github.com/pygobject/pycairo/blob/master/examples/pycairo_examples.ipynb
 fn glyphsExample(cr: *cairo.Context) !void {
-    cr.selectFontFace("Sans", cairo.FontSlant.Normal, cairo.FontWeight.Normal);
+    cr.selectFontFace("Sans", cairo.FontSlant.normal, cairo.FontWeight.normal);
     cr.setFontSize(18.0);
 
     var glyph = try cairo.Glyph.allocate(3);

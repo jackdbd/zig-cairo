@@ -5,7 +5,7 @@ const setBackground = @import("utils.zig").setBackground;
 
 /// https://www.cairographics.org/samples/text_extents/
 fn textExtents(cr: *cairo.Context) !void {
-    cr.selectFontFace("Sans", cairo.FontSlant.Normal, cairo.FontWeight.Normal);
+    cr.selectFontFace("Sans", cairo.FontSlant.normal, cairo.FontWeight.normal);
     cr.setFontSize(100.0);
     const some_text = "cairo"; // TODO: check that text is UTF8-encoded
 

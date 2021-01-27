@@ -41,6 +41,35 @@ pub const Antialias = enum {
     }
 };
 
+/// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-extend-t
+pub const Extend = enum {
+    none = c.CAIRO_EXTEND_NONE,
+    repeat = c.CAIRO_EXTEND_REPEAT,
+    reflect = c.CAIRO_EXTEND_REFLECT,
+    pad = c.CAIRO_EXTEND_PAD,
+
+    pub fn fromCairoEnum(c_enum: c.enum__cairo_extend) Extend {
+        const c_integer = @enumToInt(c_enum);
+        return switch (c_integer) {
+            c.CAIRO_EXTEND_NONE => Extend.none,
+            c.CAIRO_EXTEND_REPEAT => Extend.repeat,
+            c.CAIRO_EXTEND_REFLECT => Extend.reflect,
+            c.CAIRO_EXTEND_PAD => Extend.pad,
+            else => std.debug.panic("cairo_extend_t member {} not handled.", .{c_integer}),
+        };
+    }
+
+    pub fn toCairoEnum(self: Extend) c.enum__cairo_extend {
+        const c_integer = @enumToInt(self);
+        return switch (self) {
+            .none => @intToEnum(c.enum__cairo_extend, c.CAIRO_EXTEND_NONE),
+            .repeat => @intToEnum(c.enum__cairo_extend, c.CAIRO_EXTEND_REPEAT),
+            .reflect => @intToEnum(c.enum__cairo_extend, c.CAIRO_EXTEND_REFLECT),
+            .pad => @intToEnum(c.enum__cairo_extend, c.CAIRO_EXTEND_PAD),
+        };
+    }
+};
+
 /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-fill-rule-t
 pub const FillRule = enum {
     winding = c.CAIRO_FILL_RULE_WINDING,
@@ -61,6 +90,20 @@ pub const FillRule = enum {
             .even_odd => @intToEnum(c.enum__cairo_fill_rule, c.CAIRO_FILL_RULE_EVEN_ODD),
         };
     }
+};
+
+/// https://github.com/freedesktop/cairo/blob/6a6ab2475906635fcc5ba0c73182fae73c4f7ee8/src/cairoint.h#L691
+/// https://github.com/freedesktop/cairo/blob/577477207a300fd75c93da93dbb233256d8b48d8/util/cairo-trace/trace.c#L2925
+pub const FontSlant = enum {
+    normal = c.CAIRO_FONT_SLANT_NORMAL,
+    italic = c.CAIRO_FONT_SLANT_ITALIC,
+    oblique = c.CAIRO_FONT_SLANT_OBLIQUE,
+};
+
+/// https://github.com/freedesktop/cairo/blob/577477207a300fd75c93da93dbb233256d8b48d8/util/cairo-trace/trace.c#L2938
+pub const FontWeight = enum {
+    normal = c.CAIRO_FONT_WEIGHT_NORMAL,
+    bold = c.CAIRO_FONT_WEIGHT_BOLD,
 };
 
 /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-line-cap-t
@@ -245,29 +288,25 @@ pub const PathDataType = enum {
     }
 };
 
-/// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-extend-t
-pub const Extend = enum {
-    None = c.CAIRO_EXTEND_NONE, // 0
-    Repeat = c.CAIRO_EXTEND_REPEAT, // 1
-    Reflect = c.CAIRO_EXTEND_REFLECT, // 2
-    Pad = c.CAIRO_EXTEND_PAD, // 3
+/// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-type-t
+pub const PatternType = enum {
+    solid = c.CAIRO_PATTERN_TYPE_SOLID,
+    surface = c.CAIRO_PATTERN_TYPE_SURFACE,
+    linear = c.CAIRO_PATTERN_TYPE_LINEAR,
+    radial = c.CAIRO_PATTERN_TYPE_RADIAL,
+    mesh = c.CAIRO_PATTERN_TYPE_MESH,
+    raster_source = c.CAIRO_PATTERN_TYPE_RASTER_SOURCE,
 
-    pub fn toCairoEnum(self: Extend) c.enum__cairo_extend {
-        const c_integer = @enumToInt(self);
-        return @intToEnum(c.enum__cairo_extend, @intCast(u2, c_integer));
+    pub fn fromCairoEnum(c_enum: c.enum__cairo_pattern_type) PatternType {
+        const c_integer = @enumToInt(c_enum);
+        return switch (c_integer) {
+            c.CAIRO_PATTERN_TYPE_SOLID => PatternType.solid,
+            c.CAIRO_PATTERN_TYPE_SURFACE => PatternType.surface,
+            c.CAIRO_PATTERN_TYPE_LINEAR => PatternType.linear,
+            c.CAIRO_PATTERN_TYPE_RADIAL => PatternType.radial,
+            c.CAIRO_PATTERN_TYPE_MESH => PatternType.mesh,
+            c.CAIRO_PATTERN_TYPE_RASTER_SOURCE => PatternType.raster_source,
+            else => std.debug.panic("cairo_pattern_type_t member {} not handled.", .{c_integer}),
+        };
     }
-};
-
-/// https://github.com/freedesktop/cairo/blob/6a6ab2475906635fcc5ba0c73182fae73c4f7ee8/src/cairoint.h#L691
-/// https://github.com/freedesktop/cairo/blob/577477207a300fd75c93da93dbb233256d8b48d8/util/cairo-trace/trace.c#L2925
-pub const FontSlant = enum {
-    Normal = c.CAIRO_FONT_SLANT_NORMAL,
-    Italic = c.CAIRO_FONT_SLANT_ITALIC,
-    Oblique = c.CAIRO_FONT_SLANT_OBLIQUE,
-};
-
-/// https://github.com/freedesktop/cairo/blob/577477207a300fd75c93da93dbb233256d8b48d8/util/cairo-trace/trace.c#L2938
-pub const FontWeight = enum {
-    Normal = c.CAIRO_FONT_WEIGHT_NORMAL,
-    Bold = c.CAIRO_FONT_WEIGHT_BOLD,
 };

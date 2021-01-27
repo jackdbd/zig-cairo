@@ -5,7 +5,7 @@ const setBackground = @import("utils.zig").setBackground;
 
 /// https://www.cairographics.org/samples/text/
 fn text(cr: *cairo.Context) void {
-    cr.selectFontFace("Sans", cairo.FontSlant.Normal, cairo.FontWeight.Bold);
+    cr.selectFontFace("Sans", cairo.FontSlant.normal, cairo.FontWeight.bold);
     cr.setFontSize(90.0);
 
     cr.moveTo(10.0, 135.0);

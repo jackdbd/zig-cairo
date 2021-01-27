@@ -11,7 +11,7 @@ const Path = @import("./path.zig").Path;
 const scaled_font = @import("../fonts/scaled_font.zig");
 const Error = @import("../errors.zig").Error;
 
-/// Wrapper for the Cairo drawing context.
+/// Wrapper for the Cairo cairo_t C struct.
 pub const Context = struct {
     /// The original cairo_t C struct.
     /// Memory management of cairo_t is done with cairo_reference() and
@@ -293,6 +293,7 @@ pub const Context = struct {
 
     /// https://cairographics.org/manual/cairo-Paths.html#cairo-move-to
     pub fn moveTo(self: *Self, x: f64, y: f64) void {
+        // TODO: check status
         c.cairo_move_to(self.c_ptr, x, y);
     }
 
