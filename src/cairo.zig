@@ -1,10 +1,10 @@
 const std = @import("std");
-const c = @import("c.zig");
+pub const c = @import("c.zig"); // export c to allow calling the C API
 
 usingnamespace @import("enums.zig");
 
+usingnamespace @import("surfaces/device.zig");
 usingnamespace @import("surfaces/surface.zig");
-pub const image_surface = @import("surfaces/image.zig");
 
 usingnamespace @import("drawing/path.zig");
 usingnamespace @import("drawing/pattern.zig");

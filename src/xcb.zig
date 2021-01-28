@@ -20,54 +20,53 @@ pub const WindowClass = enum {
 pub const Xcb = struct {
     // An xcb_connection_t is an opaque structure containing all data that XCB
     // needs to communicate with an X server. The structure is defined in xcbint.h.
-    conn: *c.struct_xcb_connection_t,
+    c_ptr: *c.struct_xcb_connection_t,
 
     const Self = @This();
 
     pub fn connect(display: ?[*]const u8, screen: ?[*]c_int) Error!Self {
-        const conn = c.xcb_connect(display, screen);
-        if (conn == null) return error.CannotConnectToXServer;
-        // std.debug.print("XCB connection: {}\n", .{conn});
-        return Self{ .conn = conn.? };
+        const c_ptr = c.xcb_connect(display, screen);
+        if (c_ptr == null) return error.CannotConnectToXServer;
+        return Self{ .c_ptr = c_ptr.? };
     }
 
     pub fn disconnect(self: *Self) void {
         // std.debug.print("XCB disconnect\n", .{});
-        c.xcb_disconnect(self.conn);
+        c.xcb_disconnect(self.c_ptr);
     }
 
     pub fn generateId(self: *const Self) u32 {
-        const window_id = c.xcb_generate_id(self.conn);
+        const window_id = c.xcb_generate_id(self.c_ptr);
         return window_id;
     }
 
     pub fn setupRootsIterator(self: *Self) *c.struct_xcb_screen_t {
         // we need to cast from unknown length pointer to single pointer because
         // otherwise the zig compiler complains about s not supporting field access.
-        const s = @ptrCast(*c.xcb_screen_t, c.xcb_setup_roots_iterator(c.xcb_get_setup(self.conn)).data);
+        const s = @ptrCast(*c.xcb_screen_t, c.xcb_setup_roots_iterator(c.xcb_get_setup(self.c_ptr)).data);
         return s;
     }
 
     /// In XCB, a Graphics Context is, as a window, characterized by an Id.
     /// https://xcb.freedesktop.org/tutorial/basicwindowsanddrawing/
     pub fn createWindow(self: *Self, depth: u8, window_id: u32, root: u32, x: i16, y: i16, width: u16, height: u16, border_width: u16, win_class: u16, root_visual: u32, mask: comptime u32, values: anytype) void {
-        const win = c.xcb_create_window(self.conn, depth, window_id, root, x, y, width, height, border_width, win_class, root_visual, mask, values);
+        const win = c.xcb_create_window(self.c_ptr, depth, window_id, root, x, y, width, height, border_width, win_class, root_visual, mask, values);
         // std.debug.print("XCB createWindow: {}\n", .{win});
     }
 
     pub fn mapWindow(self: *Self, window_id: u32) void {
-        const x = c.xcb_map_window(self.conn, window_id);
+        const x = c.xcb_map_window(self.c_ptr, window_id);
         // std.debug.print("XCB mapWindow: {}\n", .{x});
     }
 
     pub fn flush(self: *Self) void {
-        const x = c.xcb_flush(self.conn);
+        const x = c.xcb_flush(self.c_ptr);
         // std.debug.print("XCB flush: {}\n", .{x});
     }
 
     pub fn waitForEvent(self: *Self) *c.xcb_generic_event_t {
         // xcb_generic_event_t *event;
-        return c.xcb_wait_for_event(self.conn);
+        return c.xcb_wait_for_event(self.c_ptr);
     }
 };
 

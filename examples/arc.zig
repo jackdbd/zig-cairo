@@ -44,30 +44,6 @@ pub fn main() !void {
     var cr = try cairo.Context.create(&surface);
     defer cr.destroy();
 
-    ///////////////////////////////////////////////////////////////////////////
-    // var pattern = try cairo.Pattern.createLinear(0, 0, 10, 10);
-    // var pattern = try cairo.Pattern.createRgb(1, 0, 0);
-    // defer pattern.destroy();
-
-    // // const index: usize = 1;
-    // // var offset: f64 = undefined;
-    // var red: f64 = undefined;
-    // var green: f64 = undefined;
-    // var blue: f64 = undefined;
-    // var alpha: f64 = undefined;
-
-    // try pattern.addColorStopRgba(0.1, 1, 0.75, 0.5, 0.95); // offset,r,g,b,a
-
-    // _ = try pattern.getColorStopRgba(index, &offset, &red, &green, &blue, &alpha);
-    // _ = try pattern.getRgba(&red, &green, &blue, &alpha);
-
-    // var pattern = try cairo.Pattern.createForSurface(&surface);
-    // defer pattern.destroy();
-
-    // _ = try pattern.getSurface(&surface);
-    // _ = try pattern.getPatchCount();
-    ///////////////////////////////////////////////////////////////////////////
-
     setBackground(&cr);
     arc(&cr);
     _ = surface.writeToPng("examples/generated/arc.png");

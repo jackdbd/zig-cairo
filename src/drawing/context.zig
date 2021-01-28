@@ -2,9 +2,15 @@
 const std = @import("std");
 const c = @import("../c.zig");
 const enums = @import("../enums.zig");
-const cairo_surface = @import("../surfaces/surface.zig");
-const Surface = cairo_surface.Surface;
-const Content = cairo_surface.Content;
+const Antialias = enums.Antialias;
+const Content = enums.Content;
+const FillRule = enums.FillRule;
+const FontSlant = enums.FontSlant;
+const FontWeight = enums.FontWeight;
+const LineCap = enums.LineCap;
+const LineJoin = enums.LineJoin;
+const Operator = enums.Operator;
+const Surface = @import("../surfaces/surface.zig").Surface;
 const FontOptions = @import("../fonts/font_options.zig").FontOptions;
 const Pattern = @import("./pattern.zig").Pattern;
 const Path = @import("./path.zig").Path;
@@ -144,8 +150,8 @@ pub const Context = struct {
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-antialias
-    pub fn getAntialias(self: *Self) enums.Antialias {
-        return enums.Antialias.fromCairoEnum(c.cairo_get_antialias(self.c_ptr));
+    pub fn getAntialias(self: *Self) Antialias {
+        return Antialias.fromCairoEnum(c.cairo_get_antialias(self.c_ptr));
     }
 
     /// https://cairographics.org/manual/cairo-Paths.html#cairo-get-current-point
@@ -183,8 +189,8 @@ pub const Context = struct {
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-fill-rule
-    pub fn getFillRule(self: *Self) enums.FillRule {
-        return enums.FillRule.fromCairoEnum(c.cairo_get_fill_rule(self.c_ptr));
+    pub fn getFillRule(self: *Self) FillRule {
+        return FillRule.fromCairoEnum(c.cairo_get_fill_rule(self.c_ptr));
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-group-target
@@ -197,13 +203,13 @@ pub const Context = struct {
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-line-cap
-    pub fn getLineCap(self: *Self) enums.LineCap {
-        return enums.LineCap.fromCairoEnum(c.cairo_get_line_cap(self.c_ptr));
+    pub fn getLineCap(self: *Self) LineCap {
+        return LineCap.fromCairoEnum(c.cairo_get_line_cap(self.c_ptr));
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-line-join
-    pub fn getLineJoin(self: *Self) enums.LineJoin {
-        return enums.LineJoin.fromCairoEnum(c.cairo_get_line_join(self.c_ptr));
+    pub fn getLineJoin(self: *Self) LineJoin {
+        return LineJoin.fromCairoEnum(c.cairo_get_line_join(self.c_ptr));
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-line-width
@@ -217,8 +223,8 @@ pub const Context = struct {
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-operator
-    pub fn getOperator(self: *Self) enums.Operator {
-        return enums.Operator.fromCairoEnum(c.cairo_get_operator(self.c_ptr));
+    pub fn getOperator(self: *Self) Operator {
+        return Operator.fromCairoEnum(c.cairo_get_operator(self.c_ptr));
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-reference-count
@@ -425,14 +431,14 @@ pub const Context = struct {
 
     /// https://cairographics.org/manual/cairo-text.html#cairo-select-font-face
     /// https://github.com/freedesktop/cairo/blob/577477207a300fd75c93da93dbb233256d8b48d8/util/cairo-trace/trace.c#L2948
-    pub fn selectFontFace(self: *Self, family: [*]const u8, slant: enums.FontSlant, weight: enums.FontWeight) void {
+    pub fn selectFontFace(self: *Self, family: [*]const u8, slant: FontSlant, weight: FontWeight) void {
         const font_slant = @intToEnum(c.enum__cairo_font_slant, @enumToInt(slant));
         const font_weight = @intToEnum(c.enum__cairo_font_weight, @enumToInt(weight));
         c.cairo_select_font_face(self.c_ptr, family, font_slant, font_weight);
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-antialias
-    pub fn setAntialias(self: *Self, antialias: enums.Antialias) void {
+    pub fn setAntialias(self: *Self, antialias: Antialias) void {
         c.cairo_set_antialias(self.c_ptr, antialias.toCairoEnum());
     }
 
@@ -442,7 +448,7 @@ pub const Context = struct {
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-fill-rule
-    pub fn setFillRule(self: *Self, fill_rule: enums.FillRule) void {
+    pub fn setFillRule(self: *Self, fill_rule: FillRule) void {
         c.cairo_set_fill_rule(self.c_ptr, fill_rule.toCairoEnum());
     }
 
@@ -456,12 +462,12 @@ pub const Context = struct {
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-line-cap
-    pub fn setLineCap(self: *Self, line_cap: enums.LineCap) void {
+    pub fn setLineCap(self: *Self, line_cap: LineCap) void {
         c.cairo_set_line_cap(self.c_ptr, line_cap.toCairoEnum());
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-line-join
-    pub fn setLineJoin(self: *Self, line_join: enums.LineJoin) void {
+    pub fn setLineJoin(self: *Self, line_join: LineJoin) void {
         c.cairo_set_line_join(self.c_ptr, line_join.toCairoEnum());
     }
 
@@ -476,7 +482,7 @@ pub const Context = struct {
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-operator
-    pub fn setOperator(self: *Self, operator: enums.Operator) void {
+    pub fn setOperator(self: *Self, operator: Operator) void {
         c.cairo_set_operator(self.c_ptr, operator.toCairoEnum());
     }
 
@@ -550,7 +556,7 @@ pub const Context = struct {
             c.CAIRO_STATUS_CLIP_NOT_REPRESENTABLE => Error.ClipNotRepresentable,
             c.CAIRO_STATUS_TEMP_FILE_ERROR => Error.TempFileError,
             c.CAIRO_STATUS_INVALID_STRIDE => Error.InvalidStride,
-            c.CAIRO_STATUS_FONT_TYPE_MISMATCH => Error.FotnTypeMismatch,
+            c.CAIRO_STATUS_FONT_TYPE_MISMATCH => Error.FontTypeMismatch,
             c.CAIRO_STATUS_USER_FONT_IMMUTABLE => Error.UserFontImmutable,
             c.CAIRO_STATUS_USER_FONT_ERROR => Error.UserFontError,
             c.CAIRO_STATUS_NEGATIVE_COUNT => Error.NegativeCount,
@@ -753,7 +759,7 @@ test "getAntialias() returns the expected antialias" {
     var cr = try testContext();
     defer cr.destroy();
 
-    const A = enums.Antialias;
+    const A = Antialias;
     expectEqual(A.default, cr.getAntialias());
     cr.setAntialias(A.fast);
     expectEqual(A.fast, cr.getAntialias());
@@ -840,16 +846,16 @@ test "getFillRule() returns the expected fill rule" {
     var cr = try testContext();
     defer cr.destroy();
 
-    expectEqual(enums.FillRule.winding, cr.getFillRule());
-    cr.setFillRule(enums.FillRule.even_odd);
-    expectEqual(enums.FillRule.even_odd, cr.getFillRule());
+    expectEqual(FillRule.winding, cr.getFillRule());
+    cr.setFillRule(FillRule.even_odd);
+    expectEqual(FillRule.even_odd, cr.getFillRule());
 }
 
 test "getLineCap() returns the expected line cap" {
     var cr = try testContext();
     defer cr.destroy();
 
-    const L = enums.LineCap;
+    const L = LineCap;
     expectEqual(L.butt, cr.getLineCap());
     cr.setLineCap(L.round);
     expectEqual(L.round, cr.getLineCap());
@@ -861,7 +867,7 @@ test "getLineJoin() returns the expected line join" {
     var cr = try testContext();
     defer cr.destroy();
 
-    const L = enums.LineJoin;
+    const L = LineJoin;
     expectEqual(L.miter, cr.getLineJoin());
     cr.setLineJoin(L.round);
     expectEqual(L.round, cr.getLineJoin());
@@ -922,7 +928,7 @@ test "getMiterLimit() returns the expected miter limit" {
 test "getOperator() returns the expected operator" {
     var cr = try testContext();
 
-    const Op = enums.Operator;
+    const Op = Operator;
     expectEqual(Op.over, cr.getOperator());
     cr.setOperator(Op.clear);
     expectEqual(Op.clear, cr.getOperator());

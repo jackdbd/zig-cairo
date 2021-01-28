@@ -41,6 +41,75 @@ pub const Antialias = enum {
     }
 };
 
+/// https://cairographics.org/manual/cairo-cairo-surface-t.html#cairo-content-t
+/// https://gitlab.freedesktop.org/cairo/cairo/-/blob/master/src/cairo.h#L379
+pub const Content = enum {
+    color, // in Cairo is 0x1000 i.e. 4096
+    alpha, // in Cairo is0x2000 i.e. 8192
+    color_alpha, // in Cairo is 0x3000 i.e. 12288
+
+    pub fn fromCairoEnum(c_enum: c.enum__cairo_content) Content {
+        const c_integer = @enumToInt(c_enum);
+        return switch (c_integer) {
+            c.CAIRO_CONTENT_COLOR => Content.color,
+            c.CAIRO_CONTENT_ALPHA => Content.alpha,
+            c.CAIRO_CONTENT_COLOR_ALPHA => Content.color_alpha,
+            else => std.debug.panic("cairo_content_t member {} not handled.", .{c_integer}),
+        };
+    }
+
+    pub fn toCairoEnum(self: Content) c.enum__cairo_content {
+        return switch (self) {
+            .color => @intToEnum(c.enum__cairo_content, c.CAIRO_CONTENT_COLOR),
+            .alpha => @intToEnum(c.enum__cairo_content, c.CAIRO_CONTENT_ALPHA),
+            .color_alpha => @intToEnum(c.enum__cairo_content, c.CAIRO_CONTENT_COLOR_ALPHA),
+        };
+    }
+};
+
+/// https://www.cairographics.org/manual/cairo-cairo-device-t.html#cairo-device-type-t
+pub const DeviceType = enum {
+    drm = c.CAIRO_DEVICE_TYPE_DRM,
+    gl = c.CAIRO_DEVICE_TYPE_GL,
+    script = c.CAIRO_DEVICE_TYPE_SCRIPT,
+    xcb = c.CAIRO_DEVICE_TYPE_XCB,
+    xlib = c.CAIRO_DEVICE_TYPE_XLIB,
+    xml = c.CAIRO_DEVICE_TYPE_XML,
+    cogl = c.CAIRO_DEVICE_TYPE_COGL,
+    win32 = c.CAIRO_DEVICE_TYPE_WIN32,
+    // invalid = c.CAIRO_DEVICE_TYPE_INVALID, // -1
+
+    pub fn fromCairoEnum(c_enum: c.enum__cairo_device_type) DeviceType {
+        const c_integer = @enumToInt(c_enum);
+        return switch (c_integer) {
+            c.CAIRO_DEVICE_TYPE_DRM => DeviceType.drm,
+            c.CAIRO_DEVICE_TYPE_GL => DeviceType.gl,
+            c.CAIRO_DEVICE_TYPE_SCRIPT => DeviceType.script,
+            c.CAIRO_DEVICE_TYPE_XCB => DeviceType.xcb,
+            c.CAIRO_DEVICE_TYPE_XLIB => DeviceType.xlib,
+            c.CAIRO_DEVICE_TYPE_XML => DeviceType.xml,
+            c.CAIRO_DEVICE_TYPE_COGL => DeviceType.cogl,
+            c.CAIRO_DEVICE_TYPE_WIN32 => DeviceType.win32,
+            // c.CAIRO_DEVICE_TYPE_INVALID => DeviceType.invalid,
+            else => std.debug.panic("cairo_device_type_t member {} not handled.", .{c_integer}),
+        };
+    }
+
+    pub fn toCairoEnum(self: DeviceType) c.enum__cairo_device_type {
+        return switch (self) {
+            .drm => @intToEnum(c.enum__cairo_device_type, c.CAIRO_DEVICE_TYPE_DRM),
+            .gl => @intToEnum(c.enum__cairo_device_type, c.CAIRO_DEVICE_TYPE_GL),
+            .script => @intToEnum(c.enum__cairo_device_type, c.CAIRO_DEVICE_TYPE_SCRIPT),
+            .xcb => @intToEnum(c.enum__cairo_device_type, c.CAIRO_DEVICE_TYPE_XCB),
+            .xlib => @intToEnum(c.enum__cairo_device_type, c.CAIRO_DEVICE_TYPE_XLIB),
+            .xml => @intToEnum(c.enum__cairo_device_type, c.CAIRO_DEVICE_TYPE_XML),
+            .cogl => @intToEnum(c.enum__cairo_device_type, c.CAIRO_DEVICE_TYPE_WIN32),
+            .win32 => @intToEnum(c.enum__cairo_device_type, c.CAIRO_DEVICE_TYPE_COGL),
+            // .invalid => @intToEnum(c.enum__cairo_device_type, c.CAIRO_DEVICE_TYPE_INVALID),
+        };
+    }
+};
+
 /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-extend-t
 pub const Extend = enum {
     none = c.CAIRO_EXTEND_NONE,
@@ -104,6 +173,32 @@ pub const FontSlant = enum {
 pub const FontWeight = enum {
     normal = c.CAIRO_FONT_WEIGHT_NORMAL,
     bold = c.CAIRO_FONT_WEIGHT_BOLD,
+};
+
+/// https://www.cairographics.org/manual/cairo-Image-Surfaces.html#cairo-format-t
+/// https://github.com/freedesktop/cairo/blob/6a6ab2475906635fcc5ba0c73182fae73c4f7ee8/src/cairo.h#L418
+pub const Format = enum {
+    // invalid = c.CAIRO_FORMAT_INVALID, // -1
+    argb32 = c.CAIRO_FORMAT_ARGB32, // 0
+    rgb24 = c.CAIRO_FORMAT_RGB24, // 1
+    a8 = c.CAIRO_FORMAT_A8, // 2
+    a1 = c.CAIRO_FORMAT_A1, // 3
+    rgb16_565 = c.CAIRO_FORMAT_RGB16_565, // 4
+    rgb30 = c.CAIRO_FORMAT_RGB30, // 5
+    // rgb96f = c.CAIRO_FORMAT_RGB96F, // 6
+    // rgba128f = c.CAIRO_FORMAT_RGBA128F, // 7
+
+    pub fn toCairoEnum(self: Format) c.enum__cairo_format {
+        return switch (self) {
+            // .invalid => @intToEnum(c.enum__cairo_format, c.CAIRO_FORMAT_INVALID),
+            .argb32 => @intToEnum(c.enum__cairo_format, c.CAIRO_FORMAT_ARGB32),
+            .rgb24 => @intToEnum(c.enum__cairo_format, c.CAIRO_FORMAT_RGB24),
+            .a8 => @intToEnum(c.enum__cairo_format, c.CAIRO_FORMAT_A8),
+            .a1 => @intToEnum(c.enum__cairo_format, c.CAIRO_FORMAT_A1),
+            .rgb16_565 => @intToEnum(c.enum__cairo_format, c.CAIRO_FORMAT_RGB16_565),
+            .rgb30 => @intToEnum(c.enum__cairo_format, c.CAIRO_FORMAT_RGB30),
+        };
+    }
 };
 
 /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-line-cap-t
@@ -307,6 +402,28 @@ pub const PatternType = enum {
             c.CAIRO_PATTERN_TYPE_MESH => PatternType.mesh,
             c.CAIRO_PATTERN_TYPE_RASTER_SOURCE => PatternType.raster_source,
             else => std.debug.panic("cairo_pattern_type_t member {} not handled.", .{c_integer}),
+        };
+    }
+};
+
+/// https://www.cairographics.org/manual/cairo-Script-Surfaces.html#cairo-script-mode-t
+pub const ScriptMode = enum {
+    ascii = c.CAIRO_SCRIPT_MODE_ASCII,
+    binary = c.CAIRO_SCRIPT_MODE_BINARY,
+
+    pub fn fromCairoEnum(c_enum: anytype) ScriptMode {
+        const c_integer = @enumToInt(c_enum);
+        return switch (c_integer) {
+            0 => ScriptMode.ascii,
+            1 => ScriptMode.binary,
+            else => std.debug.panic("cairo_script_mode_t member {} not handled.", .{c_integer}),
+        };
+    }
+
+    pub fn toCInt(self: ScriptMode) c_int {
+        return switch (self) {
+            .ascii => c.CAIRO_SCRIPT_MODE_ASCII,
+            .binary => c.CAIRO_SCRIPT_MODE_BINARY,
         };
     }
 };

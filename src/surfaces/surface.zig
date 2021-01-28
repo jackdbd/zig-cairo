@@ -4,10 +4,13 @@ const std = @import("std");
 const c = @import("../c.zig");
 const Device = @import("device.zig").Device;
 const Error = @import("../errors.zig").Error;
+const enums = @import("../enums.zig");
+const Content = enums.Content;
+const Format = enums.Format;
 const image_surface = @import("image.zig");
-const Format = image_surface.Format;
 const pdf_surface = @import("pdf.zig");
 const png_surface = @import("png.zig");
+const script_surface = @import("script.zig");
 const svg_surface = @import("svg.zig");
 const xcb_surface = @import("xcb.zig");
 
@@ -65,7 +68,7 @@ pub const Surface = struct {
 
     /// https://cairographics.org/manual/cairo-Image-Surfaces.html#cairo-image-surface-create
     pub fn image(width: u16, height: u16) !Surface {
-        var c_ptr = try image_surface.create(Format.Argb32, width, height);
+        var c_ptr = try image_surface.create(Format.argb32, width, height);
         try Surface.status(c_ptr);
         return Self{ .c_ptr = c_ptr };
     }
@@ -89,14 +92,14 @@ pub const Surface = struct {
         }
     }
 
-    pub fn pdf(comptime filename: [*]const u8, width_pt: f64, height_pt: f64) !Surface {
-        var c_ptr = try pdf_surface.create(filename, width_pt, height_pt);
+    pub fn pdf(comptime filename: []const u8, width_pt: f64, height_pt: f64) !Surface {
+        var c_ptr = try pdf_surface.create(filename.ptr, width_pt, height_pt);
         try Surface.status(c_ptr);
         return Self{ .c_ptr = c_ptr };
     }
 
-    pub fn createFromPng(filename: [*]const u8) !Surface {
-        var c_ptr = try png_surface.create(filename);
+    pub fn createFromPng(filename: []const u8) !Surface {
+        var c_ptr = try png_surface.create(filename.ptr);
         try Surface.status(c_ptr);
         return Self{ .c_ptr = c_ptr };
     }
@@ -123,6 +126,17 @@ pub const Surface = struct {
         }
     }
 
+    /// Create a Script Surface
+    /// https://www.cairographics.org/manual/cairo-Script-Surfaces.html#cairo-script-surface-create
+    pub fn script(filename: []const u8, content: Content, width: f64, height: f64) !Self {
+        var c_ptr = try script_surface.surfaceCreate(filename, content, width, height);
+        // Cairo guarantees that c_ptr is a valid pointer, but it could be a
+        // pointer to a "nil" surface if an error such as out of memory occurs.
+        // That's why we check the surface's status.
+        _ = try Self.status(c_ptr);
+        return Self{ .c_ptr = c_ptr };
+    }
+
     /// Check whether an error has previously occurred for this surface.
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-status
     pub fn status(c_ptr: ?*c.struct__cairo_surface) !void {
@@ -139,25 +153,33 @@ pub const Surface = struct {
         };
     }
 
-    pub fn svg(comptime filename: [*]const u8, width_pt: f64, height_pt: f64) !Surface {
-        var c_ptr = try svg_surface.create(filename, width_pt, height_pt);
+    pub fn svg(comptime filename: []const u8, width_pt: f64, height_pt: f64) !Surface {
+        var c_ptr = try svg_surface.create(filename.ptr, width_pt, height_pt);
         try Surface.status(c_ptr);
         return Self{ .c_ptr = c_ptr };
     }
-
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-get-device
-    pub fn getDevice(cairo_surface: *c.struct__cairo_surface) !Device {
-        const device = c.cairo_surface_get_device(cairo_surface);
-        // if (device == null) return Status.NullPointer;
-        if (device == null) return Error.NullPointer;
-        return Device{ .device = device.? };
+    // pub fn getDevice(cairo_surface: *c.struct__cairo_surface) !Device {
+    pub fn getDevice(self: *Self) !Device {
+        const c_ptr = c.cairo_surface_get_device(self.c_ptr);
+        // The C pointer is null if the surface does not have an associated
+        // device (for example, if the user called surface.writeComment() on a
+        // non-script surface). I am not sure which error would be more
+        // appropriate to return.
+        // 1. CAIRO_STATUS_DEVICE_TYPE_MISMATCH?
+        // 2. CAIRO_STATUS_DEVICE_ERROR?
+        // 3. something else?
+        if (c_ptr == null) return error.OperationNotAvailableForSurface;
+        return Device{ .c_ptr = c_ptr.? };
     }
 
     pub fn xcb(conn: ?*c.struct_xcb_connection_t, drawable: u32, visual: ?*c.struct_xcb_visualtype_t, width: u16, height: u16) !Surface {
-        var c_ptr = try xcb_surface.create(conn, drawable, visual, width, height);
-        try Surface.status(c_ptr);
-        var device = try Surface.getDevice(c_ptr);
-        return Self{ .c_ptr = c_ptr };
+        var c_ptr = try xcb_surface.surfaceCreate(conn, drawable, visual, width, height);
+        try Self.status(c_ptr);
+        var surface = Self{ .c_ptr = c_ptr };
+        // var device = try surface.getDevice();
+        // return Self{ .c_ptr = c_ptr };
+        return surface;
     }
 
     /// Decrease the reference count on surface by one.
@@ -180,9 +202,20 @@ pub const Surface = struct {
     /// Write the contents of surface to a new file filename as a PNG image.
     /// https://cairographics.org/manual/cairo-PNG-Support.html#cairo-surface-write-to-png
     /// TODO: cast C string
-    pub fn writeToPng(self: *Self, filename: [*]const u8) c.enum__cairo_status {
-        const s = c.cairo_surface_write_to_png(self.c_ptr, filename);
+    pub fn writeToPng(self: *Self, filename: []const u8) c.enum__cairo_status {
+        const s = c.cairo_surface_write_to_png(self.c_ptr, filename.ptr);
         return s;
+    }
+
+    /// Emit a string verbatim into the script.
+    /// Available only for Cairo Script surfaces.
+    /// https://www.cairographics.org/manual/cairo-Script-Surfaces.html#cairo-script-write-comment
+    pub fn writeComment(self: *Self, comment: []const u8) !void {
+        var device = try self.getDevice();
+        // I don't know if we really need to acquire/release the device
+        try device.acquire();
+        script_surface.writeComment(device.c_ptr, comment);
+        device.release();
     }
 
     /// https://cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-get-reference-count
@@ -197,26 +230,10 @@ pub fn statusAsString(cairo_surface: *c.struct__cairo_surface) [:0]const u8 {
     return std.mem.span(c.cairo_status_to_string(c_enum)); // or spanZ?
 }
 
-/// https://cairographics.org/manual/cairo-cairo-surface-t.html#cairo-content-t
-/// https://gitlab.freedesktop.org/cairo/cairo/-/blob/master/src/cairo.h#L379
-pub const Content = enum {
-    color, // in Cairo is 0x1000 i.e. 4096
-    alpha, // in Cairo is0x2000 i.e. 8192
-    color_alpha, // in Cairo is 0x3000 i.e. 12288
-
-    /// Convert the Zig enum(u2) into the C enum that Cairo expects.
-    pub fn toCairoEnum(self: Content) c.enum__cairo_content {
-        return switch (self) {
-            .color => @intToEnum(c.enum__cairo_content, c.CAIRO_CONTENT_COLOR),
-            .alpha => @intToEnum(c.enum__cairo_content, c.CAIRO_CONTENT_ALPHA),
-            .color_alpha => @intToEnum(c.enum__cairo_content, c.CAIRO_CONTENT_COLOR_ALPHA),
-        };
-    }
-};
-
 const testing = std.testing;
 const expect = testing.expect;
 const expectEqual = testing.expectEqual;
+const expectError = testing.expectError;
 
 test "Surface.getType() returns the expected SurfaceType" {
     var surface_image = try Surface.image(320, 240);
@@ -257,13 +274,16 @@ test "Surface.getDocumentUnit() returns SurfaceTypeMismatch for non-SVG surfaces
     };
 }
 
-test "Surface.getDevice() returns NullPointer when the surface does not have an associated device" {
-    var surface_image = try Surface.image(320, 240);
-    defer surface_image.destroy();
-    var caught = false;
-    _ = Surface.getDevice(surface_image.c_ptr) catch |err| {
-        expectEqual(Error.NullPointer, err);
-        caught = true;
-    };
-    expectEqual(true, caught);
+test "getDevice() returns expected error when called on an image surface" {
+    var surface = try Surface.image(320, 240);
+    defer surface.destroy();
+
+    expectError(error.OperationNotAvailableForSurface, surface.getDevice());
+}
+
+test "writeComment() returns expected error when called on an image surface" {
+    var surface = try Surface.image(320, 240);
+    defer surface.destroy();
+
+    expectError(error.OperationNotAvailableForSurface, surface.writeComment("foo"));
 }

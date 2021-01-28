@@ -4,7 +4,6 @@ const xcb = @import("xcb");
 const render = @import("render.zig");
 
 pub fn main() !void {
-    // std.debug.print("Example with the Cairo surface XCB backend\n", .{});
     var display: ?[*]const u8 = null;
     var screen: ?[*]c_int = null;
 
@@ -28,7 +27,7 @@ pub fn main() !void {
     _ = conn.flush();
     const vis = xcb.lookup_visual(s, s.root_visual);
 
-    var surface = try cairo.Surface.xcb(conn.conn, window_id, vis, window_width, window_height);
+    var surface = try cairo.Surface.xcb(conn.c_ptr, window_id, vis, window_width, window_height);
     defer surface.destroy();
 
     var cr = try cairo.Context.create(&surface);

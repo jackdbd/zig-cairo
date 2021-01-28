@@ -6,6 +6,7 @@
 const std = @import("std");
 const c = @import("../c.zig");
 const Error = @import("../errors.zig").Error;
+const Format = @import("../enums.zig").Format;
 
 /// https://www.cairographics.org/manual/cairo-Image-Surfaces.html#cairo-image-surface-create
 pub fn create(format: Format, width: u16, height: u16) !*c.struct__cairo_surface {
@@ -44,17 +45,3 @@ pub fn getData(surface: *c.struct__cairo_surface) ![*c]u8 {
 pub fn getStride(surface: *c.struct__cairo_surface) u16 {
     return @intCast(u16, c.cairo_image_surface_get_stride(surface));
 }
-
-/// https://www.cairographics.org/manual/cairo-Image-Surfaces.html#cairo-format-t
-/// https://github.com/freedesktop/cairo/blob/6a6ab2475906635fcc5ba0c73182fae73c4f7ee8/src/cairo.h#L418
-pub const Format = enum {
-    // Invalid = c.CAIRO_FORMAT_INVALID, // -1
-    Argb32 = c.CAIRO_FORMAT_ARGB32, // 0
-    Rgb24 = c.CAIRO_FORMAT_RGB24, // 1
-    A8 = c.CAIRO_FORMAT_A8, // 2
-    A1 = c.CAIRO_FORMAT_A1, // 3
-    Rgb16_565 = c.CAIRO_FORMAT_RGB16_565, // 4
-    Rgb30 = c.CAIRO_FORMAT_RGB30, // 5
-    // Rgb96f = c.CAIRO_FORMAT_RGB96F, // 6
-    // Rgba128f = c.CAIRO_FORMAT_RGBA128F, // 7
-};

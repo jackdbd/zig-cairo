@@ -1,4 +1,6 @@
 //! Errors used in Cairo.
+const std = @import("std");
+const c = @import("c.zig");
 
 /// Errors that can occur when using Cairo. This error set matches the original
 /// cairo_status_t C enum, except for CAIRO_STATUS_SUCCESS (which of course is
@@ -29,7 +31,7 @@ pub const Error = error{
     ClipNotRepresentable,
     TempFileError,
     InvalidStride,
-    FotnTypeMismatch,
+    FontTypeMismatch,
     UserFontImmutable,
     UserFontError,
     NegativeCount,
@@ -49,3 +51,56 @@ pub const Error = error{
     TagError,
     LastStatus,
 };
+
+/// Convert a Cairo status into a zig error (or void if the Cairo status is
+/// CAIRO_STATUS_SUCCESS).
+pub fn statusToError(c_enum: c.enum__cairo_status) !void {
+    const c_integer = @enumToInt(c_enum);
+    return switch (c_integer) {
+        c.CAIRO_STATUS_SUCCESS => {},
+        c.CAIRO_STATUS_NO_MEMORY => Error.NoMemory,
+        c.CAIRO_STATUS_INVALID_RESTORE => Error.InvalidRestore,
+        c.CAIRO_STATUS_INVALID_POP_GROUP => Error.InvalidPopGroup,
+        c.CAIRO_STATUS_NO_CURRENT_POINT => Error.NoCurrentPoint,
+        c.CAIRO_STATUS_INVALID_MATRIX => Error.InvalidMatrix,
+        c.CAIRO_STATUS_INVALID_STATUS => Error.InvalidStatus,
+        c.CAIRO_STATUS_NULL_POINTER => Error.NullPointer,
+        c.CAIRO_STATUS_INVALID_STRING => Error.InvalidString,
+        c.CAIRO_STATUS_INVALID_PATH_DATA => Error.InvalidPathData,
+        c.CAIRO_STATUS_READ_ERROR => Error.ReadError,
+        c.CAIRO_STATUS_WRITE_ERROR => Error.WriteError,
+        c.CAIRO_STATUS_SURFACE_FINISHED => Error.SurfaceFinished,
+        c.CAIRO_STATUS_SURFACE_TYPE_MISMATCH => Error.SurfaceTypeMismatch,
+        c.CAIRO_STATUS_PATTERN_TYPE_MISMATCH => Error.PatternTypeMismatch,
+        c.CAIRO_STATUS_INVALID_CONTENT => Error.InvalidContent,
+        c.CAIRO_STATUS_INVALID_FORMAT => Error.InvalidFormat,
+        c.CAIRO_STATUS_INVALID_VISUAL => Error.InvalidVisual,
+        c.CAIRO_STATUS_FILE_NOT_FOUND => Error.FileNotFound,
+        c.CAIRO_STATUS_INVALID_DASH => Error.InvalidDash,
+        c.CAIRO_STATUS_INVALID_DSC_COMMENT => Error.InvalidDscComment,
+        c.CAIRO_STATUS_INVALID_INDEX => Error.InvalidIndex,
+        c.CAIRO_STATUS_CLIP_NOT_REPRESENTABLE => Error.ClipNotRepresentable,
+        c.CAIRO_STATUS_TEMP_FILE_ERROR => Error.TempFileError,
+        c.CAIRO_STATUS_INVALID_STRIDE => Error.InvalidStride,
+        c.CAIRO_STATUS_FONT_TYPE_MISMATCH => Error.FontTypeMismatch,
+        c.CAIRO_STATUS_USER_FONT_IMMUTABLE => Error.UserFontImmutable,
+        c.CAIRO_STATUS_USER_FONT_ERROR => Error.UserFontError,
+        c.CAIRO_STATUS_NEGATIVE_COUNT => Error.NegativeCount,
+        c.CAIRO_STATUS_INVALID_CLUSTERS => Error.InvalidClusters,
+        c.CAIRO_STATUS_INVALID_SLANT => Error.InvalidSlant,
+        c.CAIRO_STATUS_INVALID_WEIGHT => Error.InvalidWeight,
+        c.CAIRO_STATUS_INVALID_SIZE => Error.InvalidSize,
+        c.CAIRO_STATUS_USER_FONT_NOT_IMPLEMENTED => Error.UserFontNotImplemented,
+        c.CAIRO_STATUS_DEVICE_TYPE_MISMATCH => Error.DeviceTypeMismatch,
+        c.CAIRO_STATUS_DEVICE_ERROR => Error.DeviceError,
+        c.CAIRO_STATUS_INVALID_MESH_CONSTRUCTION => Error.InvalidMeshConstruction,
+        c.CAIRO_STATUS_DEVICE_FINISHED => Error.DeviceFinished,
+        c.CAIRO_STATUS_JBIG2_GLOBAL_MISSING => Error.Jbig2GlobalMissing,
+        c.CAIRO_STATUS_PNG_ERROR => Error.PngError,
+        c.CAIRO_STATUS_FREETYPE_ERROR => Error.FreetypeError,
+        c.CAIRO_STATUS_WIN32_GDI_ERROR => Error.Win32GdiError,
+        c.CAIRO_STATUS_TAG_ERROR => Error.TagError,
+        c.CAIRO_STATUS_LAST_STATUS => Error.LastStatus, // TODO: should this be an error?
+        else => std.debug.panic("cairo_status_t member {} not handled.", .{c_integer}),
+    };
+}
