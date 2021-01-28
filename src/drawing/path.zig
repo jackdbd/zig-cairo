@@ -2,7 +2,7 @@
 const std = @import("std");
 const c = @import("../c.zig");
 const PathDataType = @import("../enums.zig").PathDataType;
-const Error = @import("../errors.zig").Error;
+const Error = @import("../utilities/error_handling.zig").Error;
 
 /// Convenience struct to iterate over the data elements in a Cairo path.
 const PathIterator = struct {

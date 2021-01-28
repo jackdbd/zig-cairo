@@ -38,8 +38,6 @@ fn fillStyle(cr: *cairo.Context) void {
 pub fn main() !void {
     const width: u16 = 256;
     const height: u16 = 256;
-    // std.debug.print("fill_style example ({}x{} px)\n", .{ width, height });
-
     var surface = try cairo.Surface.image(width, height);
     defer surface.destroy();
 

@@ -3,23 +3,26 @@ const cairo = @import("cairo");
 const render = @import("render.zig");
 
 pub fn main() !void {
-    // std.debug.print("Example with the Cairo surface PDF backend\n", .{});
     const width_pt: f64 = 640;
     const height_pt: f64 = 480;
-
-    var surface = try cairo.Surface.pdf("examples/generated/test-image.pdf", width_pt, height_pt);
+    var surface = try cairo.Surface.pdf("examples/generated/report.pdf", width_pt, height_pt);
     defer surface.destroy();
+
+    try surface.setMetadata(cairo.PdfMetadata.title, "Some Title");
+    try surface.setMetadata(cairo.PdfMetadata.author, "Some author");
+    try surface.setMetadata(cairo.PdfMetadata.create_date, "2021-01-28T19:49+02:00");
+    try surface.setMetadata(cairo.PdfMetadata.keywords, "foo,bar");
 
     var cr = try cairo.Context.create(&surface);
     defer cr.destroy();
 
-    render.testImage(&cr, width_pt, height_pt);
+    cr.tagBegin("H1", null);
+    cr.moveTo(20, 30);
+    cr.showText("Heading 1");
+    cr.tagEnd("H1");
 
-    var surface2 = try cairo.Surface.pdf("examples/generated/line-chart.pdf", width_pt, height_pt);
-    defer surface2.destroy();
-
-    var cr2 = try cairo.Context.create(&surface2);
-    defer cr2.destroy();
-
-    render.lineChart(&cr2, width_pt, height_pt);
+    cr.tagBegin(cairo.Link, "uri='https://cairographics.org'");
+    cr.moveTo(100, 200);
+    cr.showText("This is a hyperlink to the Cairo website.");
+    cr.tagEnd(cairo.Link);
 }

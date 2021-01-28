@@ -1,12 +1,14 @@
 const std = @import("std");
-const log = std.log;
 const c = @import("c.zig");
 const cairo = @import("cairo.zig");
-const Error = @import("errors.zig").Error;
 
 pub const SCALE = c.PANGO_SCALE;
 
-// log.debug("TYPE INFO: {}", .{@typeInfo(@TypeOf(ret))});
+// TODO: create file for Pango and Pangocairo errors?
+pub const Error = error{
+    NoMemory,
+    NullPointer,
+};
 
 /// https://developer.gnome.org/pango/stable/pango-Layout-Objects.html#PangoLayoutLine
 pub const LayoutLine = struct {
@@ -140,14 +142,14 @@ pub const FontDescription = struct {
     /// https://developer.gnome.org/pango/stable/pango-Fonts.html#PangoStyle
     pub fn getStyle(self: *Self) void {
         const style = c.pango_font_description_get_style(self.c_ptr);
-        // log.debug("style {}", .{&style}); // it's unnamed
+        // std.log.debug("style {}", .{&style}); // it's unnamed
     }
 
     /// https://developer.gnome.org/pango/stable/pango-Fonts.html#pango-font-description-get-weight
     /// https://developer.gnome.org/pango/stable/pango-Fonts.html#PangoWeight
     pub fn getWeight(self: *Self) void {
         const weight = c.pango_font_description_get_weight(self.c_ptr);
-        // log.debug("weight {}", .{weight}); // it's unnamed
+        // std.log.debug("weight {}", .{weight}); // it's unnamed
     }
 
     /// https://developer.gnome.org/pango/stable/pango-Fonts.html#pango-font-description-new
@@ -186,12 +188,12 @@ pub const Context = struct {
 
     /// https://developer.gnome.org/pango/stable/pango-Cairo-Rendering.html#pango-cairo-context-set-shape-renderer
     pub fn setShapeRenderer(self: *Self, func: PangoCairoShapeRendererFunc, data: ?*c_void, dnotify: ?DNotify) void {
-        // log.debug("setShapeRenderer", .{});
-        // log.debug("func {}", .{func});
-        // log.debug("data {}", .{data});
-        // log.debug("dnotify {}", .{dnotify});
+        // std.log.debug("setShapeRenderer", .{});
+        // std.log.debug("func {}", .{func});
+        // std.log.debug("data {}", .{data});
+        // std.log.debug("dnotify {}", .{dnotify});
         c.pango_cairo_context_set_shape_renderer(self.c_ptr, func, data, dnotify);
-        // log.debug("", .{});
+        // std.log.debug("", .{});
     }
 };
 
@@ -250,8 +252,8 @@ pub const Attribute = struct {
 
     /// https://developer.gnome.org/pango/stable/pango-Text-Attributes.html#pango-attr-shape-new-with-data
     pub fn newShapeWithData(comptime T: type, ink_rect: *Rectangle, logical_rect: *Rectangle, data: *T, copy_fn: ?PangoAttrDataCopyFunc, destroy_fn: ?GDestroyNotify) !Self {
-        log.debug("newShapeWithData T {}", .{T});
-        // log.debug("data {}", .{data});
+        std.log.debug("newShapeWithData T {}", .{T});
+        // std.log.debug("data {}", .{data});
         const c_ptr = c.pango_attr_shape_new_with_data(ink_rect.c_ptr, logical_rect.c_ptr, data, copy_fn, destroy_fn);
         if (c_ptr == null) return Error.NoMemory; // or other errors?
         return Self{ .c_ptr = c_ptr.? };

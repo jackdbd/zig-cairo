@@ -12,7 +12,6 @@ fn clipImage(cr: *cairo.Context) !void {
 
     const w = try image.getWidth();
     const h = try image.getHeight();
-    // std.debug.print("Original PNG image dimensions: {}x{} px\n", .{ w, h });
 
     cr.arc(128.0, 128.0, 76.8, 0, 2 * pi);
     cr.clip();
@@ -26,8 +25,6 @@ fn clipImage(cr: *cairo.Context) !void {
 pub fn main() !void {
     const width: u16 = 256;
     const height: u16 = 256;
-    // std.debug.print("clip_image example ({}x{} px)\n", .{ width, height });
-
     var surface = try cairo.Surface.image(width, height);
     defer surface.destroy();
 

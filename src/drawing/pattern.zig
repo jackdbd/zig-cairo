@@ -6,7 +6,7 @@ const PatternType = enums.PatternType;
 const Extend = enums.Extend;
 const Surface = @import("../surfaces/surface.zig").Surface;
 const Matrix = @import("../utilities/matrix.zig").Matrix;
-const Error = @import("../errors.zig").Error;
+const Error = @import("../utilities/error_handling.zig").Error;
 
 /// Wrapper for the Cairo cairo_pattern_t C struct.
 pub const Pattern = struct {

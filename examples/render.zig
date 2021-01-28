@@ -72,7 +72,6 @@ pub fn lineChart(cr: *cairo.Context, width: usize, height: usize) void {
     while (i < n) : (i += 1) {
         const x = points[i].x * w / max_width;
         const y = h - (points[i].y * h / max_height);
-        // std.debug.print("[{},{}]\n", .{x, y});
         cr.lineTo(x, y);
         cr.moveTo(x, y);
     }

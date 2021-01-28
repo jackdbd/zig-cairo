@@ -31,7 +31,6 @@ pub const Xcb = struct {
     }
 
     pub fn disconnect(self: *Self) void {
-        // std.debug.print("XCB disconnect\n", .{});
         c.xcb_disconnect(self.c_ptr);
     }
 
@@ -51,17 +50,14 @@ pub const Xcb = struct {
     /// https://xcb.freedesktop.org/tutorial/basicwindowsanddrawing/
     pub fn createWindow(self: *Self, depth: u8, window_id: u32, root: u32, x: i16, y: i16, width: u16, height: u16, border_width: u16, win_class: u16, root_visual: u32, mask: comptime u32, values: anytype) void {
         const win = c.xcb_create_window(self.c_ptr, depth, window_id, root, x, y, width, height, border_width, win_class, root_visual, mask, values);
-        // std.debug.print("XCB createWindow: {}\n", .{win});
     }
 
     pub fn mapWindow(self: *Self, window_id: u32) void {
         const x = c.xcb_map_window(self.c_ptr, window_id);
-        // std.debug.print("XCB mapWindow: {}\n", .{x});
     }
 
     pub fn flush(self: *Self) void {
         const x = c.xcb_flush(self.c_ptr);
-        // std.debug.print("XCB flush: {}\n", .{x});
     }
 
     pub fn waitForEvent(self: *Self) *c.xcb_generic_event_t {
@@ -74,7 +70,6 @@ pub const Xcb = struct {
 /// https://xcb.freedesktop.org/xlibtoxcbtranslationguide/
 pub fn lookup_visual(s: *c.xcb_screen_t, visual: c.xcb_visualid_t) ?*c.xcb_visualtype_t {
     var depth_iter = c.xcb_screen_allowed_depths_iterator(s);
-    // std.debug.print("TYPE INFO depth_iter: {}\n", .{@typeInfo(@TypeOf(depth_iter))});
     while (depth_iter.rem != 0) {
         var visual_iter = c.xcb_depth_visuals_iterator(depth_iter.data);
         while (visual_iter.rem != 0) {

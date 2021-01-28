@@ -14,8 +14,9 @@ const Surface = @import("../surfaces/surface.zig").Surface;
 const FontOptions = @import("../fonts/font_options.zig").FontOptions;
 const Pattern = @import("./pattern.zig").Pattern;
 const Path = @import("./path.zig").Path;
+const tags_and_links = @import("./tags_and_links.zig");
 const scaled_font = @import("../fonts/scaled_font.zig");
-const Error = @import("../errors.zig").Error;
+const Error = @import("../utilities/error_handling.zig").Error;
 
 /// Wrapper for the Cairo cairo_t C struct.
 pub const Context = struct {
@@ -592,6 +593,14 @@ pub const Context = struct {
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-stroke-extents
     pub fn strokeExtents(self: *Self, x1: *f64, y1: *f64, x2: *f64, y2: *f64) void {
         c.cairo_stroke_extents(self.c_ptr, x1, y1, x2, y2);
+    }
+
+    pub fn tagBegin(self: *Self, tag_name: []const u8, attributes: ?[]const u8) void {
+        tags_and_links.tagBegin(self.c_ptr, tag_name, attributes);
+    }
+
+    pub fn tagEnd(self: *Self, tag_name: []const u8) void {
+        tags_and_links.tagEnd(self.c_ptr, tag_name);
     }
 
     /// https://cairographics.org/manual/cairo-text.html#cairo-text-extents

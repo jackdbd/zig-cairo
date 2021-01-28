@@ -13,14 +13,12 @@ fn glyphsExample(cr: *cairo.Context) !void {
     cr.setFontSize(18.0);
 
     var glyph = try cairo.Glyph.allocate(3);
-    std.debug.print("glyph {}\n", .{glyph});
+    std.log.debug("glyph {}", .{glyph});
 }
 
 pub fn main() !void {
     const width: u16 = 256;
     const height: u16 = 256;
-    // std.debug.print("glyphs example ({}x{} px)\n", .{ width, height });
-
     var surface = try cairo.Surface.image(width, height);
     defer surface.destroy();
 

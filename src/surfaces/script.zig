@@ -4,8 +4,9 @@ const c = @import("../c.zig");
 const enums = @import("../enums.zig");
 const Content = enums.Content;
 const ScriptMode = enums.ScriptMode;
-const Error = @import("../errors.zig").Error;
-const statusToError = @import("../errors.zig").statusToError;
+const error_handling = @import("../utilities/error_handling.zig");
+const Error = error_handling.Error;
+const statusToError = error_handling.statusToError;
 
 /// Create a output device for emitting the script, used when creating the
 /// individual surfaces. The caller owns the returned device and should call

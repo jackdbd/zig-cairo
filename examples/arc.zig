@@ -34,10 +34,6 @@ fn arc(cr: *cairo.Context) void {
 pub fn main() !void {
     const width: u16 = 256;
     const height: u16 = 256;
-    // std.debug.print and std.log.debug not available in zig 0.6.0
-    // std.log.debug("Zig version {}", .{ builtin.zig_version });
-    // std.debug.print("arc example ({}x{} px)\n", .{ width, height });
-
     var surface = try cairo.Surface.image(width, height);
     defer surface.destroy();
 

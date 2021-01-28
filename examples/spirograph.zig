@@ -37,8 +37,6 @@ fn spirograph(cr: *cairo.Context, width: f64, height: f64) void {
 pub fn main() !void {
     const width: u16 = 400;
     const height: u16 = 400;
-    // std.debug.print("spirograph example ({}x{} px)\n", .{ width, height });
-
     var surface = try cairo.Surface.image(width, height);
     defer surface.destroy();
 

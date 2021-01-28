@@ -188,6 +188,19 @@ pub const Format = enum {
     // rgb96f = c.CAIRO_FORMAT_RGB96F, // 6
     // rgba128f = c.CAIRO_FORMAT_RGBA128F, // 7
 
+    pub fn fromCairoEnum(c_enum: c.enum__cairo_format) Format {
+        const c_integer = @enumToInt(c_enum);
+        return switch (c_integer) {
+            c.CAIRO_FORMAT_ARGB32 => Format.argb32,
+            c.CAIRO_FORMAT_RGB24 => Format.rgb24,
+            c.CAIRO_FORMAT_A8 => Format.a8,
+            c.CAIRO_FORMAT_A1 => Format.a1,
+            c.CAIRO_FORMAT_RGB16_565 => Format.rgb16_565,
+            c.CAIRO_FORMAT_RGB30 => Format.rgb30,
+            else => std.debug.panic("cairo_format_t member {} not handled.", .{c_integer}),
+        };
+    }
+
     pub fn toCairoEnum(self: Format) c.enum__cairo_format {
         return switch (self) {
             // .invalid => @intToEnum(c.enum__cairo_format, c.CAIRO_FORMAT_INVALID),
@@ -251,7 +264,6 @@ pub const LineJoin = enum {
     }
 };
 
-// TODO: FINISH HIM!
 /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-operator-t
 pub const Operator = enum {
     clear = c.CAIRO_OPERATOR_CLEAR,
@@ -406,6 +418,43 @@ pub const PatternType = enum {
     }
 };
 
+/// https://www.cairographics.org/manual/cairo-PDF-Surfaces.html#cairo-pdf-metadata-t
+pub const PdfMetadata = enum {
+    title = c.CAIRO_PDF_METADATA_TITLE,
+    author = c.CAIRO_PDF_METADATA_AUTHOR,
+    subject = c.CAIRO_PDF_METADATA_SUBJECT,
+    keywords = c.CAIRO_PDF_METADATA_KEYWORDS,
+    creator = c.CAIRO_PDF_METADATA_CREATOR,
+    create_date = c.CAIRO_PDF_METADATA_CREATE_DATE,
+    mod_date = c.CAIRO_PDF_METADATA_MOD_DATE,
+
+    pub fn fromCairoEnum(c_enum: c.enum__cairo_pdf_metadata) PdfMetadata {
+        const c_integer = @enumToInt(c_enum);
+        return switch (c_integer) {
+            c.CAIRO_PDF_METADATA_TITLE => PdfMetadata.title,
+            c.CAIRO_PDF_METADATA_AUTHOR => PdfMetadata.author,
+            c.CAIRO_PDF_METADATA_SUBJECT => PdfMetadata.subject,
+            c.CAIRO_PDF_METADATA_KEYWORDS => PdfMetadata.keywords,
+            c.CAIRO_PDF_METADATA_CREATOR => PdfMetadata.creator,
+            c.CAIRO_PDF_METADATA_CREATE_DATE => PdfMetadata.create_date,
+            c.CAIRO_PDF_METADATA_MOD_DATE => PdfMetadata.mod_date,
+            else => std.debug.panic("cairo_pdf_metadata_t member {} not handled.", .{c_integer}),
+        };
+    }
+
+    pub fn toCairoEnum(self: PdfMetadata) c.enum__cairo_pdf_metadata {
+        return switch (self) {
+            .title => @intToEnum(c.enum__cairo_pdf_metadata, c.CAIRO_PDF_METADATA_TITLE),
+            .author => @intToEnum(c.enum__cairo_pdf_metadata, c.CAIRO_PDF_METADATA_AUTHOR),
+            .subject => @intToEnum(c.enum__cairo_pdf_metadata, c.CAIRO_PDF_METADATA_SUBJECT),
+            .keywords => @intToEnum(c.enum__cairo_pdf_metadata, c.CAIRO_PDF_METADATA_KEYWORDS),
+            .creator => @intToEnum(c.enum__cairo_pdf_metadata, c.CAIRO_PDF_METADATA_CREATOR),
+            .create_date => @intToEnum(c.enum__cairo_pdf_metadata, c.CAIRO_PDF_METADATA_CREATE_DATE),
+            .mod_date => @intToEnum(c.enum__cairo_pdf_metadata, c.CAIRO_PDF_METADATA_MOD_DATE),
+        };
+    }
+};
+
 /// https://www.cairographics.org/manual/cairo-Script-Surfaces.html#cairo-script-mode-t
 pub const ScriptMode = enum {
     ascii = c.CAIRO_SCRIPT_MODE_ASCII,
@@ -424,6 +473,98 @@ pub const ScriptMode = enum {
         return switch (self) {
             .ascii => c.CAIRO_SCRIPT_MODE_ASCII,
             .binary => c.CAIRO_SCRIPT_MODE_BINARY,
+        };
+    }
+};
+
+/// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-type-t
+pub const SurfaceType = enum {
+    image = c.CAIRO_SURFACE_TYPE_IMAGE,
+    pdf = c.CAIRO_SURFACE_TYPE_PDF,
+    ps = c.CAIRO_SURFACE_TYPE_PS,
+    xlib = c.CAIRO_SURFACE_TYPE_XLIB,
+    xcb = c.CAIRO_SURFACE_TYPE_XCB,
+    glitz = c.CAIRO_SURFACE_TYPE_GLITZ,
+    quartz = c.CAIRO_SURFACE_TYPE_QUARTZ,
+    win32 = c.CAIRO_SURFACE_TYPE_WIN32,
+    beos = c.CAIRO_SURFACE_TYPE_BEOS,
+    directfb = c.CAIRO_SURFACE_TYPE_DIRECTFB,
+    svg = c.CAIRO_SURFACE_TYPE_SVG,
+    os2 = c.CAIRO_SURFACE_TYPE_OS2,
+    win32_printing = c.CAIRO_SURFACE_TYPE_WIN32_PRINTING,
+    quartz_image = c.CAIRO_SURFACE_TYPE_QUARTZ_IMAGE,
+    script = c.CAIRO_SURFACE_TYPE_SCRIPT,
+    qt = c.CAIRO_SURFACE_TYPE_QT,
+    recording = c.CAIRO_SURFACE_TYPE_RECORDING,
+    vg = c.CAIRO_SURFACE_TYPE_VG,
+    gl = c.CAIRO_SURFACE_TYPE_GL,
+    drm = c.CAIRO_SURFACE_TYPE_DRM,
+    tee = c.CAIRO_SURFACE_TYPE_TEE,
+    xml = c.CAIRO_SURFACE_TYPE_XML,
+    skia = c.CAIRO_SURFACE_TYPE_SKIA,
+    subsurface = c.CAIRO_SURFACE_TYPE_SUBSURFACE,
+    cogl = c.CAIRO_SURFACE_TYPE_COGL,
+
+    pub fn fromCairoEnum(c_enum: c.enum__cairo_surface_type) SurfaceType {
+        const c_integer = @enumToInt(c_enum);
+        return switch (c_integer) {
+            c.CAIRO_SURFACE_TYPE_IMAGE => SurfaceType.image,
+            c.CAIRO_SURFACE_TYPE_PDF => SurfaceType.pdf,
+            c.CAIRO_SURFACE_TYPE_PS => SurfaceType.ps,
+            c.CAIRO_SURFACE_TYPE_XLIB => SurfaceType.xlib,
+            c.CAIRO_SURFACE_TYPE_XCB => SurfaceType.xcb,
+            c.CAIRO_SURFACE_TYPE_GLITZ => SurfaceType.glitz,
+            c.CAIRO_SURFACE_TYPE_QUARTZ => SurfaceType.quartz,
+            c.CAIRO_SURFACE_TYPE_WIN32 => SurfaceType.win32,
+            c.CAIRO_SURFACE_TYPE_BEOS => SurfaceType.beos,
+            c.CAIRO_SURFACE_TYPE_DIRECTFB => SurfaceType.directfb,
+            c.CAIRO_SURFACE_TYPE_SVG => SurfaceType.svg,
+            c.CAIRO_SURFACE_TYPE_OS2 => SurfaceType.os2,
+            c.CAIRO_SURFACE_TYPE_WIN32_PRINTING => SurfaceType.win32_printing,
+            c.CAIRO_SURFACE_TYPE_QUARTZ_IMAGE => SurfaceType.quartz_image,
+            c.CAIRO_SURFACE_TYPE_SCRIPT => SurfaceType.script,
+            c.CAIRO_SURFACE_TYPE_QT => SurfaceType.qt,
+            c.CAIRO_SURFACE_TYPE_RECORDING => SurfaceType.recording,
+            c.CAIRO_SURFACE_TYPE_VG => SurfaceType.vg,
+            c.CAIRO_SURFACE_TYPE_GL => SurfaceType.gl,
+            c.CAIRO_SURFACE_TYPE_DRM => SurfaceType.drm,
+            c.CAIRO_SURFACE_TYPE_TEE => SurfaceType.tee,
+            c.CAIRO_SURFACE_TYPE_XML => SurfaceType.xml,
+            c.CAIRO_SURFACE_TYPE_SKIA => SurfaceType.skia,
+            c.CAIRO_SURFACE_TYPE_SUBSURFACE => SurfaceType.subsurface,
+            c.CAIRO_SURFACE_TYPE_COGL => SurfaceType.cogl,
+            else => std.debug.panic("cairo_surface_type_t member {} not handled.", .{c_integer}),
+        };
+    }
+};
+
+/// https://www.cairographics.org/manual/cairo-SVG-Surfaces.html#cairo-svg-unit-t
+pub const Unit = enum {
+    user = c.CAIRO_SVG_UNIT_USER,
+    em = c.CAIRO_SVG_UNIT_EM,
+    ex = c.CAIRO_SVG_UNIT_EX,
+    px = c.CAIRO_SVG_UNIT_PX,
+    in = c.CAIRO_SVG_UNIT_IN,
+    cm = c.CAIRO_SVG_UNIT_CM,
+    mm = c.CAIRO_SVG_UNIT_MM,
+    pt = c.CAIRO_SVG_UNIT_PT,
+    pc = c.CAIRO_SVG_UNIT_PC,
+    percent = c.CAIRO_SVG_UNIT_PERCENT,
+
+    pub fn fromCairoEnum(c_enum: anytype) Unit { // there is no c.enum__cairo_unit
+        const c_integer = @enumToInt(c_enum);
+        return switch (c_integer) {
+            c.CAIRO_SVG_UNIT_USER => Unit.user,
+            c.CAIRO_SVG_UNIT_EM => Unit.em,
+            c.CAIRO_SVG_UNIT_EX => Unit.ex,
+            c.CAIRO_SVG_UNIT_PX => Unit.px,
+            c.CAIRO_SVG_UNIT_IN => Unit.in,
+            c.CAIRO_SVG_UNIT_CM => Unit.cm,
+            c.CAIRO_SVG_UNIT_MM => Unit.mm,
+            c.CAIRO_SVG_UNIT_PT => Unit.pt,
+            c.CAIRO_SVG_UNIT_PC => Unit.pc,
+            c.CAIRO_SVG_UNIT_PERCENT => Unit.percent,
+            else => std.debug.panic("cairo_surface_type_t member {} not handled.", .{c_integer}),
         };
     }
 };

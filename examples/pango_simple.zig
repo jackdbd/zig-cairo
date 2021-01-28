@@ -25,7 +25,6 @@ fn drawText(cr: *cairo.Context) !void {
     var desc = try pc.FontDescription.fromString(FONT_WITH_MANUAL_SIZE);
     defer desc.destroy();
 
-    // std.log.debug("pc.SCALE {} pc.G_PI {}", .{ pc.SCALE, pc.G_PI });
     desc.setAbsoluteSize(FONT_SIZE * DEVICE_DPI * pc.SCALE / (72.0 / TWEAKABLE_SCALE));
     layout.setFontDescription(desc);
 

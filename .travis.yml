@@ -37,6 +37,7 @@ before_script:
 script:
   - zig build test
   - zig build arc
+  - zig build cairoscript
   - zig build pango_simple
   - zig build spiral
   - zig build spirograph

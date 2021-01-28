@@ -3,10 +3,8 @@ const cairo = @import("cairo");
 const render = @import("render.zig");
 
 pub fn main() !void {
-    // std.debug.print("Example with the Cairo surface SVG backend\n", .{});
     const width_pt: f64 = 640;
     const height_pt: f64 = 480;
-
     var surface = try cairo.Surface.svg("examples/generated/test-image.svg", width_pt, height_pt);
     defer surface.destroy();
 

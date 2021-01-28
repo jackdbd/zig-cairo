@@ -3,21 +3,36 @@
 //! multi-page vector surface backend.
 //! https://www.cairographics.org/manual/cairo-SVG-Surfaces.html
 const c = @import("../c.zig");
-const Error = @import("../errors.zig").Error;
+const Error = @import("../utilities/error_handling.zig").Error;
+const Unit = @import("../enums.zig").Unit;
 
+/// Create a SVG surface of the specified size in points to be written to filename.
 /// https://www.cairographics.org/manual/cairo-SVG-Surfaces.html#cairo-svg-surface-create
-pub fn create(comptime filename: [*]const u8, width_pt: f64, height_pt: f64) !*c.struct__cairo_surface {
-    var surface = c.cairo_svg_surface_create(filename, width_pt, height_pt);
-    if (surface == null) return Error.NullPointer;
-    return surface.?;
+pub fn create(comptime filename: []const u8, width_pt: f64, height_pt: f64) !*c.struct__cairo_surface {
+    // cairo_svg_surface_create always returns a valid pointer, but it will
+    // return a pointer to a "nil" surface if an error such as out of memory
+    // occurs. You can use cairo_surface_status() to check for this.
+    return c.cairo_svg_surface_create(filename.ptr, width_pt, height_pt).?;
+}
+
+/// https://www.cairographics.org/manual/cairo-SVG-Surfaces.html#cairo-svg-surface-create-for-stream
+pub fn createForStream() void {
+    @panic("TODO: to be implemented");
 }
 
 /// https://www.cairographics.org/manual/cairo-SVG-Surfaces.html#cairo-svg-surface-get-document-unit
 pub fn getDocumentUnit(surface: *c.struct__cairo_surface) Unit {
-    // TODO: check that the surface passed is a SVG surface
-    const c_enum = c.cairo_svg_surface_get_document_unit(surface);
-    const c_integer = @enumToInt(c_enum);
-    return @intToEnum(Unit, @intCast(u4, c_integer));
+    return Unit.fromCairoEnum(c.cairo_svg_surface_get_document_unit(surface));
+}
+
+/// https://www.cairographics.org/manual/cairo-SVG-Surfaces.html#cairo-svg-get-versions
+pub fn getVersions() void {
+    @panic("TODO: to be implemented");
+}
+
+/// https://www.cairographics.org/manual/cairo-SVG-Surfaces.html#cairo-svg-surface-restrict-to-version
+pub fn restrictToVersion() void {
+    @panic("TODO: to be implemented");
 }
 
 /// https://www.cairographics.org/manual/cairo-SVG-Surfaces.html#cairo-svg-surface-set-document-unit
@@ -27,16 +42,7 @@ pub fn setDocumentUnit(surface: *c.struct__cairo_surface, unit: Unit) void {
     c.cairo_svg_surface_set_document_unit(surface, u);
 }
 
-/// https://www.cairographics.org/manual/cairo-SVG-Surfaces.html#cairo-svg-unit-t
-pub const Unit = enum {
-    User = c.CAIRO_SVG_UNIT_USER,
-    Em = c.CAIRO_SVG_UNIT_EM,
-    Ex = c.CAIRO_SVG_UNIT_EX,
-    Px = c.CAIRO_SVG_UNIT_PX,
-    In = c.CAIRO_SVG_UNIT_IN,
-    Cm = c.CAIRO_SVG_UNIT_CM,
-    Mm = c.CAIRO_SVG_UNIT_MM,
-    Pt = c.CAIRO_SVG_UNIT_PT,
-    Pc = c.CAIRO_SVG_UNIT_PC,
-    Percent = c.CAIRO_SVG_UNIT_PERCENT,
-};
+/// https://www.cairographics.org/manual/cairo-SVG-Surfaces.html#cairo-svg-version-to-string
+pub fn versionToString() void {
+    @panic("TODO: to be implemented");
+}

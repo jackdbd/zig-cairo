@@ -37,8 +37,6 @@ fn curveTo(cr: *cairo.Context, width: usize, height: usize) void {
 pub fn main() !void {
     const width: u16 = 256;
     const height: u16 = 256;
-    // std.debug.print("curve_to example ({}x{} px)\n", .{ width, height });
-
     var surface = try cairo.Surface.image(width, height);
     defer surface.destroy();
 

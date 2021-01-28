@@ -3,7 +3,7 @@
 const std = @import("std");
 const log = std.log;
 const c = @import("../c.zig");
-const Error = @import("../errors.zig").Error;
+const Error = @import("../utilities/error_handling.zig").Error;
 const enums = @import("../enums.zig");
 
 const Status = enum {

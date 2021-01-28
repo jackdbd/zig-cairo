@@ -4,7 +4,7 @@
 //! https://www.cairographics.org/manual/cairo-XCB-Surfaces.html
 const c = @import("../c.zig");
 const Device = @import("device.zig").Device;
-const Error = @import("../errors.zig").Error;
+const Error = @import("../utilities/error_handling.zig").Error;
 
 /// https://www.cairographics.org/manual/cairo-XCB-Surfaces.html#cairo-xcb-device-debug-cap-xrender-version
 pub fn deviceDebugCapXrenderVersion() void {
