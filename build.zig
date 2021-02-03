@@ -40,6 +40,7 @@ const EXAMPLES = [_][]const u8{
     "text",
     "text_align_center",
     "text_extents",
+    "three_phases",
 };
 
 pub fn build(b: *Builder) void {
