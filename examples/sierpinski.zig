@@ -27,7 +27,7 @@ fn triangle(cr: *cairo.Context, size: f64) void {
 
 /// Zig porting of this example in C.
 /// https://github.com/freedesktop/cairo/blob/master/perf/micro/sierpinski.c
-fn drawSierpinski(cr: *cairo.Context, width: f64, height: f64, loops: usize) void {
+fn drawSierpinski(cr: *cairo.Context, width: f64, height: f64) void {
     const t_height = height / 2.0;
     const t_width = t_height / m_1_sqrt_3;
 
@@ -37,16 +37,13 @@ fn drawSierpinski(cr: *cairo.Context, width: f64, height: f64, loops: usize) voi
     cr.setSourceRgb(0, 0, 0); // black
     cr.setLineWidth(1.0);
 
-    var i: usize = 0;
-    while (i < loops) : (i += 1) {
-        cr.save();
-        triangle(cr, t_width);
-        cr.translate(0, height);
-        cr.scale(1, -1);
-        triangle(cr, t_width);
-        cr.stroke();
-        cr.restore();
-    }
+    cr.save();
+    triangle(cr, t_width);
+    cr.translate(0, height);
+    cr.scale(1, -1);
+    triangle(cr, t_width);
+    cr.stroke();
+    cr.restore();
 }
 
 pub fn main() !void {
@@ -59,6 +56,6 @@ pub fn main() !void {
     defer cr.destroy();
 
     setBackground(&cr);
-    drawSierpinski(&cr, @intToFloat(f64, width), @intToFloat(f64, height), 5);
+    drawSierpinski(&cr, @intToFloat(f64, width), @intToFloat(f64, height));
     _ = surface.writeToPng("examples/generated/sierpinski.png");
 }

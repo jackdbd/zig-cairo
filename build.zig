@@ -26,6 +26,7 @@ const EXAMPLES = [_][]const u8{
     "mask",
     "multi_segment_caps",
     "pango_simple",
+    "pythagoras_tree",
     "rounded_rectangle",
     "save_and_restore",
     "set_line_cap",

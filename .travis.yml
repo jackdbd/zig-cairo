@@ -39,6 +39,8 @@ script:
   - zig build arc
   - zig build cairoscript
   - zig build pango_simple
+  - zig build pythagoras_tree
+  - zig build sierpinski
   - zig build spiral
   - zig build spirograph
   - zig build surface_image
