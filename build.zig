@@ -18,6 +18,7 @@ const EXAMPLES = [_][]const u8{
     "fill_style",
     "glyphs",
     "gradient",
+    "grid",
     "group",
     "image",
     "image_pattern",
