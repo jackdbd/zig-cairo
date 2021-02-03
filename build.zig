@@ -6,6 +6,7 @@ const Mode = builtin.Mode;
 const EXAMPLES = [_][]const u8{
     "arc",
     "arc_negative",
+    "bezier",
     "cairoscript",
     "clip",
     "clip_image",
