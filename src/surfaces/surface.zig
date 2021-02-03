@@ -46,14 +46,27 @@ pub const Surface = struct {
         return Self{ .c_ptr = c_ptr };
     }
 
+    /// Create a new surface that is as compatible as possible with an existing
+    /// surface. The caller owns the returned object and should call destroy on
+    /// it when he no longer needs it.
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-create-similar
-    pub fn createSimilar(self: *Self) void {
-        @panic("TODO: to be implemented");
+    pub fn createSimilar(other: *Self, content: Content, width: u16, height: u16) !Self {
+        var c_ptr = c.cairo_surface_create_similar(other.c_ptr, content.toCairoEnum(), @intCast(c_int, width), @intCast(c_int, height));
+        // cairo_surface_create_similar always return a valid pointer, but it
+        // can return a pointer to a "nil" surface if the `other` surface is
+        // already in an error state, or if any other error occurs.
+        try Self.status(c_ptr);
+        return Self{ .c_ptr = c_ptr.? };
     }
 
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-create-similar-image
-    pub fn createSimilarImage(self: *Self) void {
-        @panic("TODO: to be implemented");
+    pub fn createSimilarImage(other: *Self, format: Format, width: u16, height: u16) !Self {
+        var c_ptr = c.cairo_surface_create_similar_image(other.c_ptr, format.toCairoEnum(), @intCast(c_int, width), @intCast(c_int, height));
+        // cairo_surface_create_similar_image always return a valid pointer, but
+        // it can return a pointer to a "nil" surface if the `other` surface is
+        // already in an error state, or if any other error occurs.
+        try Self.status(c_ptr);
+        return Self{ .c_ptr = c_ptr.? };
     }
 
     /// Decrease the reference count on surface by one.

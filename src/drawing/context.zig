@@ -314,6 +314,7 @@ pub const Context = struct {
         c.cairo_new_sub_path(self.c_ptr);
     }
 
+    /// Paint the current source everywhere within the current clip region.
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-paint
     pub fn paint(self: *Self) void {
         c.cairo_paint(self.c_ptr);
@@ -502,6 +503,8 @@ pub const Context = struct {
         c.cairo_set_source_rgba(self.c_ptr, r, g, b, alpha);
     }
 
+    /// Create a cairo.Pattern from the `surface` cairo.Surface, then set that
+    /// Pattern as the source for the `self` cairo.Surface.
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-source-surface
     pub fn setSourceSurface(self: *Self, surface: *Surface, x: f64, y: f64) void {
         c.cairo_set_source_surface(self.c_ptr, surface.c_ptr, x, y);

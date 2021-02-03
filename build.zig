@@ -10,6 +10,7 @@ const EXAMPLES = [_][]const u8{
     "cairoscript",
     "clip",
     "clip_image",
+    "compositing",
     "curve_rectangle",
     "curve_to",
     "dash",
