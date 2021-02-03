@@ -23,3 +23,4 @@ usingnamespace @import("fonts/font_options.zig");
 
 usingnamespace @import("utilities/matrix.zig");
 usingnamespace @import("utilities/error_handling.zig");
+usingnamespace @import("utilities/version_information.zig");
