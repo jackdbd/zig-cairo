@@ -16,6 +16,7 @@ usingnamespace @import("drawing/path.zig");
 usingnamespace @import("drawing/pattern.zig");
 usingnamespace @import("drawing/tags_and_links.zig");
 usingnamespace @import("drawing/text.zig");
+usingnamespace @import("drawing/transformations.zig");
 usingnamespace @import("drawing/context.zig");
 
 usingnamespace @import("fonts/scaled_font.zig");

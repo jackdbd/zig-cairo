@@ -14,8 +14,10 @@ const Surface = @import("../surfaces/surface.zig").Surface;
 const FontOptions = @import("../fonts/font_options.zig").FontOptions;
 const Pattern = @import("./pattern.zig").Pattern;
 const Path = @import("./path.zig").Path;
+const transformations = @import("./transformations.zig");
 const tags_and_links = @import("./tags_and_links.zig");
 const scaled_font = @import("../fonts/scaled_font.zig");
+const Matrix = @import("../utilities/matrix.zig").Matrix;
 const Error = @import("../utilities/error_handling.zig").Error;
 
 /// Wrapper for the Cairo cairo_t C struct.
@@ -218,6 +220,10 @@ pub const Context = struct {
         return c.cairo_get_line_width(self.c_ptr);
     }
 
+    pub fn getMatrix(self: *Self, matrix: *Matrix) void {
+        transformations.getMatrix(self.c_ptr, matrix);
+    }
+
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-miter-limit
     pub fn getMiterLimit(self: *Self) f64 {
         return c.cairo_get_miter_limit(self.c_ptr);
@@ -266,6 +272,10 @@ pub const Context = struct {
     /// https://cairographics.org/manual/cairo-Paths.html#cairo-has-current-point
     pub fn hasCurrentPoint(self: *Self) bool {
         return if (c.cairo_has_current_point(self.c_ptr) == 1) true else false;
+    }
+
+    pub fn identityMatrix(self: *Self) void {
+        transformations.identityMatrix(self.c_ptr);
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-in-clip
