@@ -30,6 +30,7 @@ const EXAMPLES = [_][]const u8{
     "save_and_restore",
     "set_line_cap",
     "set_line_join",
+    "singular",
     "spiral",
     "spirograph",
     "surface_image",
