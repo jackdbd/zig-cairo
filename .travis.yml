@@ -9,7 +9,6 @@ env:
   global:
     - ZIG_DIR=$HOME/zig
   jobs:
-    - ZIG_VERSION=0.6.0
     - ZIG_VERSION=0.7.0
     - ZIG_VERSION=0.7.1
     - ZIG_VERSION=0.8.0-dev.1032+8098b3f84
@@ -17,7 +16,6 @@ env:
 jobs:
   fast_finish: true
   allow_failures:
-    - env: ZIG_VERSION=0.6.0
     - env: ZIG_VERSION=0.7.0
     - env: ZIG_VERSION=0.7.1
 

@@ -46,7 +46,6 @@ zig build test-debug
 
 Tested against these zig compiler versions on [Travis CI](https://travis-ci.com/github/jackdbd/zig-cairo) and using [zigup](https://github.com/marler8997/zigup) on my machine:
 
-- 0.6.0
 - 0.7.0 (not working, see [#2](https://github.com/jackdbd/zig-cairo/issues/2))
 - 0.7.1 (not working, see [#2](https://github.com/jackdbd/zig-cairo/issues/2))
 - 0.8.0-dev.1032+8098b3f84
