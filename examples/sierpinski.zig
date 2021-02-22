@@ -10,6 +10,7 @@ fn triangle(cr: *cairo.Context, size: f64) void {
     cr.moveTo(0, 0);
     cr.lineTo(size, 0);
     cr.lineTo(size * 0.5, size * m_1_sqrt_3);
+    cr.lineTo(0, 0);
 
     const half = size * 0.5;
     if (half >= 4) {
