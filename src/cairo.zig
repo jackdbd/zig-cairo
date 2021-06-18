@@ -1,4 +1,5 @@
 //! zig-cairo: zig wrapper for Cairo
+const std = @import("std");
 
 // Export c to allow calling the C Cairo API.
 // For example, if you import zig-cairo with:

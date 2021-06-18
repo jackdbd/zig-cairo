@@ -17,6 +17,7 @@ const EXAMPLES = [_][]const u8{
     "ellipse",
     "fill_and_stroke2",
     "fill_style",
+    "gaussian_blur",
     "glyphs",
     "gradient",
     "grid",
