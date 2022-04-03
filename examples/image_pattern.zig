@@ -47,6 +47,11 @@ pub fn main() !void {
     defer cr.destroy();
 
     setBackground(&cr);
-    try imagePattern(std.testing.allocator, &cr);
+
+    var gpa = std.heap.GeneralPurposeAllocator(.{.verbose_log = true}){};
+    defer _ = gpa.deinit();
+    var allocator = gpa.allocator();
+
+    try imagePattern(&allocator, &cr);
     _ = surface.writeToPng("examples/generated/image_pattern.png");
 }

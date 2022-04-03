@@ -142,14 +142,14 @@ pub const FontDescription = struct {
     /// https://developer.gnome.org/pango/stable/pango-Fonts.html#PangoStyle
     pub fn getStyle(self: *Self) void {
         const style = c.pango_font_description_get_style(self.c_ptr);
-        // std.log.debug("style {}", .{&style}); // it's unnamed
+        std.log.debug("style {}", .{&style}); // it's unnamed
     }
 
     /// https://developer.gnome.org/pango/stable/pango-Fonts.html#pango-font-description-get-weight
     /// https://developer.gnome.org/pango/stable/pango-Fonts.html#PangoWeight
     pub fn getWeight(self: *Self) void {
         const weight = c.pango_font_description_get_weight(self.c_ptr);
-        // std.log.debug("weight {}", .{weight}); // it's unnamed
+        std.log.debug("weight {}", .{weight}); // it's unnamed
     }
 
     /// https://developer.gnome.org/pango/stable/pango-Fonts.html#pango-font-description-new
@@ -172,14 +172,14 @@ pub fn linePath(cr: *cairo.Context, line: LayoutLine) void {
 
 pub const PangoAttrShape = [*c]c.struct__PangoAttrShape;
 
-const DNotify = fn (?*c_void) callconv(.C) void;
+const DNotify = fn (?*anyopaque) callconv(.C) void;
 
 /// https://developer.gnome.org/pango/stable/pango-Cairo-Rendering.html#PangoCairoShapeRendererFunc
 /// https://developer.gnome.org/pango/stable/pango-Text-Attributes.html#PangoAttrShape
 /// https://developer.gnome.org/pango/stable/pango-Text-Attributes.html#pango-attr-shape-new-with-data
 /// do_path: whether only the shape path should be appended to current path of cr and no filling/stroking done.
 /// data: user data passed to pango_cairo_context_set_shape_renderer().
-const PangoCairoShapeRendererFunc = fn (?*c.struct__cairo, [*c]c.struct__PangoAttrShape, c_int, ?*c_void) callconv(.C) void;
+const PangoCairoShapeRendererFunc = fn (?*c.struct__cairo, [*c]c.struct__PangoAttrShape, c_int, ?*anyopaque) callconv(.C) void;
 
 pub const Context = struct {
     c_ptr: *c.struct__PangoContext,
@@ -187,7 +187,7 @@ pub const Context = struct {
     const Self = @This();
 
     /// https://developer.gnome.org/pango/stable/pango-Cairo-Rendering.html#pango-cairo-context-set-shape-renderer
-    pub fn setShapeRenderer(self: *Self, func: PangoCairoShapeRendererFunc, data: ?*c_void, dnotify: ?DNotify) void {
+    pub fn setShapeRenderer(self: *Self, func: PangoCairoShapeRendererFunc, data: ?*anyopaque, dnotify: ?DNotify) void {
         // std.log.debug("setShapeRenderer", .{});
         // std.log.debug("func {}", .{func});
         // std.log.debug("data {}", .{data});
@@ -238,9 +238,9 @@ pub const Rectangle = struct {
 };
 
 /// https://developer.gnome.org/pango/stable/pango-Text-Attributes.html#PangoAttrDataCopyFunc
-pub const PangoAttrDataCopyFunc = fn (?*const c_void) callconv(.C) ?*c_void;
+pub const PangoAttrDataCopyFunc = fn (?*const anyopaque) callconv(.C) ?*anyopaque;
 /// https://developer.gnome.org/glib/unstable/glib-Datasets.html#GDestroyNotify
-pub const GDestroyNotify = fn (?*c_void) callconv(.C) void;
+pub const GDestroyNotify = fn (?*anyopaque) callconv(.C) void;
 
 // TODO: move to pango.zig module?
 /// https://developer.gnome.org/pango/stable/pango-Text-Attributes.html#PangoAttribute
@@ -274,15 +274,15 @@ test "Layout.create()" {
     defer layout.destroy();
 
     const size_before = layout.getSize();
-    expectEqual(
+    try expectEqual(
         size_before.width,
         @as(f64, 0.0),
     );
-    expect(size_before.height > 0);
+    try expect(size_before.height > 0);
 
     layout.setText("foo");
     const size_after = layout.getSize();
-    expect(size_after.width > 0.0);
+    try expect(size_after.width > 0.0);
     // The next expect is fine on my machine but fails on Travis CI. Maybe it's
     // because the X server running on Travis CI is xvfb?
     // expect(size_after.height > size_before.height); // why is that?
@@ -293,7 +293,7 @@ test "FontDescription.getSize() with size specified" {
     defer desc.destroy();
 
     const size = desc.getSize();
-    expectEqual(@as(usize, 15360), size); // why not 15?
+    try expectEqual(@as(usize, 15360), size); // why not 15?
 }
 
 test "FontDescription.getSize() with size not specified" {
@@ -301,7 +301,7 @@ test "FontDescription.getSize() with size not specified" {
     defer desc.destroy();
 
     const size = desc.getSize();
-    expectEqual(@as(usize, 0), size);
+    try expectEqual(@as(usize, 0), size);
 }
 
 test "FontDescription.equal()" {
@@ -312,11 +312,11 @@ test "FontDescription.equal()" {
     var desc3 = try FontDescription.fromString("Sans 14");
     defer desc3.destroy();
 
-    expectEqual(false, desc1.equal(&desc2));
-    expectEqual(false, desc2.equal(&desc1));
+    try expectEqual(false, desc1.equal(&desc2));
+    try expectEqual(false, desc2.equal(&desc1));
 
-    expectEqual(true, desc2.equal(&desc3));
-    expectEqual(true, desc3.equal(&desc2));
+    try expectEqual(true, desc2.equal(&desc3));
+    try expectEqual(true, desc3.equal(&desc2));
 }
 
 test "FontDescription.copy()" {
@@ -325,8 +325,8 @@ test "FontDescription.copy()" {
     var desc2 = try desc1.copy();
     defer desc2.destroy();
 
-    expectEqual(true, desc1.equal(&desc2));
+    try expectEqual(true, desc1.equal(&desc2));
 
     desc1.setAbsoluteSize(100);
-    expectEqual(false, desc1.equal(&desc2));
+    try expectEqual(false, desc1.equal(&desc2));
 }

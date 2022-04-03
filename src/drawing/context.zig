@@ -68,7 +68,7 @@ pub const Context = struct {
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-copy-clip-rectangle-list
-    pub fn copyClipRectangleList(self: *Self) void {
+    pub fn copyClipRectangleList(_: *Self) void {
         @panic("TODO: to be implemented");
     }
 
@@ -168,7 +168,7 @@ pub const Context = struct {
     }
 
     // TODO: why is this function leaking memory? Isn't list.toOwnedSlice() enough?
-    pub fn getDashAlternative(self: *Self, comptime T: type, allocator: *std.mem.Allocator) !DashResult(T) {
+    pub fn getDashAlternative(self: *Self, comptime T: type, allocator: std.mem.Allocator) !DashResult(T) {
         const n = self.getDashCount();
         var offset_ptr = try allocator.create(T);
         defer allocator.destroy(offset_ptr);
@@ -260,12 +260,12 @@ pub const Context = struct {
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-get-user-data
-    pub fn getUserData(self: *Self) void {
+    pub fn getUserData(_: *Self) void {
         @panic("TODO: to be implemented");
     }
 
     /// https://cairographics.org/manual/cairo-Paths.html#cairo-glyph-path
-    pub fn glyphPath(self: *Self) void {
+    pub fn glyphPath(_: *Self) void {
         @panic("TODO: to be implemented");
     }
 
@@ -373,7 +373,7 @@ pub const Context = struct {
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-rectangle-list-destroy
-    pub fn rectangleListDestroy(self: *Self) void {
+    pub fn rectangleListDestroy(_: *Self) void {
         @panic("TODO: to be implemented");
     }
 
@@ -444,8 +444,10 @@ pub const Context = struct {
     /// https://cairographics.org/manual/cairo-text.html#cairo-select-font-face
     /// https://github.com/freedesktop/cairo/blob/577477207a300fd75c93da93dbb233256d8b48d8/util/cairo-trace/trace.c#L2948
     pub fn selectFontFace(self: *Self, family: [*]const u8, slant: FontSlant, weight: FontWeight) void {
-        const font_slant = @intToEnum(c.enum__cairo_font_slant, @enumToInt(slant));
-        const font_weight = @intToEnum(c.enum__cairo_font_weight, @enumToInt(weight));
+        // const font_slant = @intToEnum(c.enum__cairo_font_slant, @enumToInt(slant));
+        const font_slant = @enumToInt(slant);
+        const font_weight = @enumToInt(weight);
+        // const font_weight = @intToEnum(c.enum__cairo_font_weight, @enumToInt(weight));
         c.cairo_select_font_face(self.c_ptr, family, font_slant, font_weight);
     }
 
@@ -526,7 +528,7 @@ pub const Context = struct {
     }
 
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-set-user-data
-    pub fn setUserData(self: *Self) void {
+    pub fn setUserData(_: *Self) void {
         @panic("TODO: to be implemented");
     }
 
@@ -543,7 +545,9 @@ pub const Context = struct {
     /// Check whether an error has previously occurred for this context.
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-status
     fn status(c_ptr: ?*c.struct__cairo) !void {
-        const c_integer = @enumToInt(c.cairo_status(c_ptr));
+        const c_integer = c.cairo_status(c_ptr);
+        // const e = c.cairo_status(c_ptr);
+        // const c_integer = @enumToInt(e);
         return switch (c_integer) {
             c.CAIRO_STATUS_SUCCESS => {}, // nothing to do if successful
             c.CAIRO_STATUS_NO_MEMORY => Error.NoMemory,
@@ -663,13 +667,13 @@ fn testContext() !Context {
 test "reference() and destroy() modify the reference count as expected" {
     var cr = try testContext();
 
-    expectEqual(@as(c_uint, 1), cr.getReferenceCount());
+    try expectEqual(@as(c_uint, 1), cr.getReferenceCount());
     _ = cr.reference();
-    expectEqual(@as(c_uint, 2), cr.getReferenceCount());
+    try expectEqual(@as(c_uint, 2), cr.getReferenceCount());
     cr.destroy();
-    expectEqual(@as(c_uint, 1), cr.getReferenceCount());
+    try expectEqual(@as(c_uint, 1), cr.getReferenceCount());
     cr.destroy();
-    expectEqual(@as(c_uint, 0), cr.getReferenceCount());
+    try expectEqual(@as(c_uint, 0), cr.getReferenceCount());
 }
 
 test "appendPath() behaves as expected" {
@@ -682,18 +686,18 @@ test "appendPath() behaves as expected" {
     var y2: f64 = 0.0;
     cr.pathExtents(&x1, &y1, &x2, &y2);
 
-    expectEqual(@as(f64, 0.0), x1);
-    expectEqual(@as(f64, 0.0), y1);
-    expectEqual(@as(f64, 0.0), x2);
-    expectEqual(@as(f64, 0.0), y2);
+    try expectEqual(@as(f64, 0.0), x1);
+    try expectEqual(@as(f64, 0.0), y1);
+    try expectEqual(@as(f64, 0.0), x2);
+    try expectEqual(@as(f64, 0.0), y2);
 
     cr.rectangle(1, 2, 20, 30); // adds a path
     cr.pathExtents(&x1, &y1, &x2, &y2);
 
-    expectEqual(@as(f64, 1.0), x1);
-    expectEqual(@as(f64, 2.0), y1);
-    expectEqual(@as(f64, 21.0), x2);
-    expectEqual(@as(f64, 32.0), y2);
+    try expectEqual(@as(f64, 1.0), x1);
+    try expectEqual(@as(f64, 2.0), y1);
+    try expectEqual(@as(f64, 21.0), x2);
+    try expectEqual(@as(f64, 32.0), y2);
 
     var path = try cr.copyPath();
     defer path.destroy();
@@ -701,18 +705,18 @@ test "appendPath() behaves as expected" {
     cr.newPath(); // clears the current path
     cr.pathExtents(&x1, &y1, &x2, &y2);
 
-    expectEqual(@as(f64, 0.0), x1);
-    expectEqual(@as(f64, 0.0), y1);
-    expectEqual(@as(f64, 0.0), x2);
-    expectEqual(@as(f64, 0.0), y2);
+    try expectEqual(@as(f64, 0.0), x1);
+    try expectEqual(@as(f64, 0.0), y1);
+    try expectEqual(@as(f64, 0.0), x2);
+    try expectEqual(@as(f64, 0.0), y2);
 
     try cr.appendPath(&path);
     cr.pathExtents(&x1, &y1, &x2, &y2);
 
-    expectEqual(@as(f64, 1.0), x1);
-    expectEqual(@as(f64, 2.0), y1);
-    expectEqual(@as(f64, 21.0), x2);
-    expectEqual(@as(f64, 32.0), y2);
+    try expectEqual(@as(f64, 1.0), x1);
+    try expectEqual(@as(f64, 2.0), y1);
+    try expectEqual(@as(f64, 21.0), x2);
+    try expectEqual(@as(f64, 32.0), y2);
 }
 
 test "appendPath() returns the expected error when path.status is not success" {
@@ -722,10 +726,10 @@ test "appendPath() returns the expected error when path.status is not success" {
     var path = try cr.copyPath();
     defer path.destroy();
 
-    path.c_ptr.status = @intToEnum(c.enum__cairo_status, c.CAIRO_STATUS_NO_MEMORY);
-    expectError(error.NoMemory, cr.appendPath(&path));
-    path.c_ptr.status = @intToEnum(c.enum__cairo_status, c.CAIRO_STATUS_INVALID_PATH_DATA);
-    expectError(error.InvalidPathData, cr.appendPath(&path));
+    path.c_ptr.status = c.CAIRO_STATUS_NO_MEMORY;
+    try expectError(error.NoMemory, cr.appendPath(&path));
+    path.c_ptr.status = c.CAIRO_STATUS_INVALID_PATH_DATA;
+    try expectError(error.InvalidPathData, cr.appendPath(&path));
 }
 
 test "clip() and clipExtents() behave as expected" {
@@ -743,10 +747,10 @@ test "clip() and clipExtents() behave as expected" {
     cr.clip();
     cr.clipExtents(&x1, &y1, &x2, &y2);
 
-    expectEqual(@as(f64, 10.0), x1);
-    expectEqual(@as(f64, 20.0), y1);
-    expectEqual(width + 10.0, x2);
-    expectEqual(height + 20.0, y2);
+    try expectEqual(@as(f64, 10.0), x1);
+    try expectEqual(@as(f64, 20.0), y1);
+    try expectEqual(width + 10.0, x2);
+    try expectEqual(height + 20.0, y2);
 }
 
 test "fillExtents() behaves as expected" {
@@ -771,10 +775,10 @@ test "fillExtents() behaves as expected" {
 
     cr.fillExtents(&x1, &y1, &x2, &y2);
 
-    expectEqual(x0_rect_a, x1);
-    expectEqual(y0_rect_a, y1);
-    expectEqual(@as(f64, 120.0), x2);
-    expectEqual(@as(f64, 225.0), y2);
+    try expectEqual(x0_rect_a, x1);
+    try expectEqual(y0_rect_a, y1);
+    try expectEqual(@as(f64, 120.0), x2);
+    try expectEqual(@as(f64, 225.0), y2);
 }
 
 test "getAntialias() returns the expected antialias" {
@@ -782,13 +786,13 @@ test "getAntialias() returns the expected antialias" {
     defer cr.destroy();
 
     const A = Antialias;
-    expectEqual(A.default, cr.getAntialias());
+    try expectEqual(A.default, cr.getAntialias());
     cr.setAntialias(A.fast);
-    expectEqual(A.fast, cr.getAntialias());
+    try expectEqual(A.fast, cr.getAntialias());
     cr.setAntialias(A.good);
-    expectEqual(A.good, cr.getAntialias());
+    try expectEqual(A.good, cr.getAntialias());
     cr.setAntialias(A.best);
-    expectEqual(A.best, cr.getAntialias());
+    try expectEqual(A.best, cr.getAntialias());
 }
 
 test "hasCurrentPoint() and getCurrentPoint() behave as expected" {
@@ -796,7 +800,7 @@ test "hasCurrentPoint() and getCurrentPoint() behave as expected" {
     defer cr.destroy();
 
     // there is no current path, so no current point
-    expectEqual(false, cr.hasCurrentPoint());
+    try expectEqual(false, cr.hasCurrentPoint());
 
     // we add a path, so there will be a current point
     const x0: f64 = -10.0;
@@ -804,14 +808,14 @@ test "hasCurrentPoint() and getCurrentPoint() behave as expected" {
     const width: f64 = 100;
     const height: f64 = 205;
     cr.rectangle(x0, y0, width, height);
-    expectEqual(true, cr.hasCurrentPoint());
+    try expectEqual(true, cr.hasCurrentPoint());
 
     // the current point is the final point reached by the path so far
     var x: f64 = 0.0;
     var y: f64 = 0.0;
     cr.getCurrentPoint(&x, &y);
-    expectEqual(x0, x);
-    expectEqual(y0, y);
+    try expectEqual(x0, x);
+    try expectEqual(y0, y);
 }
 
 test "getDash() returns the expected dashes" {
@@ -825,11 +829,11 @@ test "getDash() returns the expected dashes" {
     var dash_actual = [_]f64{ 20.0, 15.0, 10.0, 5.0 };
     var offset_actual = [_]f64{3.0};
     cr.getDash(dash_actual[0..], offset_actual[0..]);
-    expectEqual(@as(f64, dash_expected[0]), dash_actual[0]);
-    expectEqual(@as(f64, dash_expected[1]), dash_actual[1]);
-    expectEqual(@as(f64, dash_expected[2]), dash_actual[2]);
-    expectEqual(@as(f64, dash_expected[3]), dash_actual[3]);
-    expectEqual(@as(f64, offset_expected), offset_actual[0]);
+    try expectEqual(@as(f64, dash_expected[0]), dash_actual[0]);
+    try expectEqual(@as(f64, dash_expected[1]), dash_actual[1]);
+    try expectEqual(@as(f64, dash_expected[2]), dash_actual[2]);
+    try expectEqual(@as(f64, dash_expected[3]), dash_actual[3]);
+    try expectEqual(@as(f64, offset_expected), offset_actual[0]);
 }
 
 test "getDashAlternative() returns the expected dashes" {
@@ -843,34 +847,34 @@ test "getDashAlternative() returns the expected dashes" {
     var allocator = std.heap.page_allocator;
     // var allocator = std.testing.allocator; // TODO: this shows that the function leaks
     const result = try cr.getDashAlternative(f64, allocator);
-    expectEqual(@as(usize, 4), result.dash.len);
-    expectEqual(dash_expected[0], result.dash[0]);
-    expectEqual(dash_expected[1], result.dash[1]);
-    expectEqual(dash_expected[2], result.dash[2]);
-    expectEqual(dash_expected[3], result.dash[3]);
-    expectEqual(offset_expected, result.offset);
+    try expectEqual(@as(usize, 4), result.dash.len);
+    try expectEqual(dash_expected[0], result.dash[0]);
+    try expectEqual(dash_expected[1], result.dash[1]);
+    try expectEqual(dash_expected[2], result.dash[2]);
+    try expectEqual(dash_expected[3], result.dash[3]);
+    try expectEqual(offset_expected, result.offset);
 }
 
 test "getDashCount() returns the expected dashes count" {
     var cr = try testContext();
     defer cr.destroy();
 
-    expectEqual(@as(usize, 0), cr.getDashCount());
+    try expectEqual(@as(usize, 0), cr.getDashCount());
     var dash = [_]f64{ 10.0, 10.0, 10.0, 10.0 }; // ink, skip, ink, skip
     const offset = 0.0;
     cr.setDash(dash[0..], offset);
-    expectEqual(@as(usize, 4), cr.getDashCount());
+    try expectEqual(@as(usize, 4), cr.getDashCount());
     cr.setDash(dash[0..2], offset);
-    expectEqual(@as(usize, 2), cr.getDashCount());
+    try expectEqual(@as(usize, 2), cr.getDashCount());
 }
 
 test "getFillRule() returns the expected fill rule" {
     var cr = try testContext();
     defer cr.destroy();
 
-    expectEqual(FillRule.winding, cr.getFillRule());
+    try expectEqual(FillRule.winding, cr.getFillRule());
     cr.setFillRule(FillRule.even_odd);
-    expectEqual(FillRule.even_odd, cr.getFillRule());
+    try expectEqual(FillRule.even_odd, cr.getFillRule());
 }
 
 test "getLineCap() returns the expected line cap" {
@@ -878,11 +882,11 @@ test "getLineCap() returns the expected line cap" {
     defer cr.destroy();
 
     const L = LineCap;
-    expectEqual(L.butt, cr.getLineCap());
+    try expectEqual(L.butt, cr.getLineCap());
     cr.setLineCap(L.round);
-    expectEqual(L.round, cr.getLineCap());
+    try expectEqual(L.round, cr.getLineCap());
     cr.setLineCap(L.square);
-    expectEqual(L.square, cr.getLineCap());
+    try expectEqual(L.square, cr.getLineCap());
 }
 
 test "getLineJoin() returns the expected line join" {
@@ -890,11 +894,11 @@ test "getLineJoin() returns the expected line join" {
     defer cr.destroy();
 
     const L = LineJoin;
-    expectEqual(L.miter, cr.getLineJoin());
+    try expectEqual(L.miter, cr.getLineJoin());
     cr.setLineJoin(L.round);
-    expectEqual(L.round, cr.getLineJoin());
+    try expectEqual(L.round, cr.getLineJoin());
     cr.setLineJoin(L.bevel);
-    expectEqual(L.bevel, cr.getLineJoin());
+    try expectEqual(L.bevel, cr.getLineJoin());
 }
 
 test "getTarget() returns the expected Surface" {
@@ -908,7 +912,7 @@ test "getTarget() returns the expected Surface" {
     // surface and target are just containers for the same C pointer.
     const addr_1 = @ptrToInt(surface.c_ptr);
     const addr_2 = @ptrToInt(target.c_ptr);
-    expectEqual(addr_1, addr_2);
+    try expectEqual(addr_1, addr_2);
 }
 
 test "getGroupTarget() returns different Surfaces before and after pushGroup()" {
@@ -921,39 +925,39 @@ test "getGroupTarget() returns different Surfaces before and after pushGroup()" 
     var target = try cr.getGroupTarget();
     const addr_1 = @ptrToInt(surface.c_ptr);
     const addr_2 = @ptrToInt(target.c_ptr);
-    expectEqual(addr_1, addr_2);
+    try expectEqual(addr_1, addr_2);
 
     cr.pushGroup();
     var target_after = try cr.getGroupTarget();
     const addr_3 = @ptrToInt(target_after.c_ptr);
-    expect(addr_3 != addr_2);
+    try expect(addr_3 != addr_2);
 }
 
 test "getLineWidth() returns the expected line width" {
     var cr = try testContext();
     defer cr.destroy();
 
-    expectEqual(@as(f64, 2.0), cr.getLineWidth());
+    try expectEqual(@as(f64, 2.0), cr.getLineWidth());
     cr.setLineWidth(4.0);
-    expectEqual(@as(f64, 4.0), cr.getLineWidth());
+    try expectEqual(@as(f64, 4.0), cr.getLineWidth());
 }
 
 test "getMiterLimit() returns the expected miter limit" {
     var cr = try testContext();
     defer cr.destroy();
 
-    expectEqual(@as(f64, 10.0), cr.getMiterLimit());
+    try expectEqual(@as(f64, 10.0), cr.getMiterLimit());
     cr.setMiterLimit(12.3);
-    expectEqual(@as(f64, 12.3), cr.getMiterLimit());
+    try expectEqual(@as(f64, 12.3), cr.getMiterLimit());
 }
 
 test "getOperator() returns the expected operator" {
     var cr = try testContext();
 
     const Op = Operator;
-    expectEqual(Op.over, cr.getOperator());
+    try expectEqual(Op.over, cr.getOperator());
     cr.setOperator(Op.clear);
-    expectEqual(Op.clear, cr.getOperator());
+    try expectEqual(Op.clear, cr.getOperator());
 }
 
 test "getSource() returns a pattern" {
@@ -961,16 +965,16 @@ test "getSource() returns a pattern" {
     defer cr.destroy();
 
     var pattern = cr.getSource();
-    expectEqual(@as(c_uint, 1), pattern.getReferenceCount());
+    try expectEqual(@as(c_uint, 1), pattern.getReferenceCount());
 }
 
 test "getTolerance() returns the expected tolerance" {
     var cr = try testContext();
     defer cr.destroy();
 
-    expectEqual(@as(f64, 0.1), cr.getTolerance());
+    try expectEqual(@as(f64, 0.1), cr.getTolerance());
     cr.setTolerance(0.01);
-    expectEqual(@as(f64, 0.01), cr.getTolerance());
+    try expectEqual(@as(f64, 0.01), cr.getTolerance());
 }
 
 test "inClip() behave as expected" {
@@ -985,11 +989,11 @@ test "inClip() behave as expected" {
     cr.clip();
 
     // note the difference with inFill()
-    expectEqual(true, cr.inClip(x0 + width - 1.0, y0 + height - 1.0));
-    expectEqual(false, cr.inClip(x0 + width, y0 + height - 1.0));
-    expectEqual(false, cr.inClip(x0 + width - 1.0, y0 + height));
-    expectEqual(false, cr.inClip(x0 + width, y0 + height));
-    expectEqual(false, cr.inClip(x0 + width + 1.0, y0 + height + 1.0));
+    try expectEqual(true, cr.inClip(x0 + width - 1.0, y0 + height - 1.0));
+    try expectEqual(false, cr.inClip(x0 + width, y0 + height - 1.0));
+    try expectEqual(false, cr.inClip(x0 + width - 1.0, y0 + height));
+    try expectEqual(false, cr.inClip(x0 + width, y0 + height));
+    try expectEqual(false, cr.inClip(x0 + width + 1.0, y0 + height + 1.0));
 }
 
 test "inFill() behave as expected" {
@@ -1003,11 +1007,11 @@ test "inFill() behave as expected" {
     cr.rectangle(x0, y0, width, height);
 
     // note the difference with inClip()
-    expectEqual(true, cr.inFill(x0 + width - 1.0, y0 + height - 1.0));
-    expectEqual(true, cr.inFill(x0 + width, y0 + height - 1.0));
-    expectEqual(true, cr.inFill(x0 + width - 1.0, y0 + height));
-    expectEqual(true, cr.inFill(x0 + width, y0 + height));
-    expectEqual(false, cr.inFill(x0 + width + 1.0, y0 + height + 1.0));
+    try expectEqual(true, cr.inFill(x0 + width - 1.0, y0 + height - 1.0));
+    try expectEqual(true, cr.inFill(x0 + width, y0 + height - 1.0));
+    try expectEqual(true, cr.inFill(x0 + width - 1.0, y0 + height));
+    try expectEqual(true, cr.inFill(x0 + width, y0 + height));
+    try expectEqual(false, cr.inFill(x0 + width + 1.0, y0 + height + 1.0));
 }
 
 test "inStroke() behave as expected" {
@@ -1021,11 +1025,11 @@ test "inStroke() behave as expected" {
     cr.rectangle(x0, y0, width, height);
     const lw = cr.getLineWidth();
 
-    expectEqual(false, cr.inStroke(x0 + width - lw, y0 + height - lw));
-    expectEqual(true, cr.inStroke(x0 + width, y0 + height - lw));
-    expectEqual(true, cr.inStroke(x0 + width - lw, y0 + height));
-    expectEqual(true, cr.inStroke(x0 + width, y0 + height));
-    expectEqual(false, cr.inStroke(x0 + width + lw, y0 + height + lw));
+    try expectEqual(false, cr.inStroke(x0 + width - lw, y0 + height - lw));
+    try expectEqual(true, cr.inStroke(x0 + width, y0 + height - lw));
+    try expectEqual(true, cr.inStroke(x0 + width - lw, y0 + height));
+    try expectEqual(true, cr.inStroke(x0 + width, y0 + height));
+    try expectEqual(false, cr.inStroke(x0 + width + lw, y0 + height + lw));
 }
 
 test "newPath() clears the current path and the current point" {
@@ -1044,20 +1048,20 @@ test "newPath() clears the current path and the current point" {
     cr.rectangle(x0, y0, width, height);
     cr.pathExtents(&x1, &y1, &x2, &y2);
 
-    expectEqual(true, cr.hasCurrentPoint());
-    expectEqual(x0, x1);
-    expectEqual(y0, y1);
-    expectEqual(x0 + width, x2);
-    expectEqual(y0 + height, y2);
+    try expectEqual(true, cr.hasCurrentPoint());
+    try expectEqual(x0, x1);
+    try expectEqual(y0, y1);
+    try expectEqual(x0 + width, x2);
+    try expectEqual(y0 + height, y2);
 
     cr.newPath();
     cr.pathExtents(&x1, &y1, &x2, &y2);
 
-    expectEqual(false, cr.hasCurrentPoint());
-    expectEqual(@as(f64, 0.0), x1);
-    expectEqual(@as(f64, 0.0), y1);
-    expectEqual(@as(f64, 0.0), x2);
-    expectEqual(@as(f64, 0.0), y2);
+    try expectEqual(false, cr.hasCurrentPoint());
+    try expectEqual(@as(f64, 0.0), x1);
+    try expectEqual(@as(f64, 0.0), y1);
+    try expectEqual(@as(f64, 0.0), x2);
+    try expectEqual(@as(f64, 0.0), y2);
 }
 
 test "Path.iterator() returns the expected num_data" {
@@ -1067,23 +1071,23 @@ test "Path.iterator() returns the expected num_data" {
     defer path.destroy();
 
     var iter = path.iterator();
-    expectEqual(@as(c_int, 0.0), iter.num_data);
+    try expectEqual(@as(c_int, 0.0), iter.num_data);
 
     cr.rectangle(0, 0, 100, 200);
     path = try cr.copyPath();
     iter = path.iterator();
-    expectEqual(@as(c_int, 11.0), iter.num_data);
+    try expectEqual(@as(c_int, 11.0), iter.num_data);
 
     cr.lineTo(150, 250);
     path = try cr.copyPath();
     iter = path.iterator();
-    expectEqual(@as(c_int, 13.0), iter.num_data);
+    try expectEqual(@as(c_int, 13.0), iter.num_data);
 
     cr.newPath();
     cr.lineTo(150, 250);
     path = try cr.copyPath();
     iter = path.iterator();
-    expectEqual(@as(c_int, 2.0), iter.num_data);
+    try expectEqual(@as(c_int, 2.0), iter.num_data);
 }
 
 test "pathExtents() behaves as expected" {
@@ -1108,10 +1112,10 @@ test "pathExtents() behaves as expected" {
 
     cr.pathExtents(&x1, &y1, &x2, &y2);
 
-    expectEqual(x0_rect_a, x1);
-    expectEqual(y0_rect_a, y1);
-    expectEqual(@as(f64, 120.0), x2);
-    expectEqual(@as(f64, 225.0), y2);
+    try expectEqual(x0_rect_a, x1);
+    try expectEqual(y0_rect_a, y1);
+    try expectEqual(@as(f64, 120.0), x2);
+    try expectEqual(@as(f64, 225.0), y2);
 }
 
 test "popGroup() returns a pattern" {
@@ -1120,45 +1124,45 @@ test "popGroup() returns a pattern" {
 
     cr.pushGroupWithContent(Content.color);
     var pattern = try cr.popGroup();
-    expectEqual(@as(c_uint, 1), pattern.getReferenceCount());
+    try expectEqual(@as(c_uint, 1), pattern.getReferenceCount());
 }
 
 test "popGroup() returns the expected error if we don't call pushGroup() first" {
     var cr = try testContext();
     defer cr.destroy();
 
-    expectError(error.InvalidPopGroup, cr.popGroup());
+    try expectError(error.InvalidPopGroup, cr.popGroup());
 }
 
 test "popGroupToSource() returns the expected error if we don't call pushGroup() first" {
     var cr = try testContext();
     defer cr.destroy();
 
-    expectError(error.InvalidPopGroup, cr.popGroupToSource());
+    try expectError(error.InvalidPopGroup, cr.popGroupToSource());
 }
 
 test "relCurveTo() returns the expected error when there is no current point" {
     var cr = try testContext();
     defer cr.destroy();
 
-    expectEqual(false, cr.hasCurrentPoint());
-    expectError(error.NoCurrentPoint, cr.relCurveTo(1, 2, 3, 4, 5, 6));
+    try expectEqual(false, cr.hasCurrentPoint());
+    try expectError(error.NoCurrentPoint, cr.relCurveTo(1, 2, 3, 4, 5, 6));
 }
 
 test "relLineTo() returns the expected error when there is no current point" {
     var cr = try testContext();
     defer cr.destroy();
 
-    expectEqual(false, cr.hasCurrentPoint());
-    expectError(error.NoCurrentPoint, cr.relLineTo(1, 2));
+    try expectEqual(false, cr.hasCurrentPoint());
+    try expectError(error.NoCurrentPoint, cr.relLineTo(1, 2));
 }
 
 test "relMoveTo() returns the expected error when there is no current point" {
     var cr = try testContext();
     defer cr.destroy();
 
-    expectEqual(false, cr.hasCurrentPoint());
-    expectError(error.NoCurrentPoint, cr.relMoveTo(1, 2));
+    try expectEqual(false, cr.hasCurrentPoint());
+    try expectError(error.NoCurrentPoint, cr.relMoveTo(1, 2));
 }
 
 test "resetClip() reset the current clip region to its original, unrestricted state" {
@@ -1168,9 +1172,9 @@ test "resetClip() reset the current clip region to its original, unrestricted st
     cr.rectangle(0, 0, 100, 200);
     cr.clip();
 
-    expectEqual(false, cr.inClip(10000, 10000));
+    try expectEqual(false, cr.inClip(10000, 10000));
     cr.resetClip();
-    expectEqual(true, cr.inClip(10000, 10000));
+    try expectEqual(true, cr.inClip(10000, 10000));
 }
 
 test "strokeExtents() behaves as expected" {
@@ -1196,10 +1200,10 @@ test "strokeExtents() behaves as expected" {
     cr.strokeExtents(&x1, &y1, &x2, &y2);
     const lw = cr.getLineWidth();
 
-    expectEqual(x0_rect_a - (lw / 2.0), x1);
-    expectEqual(y0_rect_a - (lw / 2.0), y1);
-    expectEqual(@as(f64, 120.0 + (lw / 2.0)), x2);
-    expectEqual(@as(f64, 225.0 + (lw / 2.0)), y2);
+    try expectEqual(x0_rect_a - (lw / 2.0), x1);
+    try expectEqual(y0_rect_a - (lw / 2.0), y1);
+    try expectEqual(@as(f64, 120.0 + (lw / 2.0)), x2);
+    try expectEqual(@as(f64, 225.0 + (lw / 2.0)), y2);
 }
 
 test "Context.status() returns no error" {
@@ -1207,8 +1211,8 @@ test "Context.status() returns no error" {
     defer cr.destroy();
 
     var errored = false;
-    _ = Context.status(cr.c_ptr) catch |err| {
+    _ = Context.status(cr.c_ptr) catch {
         errored = true;
     };
-    expectEqual(false, errored);
+    try expectEqual(false, errored);
 }

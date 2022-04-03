@@ -10,7 +10,7 @@ fn spirograph(cr: *cairo.Context, width: f64, height: f64) void {
     cr.setSourceRgb(0, 0, 0); // black
 
     const line_width: f64 = 4.0;
-    const half_lw = line_width / 2.0;
+    // const half_lw = line_width / 2.0;
     cr.setLineWidth(line_width);
 
     const xc = width / 2.0;

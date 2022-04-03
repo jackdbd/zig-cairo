@@ -35,7 +35,7 @@ pub const Surface = struct {
     }
 
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-create-for-rectangle
-    pub fn createForRectangle(self: *Self) void {
+    pub fn createForRectangle(_: *Self) void {
         @panic("TODO: to be implemented");
     }
 
@@ -87,7 +87,7 @@ pub const Surface = struct {
     }
 
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-get-content
-    pub fn getContent(self: *Self) void {
+    pub fn getContent(_: *Self) void {
         @panic("TODO: to be implemented");
     }
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-get-device
@@ -106,12 +106,12 @@ pub const Surface = struct {
     }
 
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-get-device-offset
-    pub fn getDeviceOffset(self: *Self) void {
+    pub fn getDeviceOffset(_: *Self) void {
         @panic("TODO: to be implemented");
     }
 
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-get-device-scale
-    pub fn getDeviceScale(self: *Self) void {
+    pub fn getDeviceScale(_: *Self) void {
         @panic("TODO: to be implemented");
     }
 
@@ -126,12 +126,12 @@ pub const Surface = struct {
     }
 
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-get-fallback-resolution
-    pub fn getFallbackResolution(self: *Self) void {
+    pub fn getFallbackResolution(_: *Self) void {
         @panic("TODO: to be implemented");
     }
 
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-get-font-options
-    pub fn getFontOptions(self: *Self) void {
+    pub fn getFontOptions(_: *Self) void {
         @panic("TODO: to be implemented");
     }
 
@@ -147,7 +147,7 @@ pub const Surface = struct {
     }
 
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-get-mime-data
-    pub fn getMimeData(self: *Self) void {
+    pub fn getMimeData(_: *Self) void {
         @panic("TODO: to be implemented");
     }
 
@@ -162,7 +162,7 @@ pub const Surface = struct {
     }
 
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-get-user-data
-    pub fn getUserData(self: *Self) void {
+    pub fn getUserData(_: *Self) void {
         @panic("TODO: to be implemented");
     }
 
@@ -178,7 +178,7 @@ pub const Surface = struct {
     }
 
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-has-show-text-glyphs
-    pub fn hasShowTextGlyphs(self: *Self) void {
+    pub fn hasShowTextGlyphs(_: *Self) void {
         @panic("TODO: to be implemented");
     }
 
@@ -191,7 +191,7 @@ pub const Surface = struct {
     }
 
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-map-to-image
-    pub fn mapToImage(self: *Self) void {
+    pub fn mapToImage(_: *Self) void {
         @panic("TODO: to be implemented");
     }
 
@@ -201,7 +201,7 @@ pub const Surface = struct {
     }
 
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-mark-dirty-rectangle
-    pub fn markDirtyRectangle(self: *Self) void {
+    pub fn markDirtyRectangle(_: *Self) void {
         @panic("TODO: to be implemented");
     }
 
@@ -214,7 +214,7 @@ pub const Surface = struct {
     }
 
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-reference
-    pub fn reference(self: *Self) void {
+    pub fn reference(_: *Self) void {
         @panic("TODO: to be implemented");
     }
 
@@ -253,7 +253,7 @@ pub const Surface = struct {
     }
 
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-set-mime-data
-    pub fn setMimeData(self: *Self) void {
+    pub fn setMimeData(_: *Self) void {
         @panic("TODO: to be implemented");
     }
 
@@ -267,7 +267,7 @@ pub const Surface = struct {
     }
 
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-set-user-data
-    pub fn setUserData(self: *Self) void {
+    pub fn setUserData(_: *Self) void {
         @panic("TODO: to be implemented");
     }
 
@@ -283,7 +283,7 @@ pub const Surface = struct {
     }
 
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-supports-mime-type
-    pub fn supportsMimeData(self: *Self) void {
+    pub fn supportsMimeData(_: *Self) void {
         @panic("TODO: to be implemented");
     }
 
@@ -294,7 +294,7 @@ pub const Surface = struct {
     }
 
     /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-unmap-image
-    pub fn unmapImage(self: *Self) void {
+    pub fn unmapImage(_: *Self) void {
         @panic("TODO: to be implemented");
     }
 
@@ -338,15 +338,15 @@ const expectError = testing.expectError;
 test "Surface.getType() returns the expected SurfaceType" {
     var surface_image = try Surface.image(320, 240);
     defer surface_image.destroy();
-    expectEqual(SurfaceType.image, surface_image.getType());
+    try expectEqual(SurfaceType.image, surface_image.getType());
 
     var surface_svg = try Surface.svg("examples/generated/test.svg", 320, 240);
     defer surface_svg.destroy();
-    expectEqual(SurfaceType.svg, surface_svg.getType());
+    try expectEqual(SurfaceType.svg, surface_svg.getType());
 
     var surface_pdf = try Surface.pdf("examples/generated/test.pdf", 320, 240);
     defer surface_pdf.destroy();
-    expectEqual(SurfaceType.pdf, surface_pdf.getType());
+    try expectEqual(SurfaceType.pdf, surface_pdf.getType());
 }
 
 test "status() returns no error" {
@@ -354,24 +354,24 @@ test "status() returns no error" {
     defer surface.destroy();
 
     var errored = false;
-    _ = Surface.status(surface.c_ptr) catch |err| {
+    _ = Surface.status(surface.c_ptr) catch {
         errored = true;
     };
-    expectEqual(false, errored);
+    try expectEqual(false, errored);
 }
 
 test "getDocumentUnit() returns expected unit for SVG surfaces" {
     var surface_svg = try Surface.svg("examples/generated/test.svg", 320, 240);
     defer surface_svg.destroy();
     const unit = try surface_svg.getDocumentUnit();
-    expectEqual(Unit.pt, unit);
+    try expectEqual(Unit.pt, unit);
 }
 
 test "getDocumentUnit() returns SurfaceTypeMismatch for non-SVG surfaces" {
     var surface = try Surface.image(320, 240);
     defer surface.destroy();
     _ = surface.getDocumentUnit() catch |err| {
-        expectEqual(Error.SurfaceTypeMismatch, err);
+        try expectEqual(Error.SurfaceTypeMismatch, err);
     };
 }
 
@@ -379,12 +379,12 @@ test "getDevice() returns expected error when called on an image surface" {
     var surface = try Surface.image(320, 240);
     defer surface.destroy();
 
-    expectError(error.OperationNotAvailableForSurface, surface.getDevice());
+    try expectError(error.OperationNotAvailableForSurface, surface.getDevice());
 }
 
 test "writeComment() returns expected error when called on an image surface" {
     var surface = try Surface.image(320, 240);
     defer surface.destroy();
 
-    expectError(error.OperationNotAvailableForSurface, surface.writeComment("foo"));
+    try expectError(error.OperationNotAvailableForSurface, surface.writeComment("foo"));
 }

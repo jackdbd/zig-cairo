@@ -49,3 +49,18 @@ Tested against these zig compiler versions on [Travis CI](https://travis-ci.com/
 - 0.7.0 (not working, see [#2](https://github.com/jackdbd/zig-cairo/issues/2))
 - 0.7.1 (not working, see [#2](https://github.com/jackdbd/zig-cairo/issues/2))
 - 0.8.0-dev.1032+8098b3f84
+
+## stuff...
+
+You can also [download cairo source files](https://www.cairographics.org/download/).
+
+```sh
+git clone git://anongit.freedesktop.org/git/cairo
+```
+
+```sh
+zig translate-c ~/repos/cairo/util/cairo-gobject/cairo-gobject-enums.c -lcairo
+
+zig translate-c ~/repos/cairo/src/cairo-features.h ~/repos/cairo/src/cairo.h
+cairo_helloworld.c -lcairo > cairo_helloworld.zig
+```

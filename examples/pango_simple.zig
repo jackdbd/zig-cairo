@@ -25,7 +25,9 @@ fn drawText(cr: *cairo.Context) !void {
     var desc = try pc.FontDescription.fromString(FONT_WITH_MANUAL_SIZE);
     defer desc.destroy();
 
-    desc.setAbsoluteSize(FONT_SIZE * DEVICE_DPI * pc.SCALE / (72.0 / TWEAKABLE_SCALE));
+    // const scale: f64 = pc.SCALE;
+    const scale = @intToFloat(f64, pc.SCALE);
+    desc.setAbsoluteSize(FONT_SIZE * DEVICE_DPI * scale / (72.0 / TWEAKABLE_SCALE));
     layout.setFontDescription(desc);
 
     // Draw the layout N_WORDS times in a circle
@@ -41,7 +43,7 @@ fn drawText(cr: *cairo.Context) !void {
         // tell Pango to re-layout the text with the new transformation
         layout.update(cr);
         const size = layout.getSize();
-        cr.moveTo(-(size.width / pc.SCALE / 2.0), -(RADIUS / TWEAKABLE_SCALE));
+        cr.moveTo(-(size.width / scale / 2.0), -(RADIUS / TWEAKABLE_SCALE));
         layout.show(cr);
         cr.restore();
     }

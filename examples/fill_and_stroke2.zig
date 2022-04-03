@@ -6,7 +6,7 @@ const setBackground = @import("utils.zig").setBackground;
 fn fillAndStroke2(cr: *cairo.Context) !void {
     cr.setSourceRgb(0.0, 0.0, 0.0); // black
 
-    const offset: f64 = -50.0;
+    // const offset: f64 = -50.0;
 
     cr.moveTo(128.0, 25.6);
     cr.lineTo(230.4, 230.4);

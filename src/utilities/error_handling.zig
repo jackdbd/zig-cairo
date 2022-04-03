@@ -54,8 +54,7 @@ pub const Error = error{
 
 /// Convert a Cairo status into a zig error (or void if the Cairo status is
 /// CAIRO_STATUS_SUCCESS).
-pub fn statusToError(c_enum: c.enum__cairo_status) !void {
-    const c_integer = @enumToInt(c_enum);
+pub fn statusToError(c_integer: c_uint) !void {
     return switch (c_integer) {
         c.CAIRO_STATUS_SUCCESS => {},
         c.CAIRO_STATUS_NO_MEMORY => Error.NoMemory,

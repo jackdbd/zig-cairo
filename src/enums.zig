@@ -13,8 +13,9 @@ pub const Antialias = enum {
     best,
 
     /// Convert from the C enum returned by Cairo into a Zig enum (for convenience).
-    pub fn fromCairoEnum(c_enum: c.enum__cairo_antialias) Antialias {
-        const c_integer = @enumToInt(c_enum);
+    pub fn fromCairoEnum(c_integer: c_uint) Antialias {
+    // pub fn fromCairoEnum(c_enum: c.enum__cairo_antialias) Antialias {
+        // const c_integer = @enumToInt(c_enum);
         return switch (c_integer) {
             c.CAIRO_ANTIALIAS_DEFAULT => Antialias.default,
             c.CAIRO_ANTIALIAS_NONE => Antialias.none,
@@ -30,13 +31,13 @@ pub const Antialias = enum {
     /// Convert the Zig enum into the C enum that Cairo expects.
     pub fn toCairoEnum(self: Antialias) c.enum__cairo_antialias {
         return switch (self) {
-            .default => @intToEnum(c.enum__cairo_antialias, c.CAIRO_ANTIALIAS_DEFAULT),
-            .none => @intToEnum(c.enum__cairo_antialias, c.CAIRO_ANTIALIAS_NONE),
-            .gray => @intToEnum(c.enum__cairo_antialias, c.CAIRO_ANTIALIAS_GRAY),
-            .subpixel => @intToEnum(c.enum__cairo_antialias, c.CAIRO_ANTIALIAS_SUBPIXEL),
-            .fast => @intToEnum(c.enum__cairo_antialias, c.CAIRO_ANTIALIAS_FAST),
-            .good => @intToEnum(c.enum__cairo_antialias, c.CAIRO_ANTIALIAS_GOOD),
-            .best => @intToEnum(c.enum__cairo_antialias, c.CAIRO_ANTIALIAS_BEST),
+            .default => c.CAIRO_ANTIALIAS_DEFAULT,
+            .none => c.CAIRO_ANTIALIAS_NONE,
+            .gray => c.CAIRO_ANTIALIAS_GRAY,
+            .subpixel => c.CAIRO_ANTIALIAS_SUBPIXEL,
+            .fast => c.CAIRO_ANTIALIAS_FAST,
+            .good => c.CAIRO_ANTIALIAS_GOOD,
+            .best => c.CAIRO_ANTIALIAS_BEST,
         };
     }
 };
@@ -60,15 +61,15 @@ pub const Content = enum {
 
     pub fn toCairoEnum(self: Content) c.enum__cairo_content {
         return switch (self) {
-            .color => @intToEnum(c.enum__cairo_content, c.CAIRO_CONTENT_COLOR),
-            .alpha => @intToEnum(c.enum__cairo_content, c.CAIRO_CONTENT_ALPHA),
-            .color_alpha => @intToEnum(c.enum__cairo_content, c.CAIRO_CONTENT_COLOR_ALPHA),
+            .color => c.CAIRO_CONTENT_COLOR,
+            .alpha => c.CAIRO_CONTENT_ALPHA,
+            .color_alpha => c.CAIRO_CONTENT_COLOR_ALPHA,
         };
     }
 };
 
 /// https://www.cairographics.org/manual/cairo-cairo-device-t.html#cairo-device-type-t
-pub const DeviceType = enum {
+pub const DeviceType = enum(u3) {
     drm = c.CAIRO_DEVICE_TYPE_DRM,
     gl = c.CAIRO_DEVICE_TYPE_GL,
     script = c.CAIRO_DEVICE_TYPE_SCRIPT,
@@ -79,8 +80,9 @@ pub const DeviceType = enum {
     win32 = c.CAIRO_DEVICE_TYPE_WIN32,
     // invalid = c.CAIRO_DEVICE_TYPE_INVALID, // -1
 
-    pub fn fromCairoEnum(c_enum: c.enum__cairo_device_type) DeviceType {
-        const c_integer = @enumToInt(c_enum);
+    pub fn fromCairoEnum(c_integer: c_int) DeviceType {
+    // pub fn fromCairoEnum(c_enum: c.enum__cairo_device_type) DeviceType {
+        // const c_integer = @enumToInt(c_enum);
         return switch (c_integer) {
             c.CAIRO_DEVICE_TYPE_DRM => DeviceType.drm,
             c.CAIRO_DEVICE_TYPE_GL => DeviceType.gl,
@@ -111,14 +113,15 @@ pub const DeviceType = enum {
 };
 
 /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-extend-t
-pub const Extend = enum {
+pub const Extend = enum(u2) {
     none = c.CAIRO_EXTEND_NONE,
     repeat = c.CAIRO_EXTEND_REPEAT,
     reflect = c.CAIRO_EXTEND_REFLECT,
     pad = c.CAIRO_EXTEND_PAD,
 
-    pub fn fromCairoEnum(c_enum: c.enum__cairo_extend) Extend {
-        const c_integer = @enumToInt(c_enum);
+    pub fn fromCairoEnum(c_integer: c_uint) Extend {
+    // pub fn fromCairoEnum(c_enum: c.enum__cairo_extend) Extend {
+        // const c_integer = @enumToInt(c_enum);
         return switch (c_integer) {
             c.CAIRO_EXTEND_NONE => Extend.none,
             c.CAIRO_EXTEND_REPEAT => Extend.repeat,
@@ -129,23 +132,23 @@ pub const Extend = enum {
     }
 
     pub fn toCairoEnum(self: Extend) c.enum__cairo_extend {
-        const c_integer = @enumToInt(self);
         return switch (self) {
-            .none => @intToEnum(c.enum__cairo_extend, c.CAIRO_EXTEND_NONE),
-            .repeat => @intToEnum(c.enum__cairo_extend, c.CAIRO_EXTEND_REPEAT),
-            .reflect => @intToEnum(c.enum__cairo_extend, c.CAIRO_EXTEND_REFLECT),
-            .pad => @intToEnum(c.enum__cairo_extend, c.CAIRO_EXTEND_PAD),
+            .none => c.CAIRO_EXTEND_NONE,
+            .repeat => c.CAIRO_EXTEND_REPEAT,
+            .reflect => c.CAIRO_EXTEND_REFLECT,
+            .pad => c.CAIRO_EXTEND_PAD,
         };
     }
 };
 
 /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-fill-rule-t
-pub const FillRule = enum {
+pub const FillRule = enum(u1) {
     winding = c.CAIRO_FILL_RULE_WINDING,
     even_odd = c.CAIRO_FILL_RULE_EVEN_ODD,
 
-    pub fn fromCairoEnum(c_enum: c.enum__cairo_fill_rule) FillRule {
-        const c_integer = @enumToInt(c_enum);
+    pub fn fromCairoEnum(c_integer: c_uint) FillRule {
+    // pub fn fromCairoEnum(c_enum: c.enum__cairo_fill_rule) FillRule {
+    //     const c_integer = @enumToInt(c_enum);
         return switch (c_integer) {
             c.CAIRO_FILL_RULE_WINDING => FillRule.winding,
             c.CAIRO_FILL_RULE_EVEN_ODD => FillRule.even_odd,
@@ -155,29 +158,29 @@ pub const FillRule = enum {
 
     pub fn toCairoEnum(self: FillRule) c.enum__cairo_fill_rule {
         return switch (self) {
-            .winding => @intToEnum(c.enum__cairo_fill_rule, c.CAIRO_FILL_RULE_WINDING),
-            .even_odd => @intToEnum(c.enum__cairo_fill_rule, c.CAIRO_FILL_RULE_EVEN_ODD),
+            .winding => c.CAIRO_FILL_RULE_WINDING,
+            .even_odd => c.CAIRO_FILL_RULE_EVEN_ODD,
         };
     }
 };
 
 /// https://github.com/freedesktop/cairo/blob/6a6ab2475906635fcc5ba0c73182fae73c4f7ee8/src/cairoint.h#L691
 /// https://github.com/freedesktop/cairo/blob/577477207a300fd75c93da93dbb233256d8b48d8/util/cairo-trace/trace.c#L2925
-pub const FontSlant = enum {
+pub const FontSlant = enum(u2) {
     normal = c.CAIRO_FONT_SLANT_NORMAL,
     italic = c.CAIRO_FONT_SLANT_ITALIC,
     oblique = c.CAIRO_FONT_SLANT_OBLIQUE,
 };
 
 /// https://github.com/freedesktop/cairo/blob/577477207a300fd75c93da93dbb233256d8b48d8/util/cairo-trace/trace.c#L2938
-pub const FontWeight = enum {
+pub const FontWeight = enum(u1) {
     normal = c.CAIRO_FONT_WEIGHT_NORMAL,
     bold = c.CAIRO_FONT_WEIGHT_BOLD,
 };
 
 /// https://www.cairographics.org/manual/cairo-Image-Surfaces.html#cairo-format-t
 /// https://github.com/freedesktop/cairo/blob/6a6ab2475906635fcc5ba0c73182fae73c4f7ee8/src/cairo.h#L418
-pub const Format = enum {
+pub const Format = enum(u3) {
     // invalid = c.CAIRO_FORMAT_INVALID, // -1
     argb32 = c.CAIRO_FORMAT_ARGB32, // 0
     rgb24 = c.CAIRO_FORMAT_RGB24, // 1
@@ -203,25 +206,27 @@ pub const Format = enum {
 
     pub fn toCairoEnum(self: Format) c.enum__cairo_format {
         return switch (self) {
-            // .invalid => @intToEnum(c.enum__cairo_format, c.CAIRO_FORMAT_INVALID),
-            .argb32 => @intToEnum(c.enum__cairo_format, c.CAIRO_FORMAT_ARGB32),
-            .rgb24 => @intToEnum(c.enum__cairo_format, c.CAIRO_FORMAT_RGB24),
-            .a8 => @intToEnum(c.enum__cairo_format, c.CAIRO_FORMAT_A8),
-            .a1 => @intToEnum(c.enum__cairo_format, c.CAIRO_FORMAT_A1),
-            .rgb16_565 => @intToEnum(c.enum__cairo_format, c.CAIRO_FORMAT_RGB16_565),
-            .rgb30 => @intToEnum(c.enum__cairo_format, c.CAIRO_FORMAT_RGB30),
+            // .invalid => c.CAIRO_FORMAT_INVALID,
+            // .argb32 => @enumToInt(@intToEnum(Format, c.CAIRO_FORMAT_ARGB32)),
+            .argb32 => c.CAIRO_FORMAT_ARGB32,
+            .rgb24 => c.CAIRO_FORMAT_RGB24,
+            .a8 =>  c.CAIRO_FORMAT_A8,
+            .a1 =>  c.CAIRO_FORMAT_A1,
+            .rgb16_565 =>  c.CAIRO_FORMAT_RGB16_565,
+            .rgb30 =>  c.CAIRO_FORMAT_RGB30,
         };
     }
 };
 
 /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-line-cap-t
-pub const LineCap = enum {
+pub const LineCap = enum(u2) {
     butt = c.CAIRO_LINE_CAP_BUTT,
     round = c.CAIRO_LINE_CAP_ROUND,
     square = c.CAIRO_LINE_CAP_SQUARE,
 
-    pub fn fromCairoEnum(c_enum: c.enum__cairo_line_cap) LineCap {
-        const c_integer = @enumToInt(c_enum);
+    pub fn fromCairoEnum(c_integer: c_uint) LineCap {
+    // pub fn fromCairoEnum(c_enum: c.enum__cairo_line_cap) LineCap {
+        // const c_integer = @enumToInt(c_enum);
         return switch (c_integer) {
             c.CAIRO_LINE_CAP_BUTT => LineCap.butt,
             c.CAIRO_LINE_CAP_ROUND => LineCap.round,
@@ -232,21 +237,22 @@ pub const LineCap = enum {
 
     pub fn toCairoEnum(self: LineCap) c.enum__cairo_line_cap {
         return switch (self) {
-            .butt => @intToEnum(c.enum__cairo_line_cap, c.CAIRO_LINE_CAP_BUTT),
-            .round => @intToEnum(c.enum__cairo_line_cap, c.CAIRO_LINE_CAP_ROUND),
-            .square => @intToEnum(c.enum__cairo_line_cap, c.CAIRO_LINE_CAP_SQUARE),
+            .butt => c.CAIRO_LINE_CAP_BUTT,
+            .round => c.CAIRO_LINE_CAP_ROUND,
+            .square => c.CAIRO_LINE_CAP_SQUARE,
         };
     }
 };
 
 /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-line-join-t
-pub const LineJoin = enum {
+pub const LineJoin = enum(u2) {
     miter = c.CAIRO_LINE_JOIN_MITER,
     round = c.CAIRO_LINE_JOIN_ROUND,
     bevel = c.CAIRO_LINE_JOIN_BEVEL,
 
-    pub fn fromCairoEnum(c_enum: c.enum__cairo_line_join) LineJoin {
-        const c_integer = @enumToInt(c_enum);
+    pub fn fromCairoEnum(c_integer: c_uint) LineJoin {
+    // pub fn fromCairoEnum(c_enum: c.enum__cairo_line_join) LineJoin {
+        // const c_integer = @enumToInt(c_enum);
         return switch (c_integer) {
             c.CAIRO_LINE_JOIN_MITER => LineJoin.miter,
             c.CAIRO_LINE_JOIN_ROUND => LineJoin.round,
@@ -257,15 +263,15 @@ pub const LineJoin = enum {
 
     pub fn toCairoEnum(self: LineJoin) c.enum__cairo_line_join {
         return switch (self) {
-            .miter => @intToEnum(c.enum__cairo_line_join, c.CAIRO_LINE_JOIN_MITER),
-            .round => @intToEnum(c.enum__cairo_line_join, c.CAIRO_LINE_JOIN_ROUND),
-            .bevel => @intToEnum(c.enum__cairo_line_join, c.CAIRO_LINE_JOIN_BEVEL),
+            .miter => c.CAIRO_LINE_JOIN_MITER,
+            .round => c.CAIRO_LINE_JOIN_ROUND,
+            .bevel => c.CAIRO_LINE_JOIN_BEVEL,
         };
     }
 };
 
 /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-operator-t
-pub const Operator = enum {
+pub const Operator = enum(u5) {
     clear = c.CAIRO_OPERATOR_CLEAR,
     source = c.CAIRO_OPERATOR_SOURCE,
     over = c.CAIRO_OPERATOR_OVER,
@@ -296,8 +302,9 @@ pub const Operator = enum {
     hsl_color = c.CAIRO_OPERATOR_HSL_COLOR,
     hsl_luminosity = c.CAIRO_OPERATOR_HSL_LUMINOSITY,
 
-    pub fn fromCairoEnum(c_enum: c.enum__cairo_operator) Operator {
-        const c_integer = @enumToInt(c_enum);
+    pub fn fromCairoEnum(c_integer: c_uint) Operator {
+    // pub fn fromCairoEnum(c_enum: c.enum__cairo_operator) Operator {
+        // const c_integer = @enumToInt(c_enum);
         return switch (c_integer) {
             c.CAIRO_OPERATOR_CLEAR => Operator.clear,
             c.CAIRO_OPERATOR_SOURCE => Operator.source,
@@ -333,42 +340,44 @@ pub const Operator = enum {
     }
 
     pub fn toCairoEnum(self: Operator) c.enum__cairo_operator {
+        //
         return switch (self) {
-            .clear => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_CLEAR),
-            .source => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_SOURCE),
-            .over => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_OVER),
-            .in => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_IN),
-            .out => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_IN),
-            .atop => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_ATOP),
-            .dest => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_DEST),
-            .dest_over => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_DEST_OVER),
-            .dest_in => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_DEST_IN),
-            .dest_out => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_DEST_OUT),
-            .dest_atop => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_DEST_ATOP),
-            .xor => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_XOR),
-            .add => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_ADD),
-            .saturate => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_SATURATE),
-            .multiply => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_MULTIPLY),
-            .screen => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_SCREEN),
-            .overlay => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_OVERLAY),
-            .darken => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_DARKEN),
-            .lighten => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_LIGHTEN),
-            .color_burn => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_COLOR_BURN),
-            .color_dodge => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_COLOR_DODGE),
-            .hard_light => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_HARD_LIGHT),
-            .soft_light => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_SOFT_LIGHT),
-            .difference => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_DIFFERENCE),
-            .exclusion => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_EXCLUSION),
-            .hsl_hue => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_HSL_HUE),
-            .hsl_saturation => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_HSL_SATURATION),
-            .hsl_color => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_HSL_COLOR),
-            .hsl_luminosity => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_HSL_LUMINOSITY),
+            // .clear => @intToEnum(c.enum__cairo_operator, c.CAIRO_OPERATOR_CLEAR),
+            .clear => c.CAIRO_OPERATOR_CLEAR,
+            .source => c.CAIRO_OPERATOR_SOURCE,
+            .over => c.CAIRO_OPERATOR_OVER,
+            .in => c.CAIRO_OPERATOR_IN,
+            .out => c.CAIRO_OPERATOR_IN,
+            .atop => c.CAIRO_OPERATOR_ATOP,
+            .dest => c.CAIRO_OPERATOR_DEST,
+            .dest_over => c.CAIRO_OPERATOR_DEST_OVER,
+            .dest_in => c.CAIRO_OPERATOR_DEST_IN,
+            .dest_out => c.CAIRO_OPERATOR_DEST_OUT,
+            .dest_atop => c.CAIRO_OPERATOR_DEST_ATOP,
+            .xor => c.CAIRO_OPERATOR_XOR,
+            .add => c.CAIRO_OPERATOR_ADD,
+            .saturate => c.CAIRO_OPERATOR_SATURATE,
+            .multiply => c.CAIRO_OPERATOR_MULTIPLY,
+            .screen => c.CAIRO_OPERATOR_SCREEN,
+            .overlay => c.CAIRO_OPERATOR_OVERLAY,
+            .darken => c.CAIRO_OPERATOR_DARKEN,
+            .lighten => c.CAIRO_OPERATOR_LIGHTEN,
+            .color_burn => c.CAIRO_OPERATOR_COLOR_BURN,
+            .color_dodge => c.CAIRO_OPERATOR_COLOR_DODGE,
+            .hard_light => c.CAIRO_OPERATOR_HARD_LIGHT,
+            .soft_light => c.CAIRO_OPERATOR_SOFT_LIGHT,
+            .difference => c.CAIRO_OPERATOR_DIFFERENCE,
+            .exclusion => c.CAIRO_OPERATOR_EXCLUSION,
+            .hsl_hue => c.CAIRO_OPERATOR_HSL_HUE,
+            .hsl_saturation => c.CAIRO_OPERATOR_HSL_SATURATION,
+            .hsl_color => c.CAIRO_OPERATOR_HSL_COLOR,
+            .hsl_luminosity => c.CAIRO_OPERATOR_HSL_LUMINOSITY,
         };
     }
 };
 
 /// https://cairographics.org/manual/cairo-Paths.html#cairo-path-data-type-t
-pub const PathDataType = enum {
+pub const PathDataType = enum(u2) {
     move_to = c.CAIRO_PATH_MOVE_TO,
     line_to = c.CAIRO_PATH_LINE_TO,
     curve_to = c.CAIRO_PATH_CURVE_TO,
@@ -396,7 +405,7 @@ pub const PathDataType = enum {
 };
 
 /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-type-t
-pub const PatternType = enum {
+pub const PatternType = enum(u3) {
     solid = c.CAIRO_PATTERN_TYPE_SOLID,
     surface = c.CAIRO_PATTERN_TYPE_SURFACE,
     linear = c.CAIRO_PATTERN_TYPE_LINEAR,
@@ -404,8 +413,9 @@ pub const PatternType = enum {
     mesh = c.CAIRO_PATTERN_TYPE_MESH,
     raster_source = c.CAIRO_PATTERN_TYPE_RASTER_SOURCE,
 
-    pub fn fromCairoEnum(c_enum: c.enum__cairo_pattern_type) PatternType {
-        const c_integer = @enumToInt(c_enum);
+    pub fn fromCairoEnum(c_integer: c_uint) PatternType {
+    // pub fn fromCairoEnum(c_enum: c.enum__cairo_pattern_type) PatternType {
+        // const c_integer = @enumToInt(c_enum);
         return switch (c_integer) {
             c.CAIRO_PATTERN_TYPE_SOLID => PatternType.solid,
             c.CAIRO_PATTERN_TYPE_SURFACE => PatternType.surface,
@@ -419,7 +429,7 @@ pub const PatternType = enum {
 };
 
 /// https://www.cairographics.org/manual/cairo-PDF-Surfaces.html#cairo-pdf-metadata-t
-pub const PdfMetadata = enum {
+pub const PdfMetadata = enum(u3) {
     title = c.CAIRO_PDF_METADATA_TITLE,
     author = c.CAIRO_PDF_METADATA_AUTHOR,
     subject = c.CAIRO_PDF_METADATA_SUBJECT,
@@ -444,24 +454,25 @@ pub const PdfMetadata = enum {
 
     pub fn toCairoEnum(self: PdfMetadata) c.enum__cairo_pdf_metadata {
         return switch (self) {
-            .title => @intToEnum(c.enum__cairo_pdf_metadata, c.CAIRO_PDF_METADATA_TITLE),
-            .author => @intToEnum(c.enum__cairo_pdf_metadata, c.CAIRO_PDF_METADATA_AUTHOR),
-            .subject => @intToEnum(c.enum__cairo_pdf_metadata, c.CAIRO_PDF_METADATA_SUBJECT),
-            .keywords => @intToEnum(c.enum__cairo_pdf_metadata, c.CAIRO_PDF_METADATA_KEYWORDS),
-            .creator => @intToEnum(c.enum__cairo_pdf_metadata, c.CAIRO_PDF_METADATA_CREATOR),
-            .create_date => @intToEnum(c.enum__cairo_pdf_metadata, c.CAIRO_PDF_METADATA_CREATE_DATE),
-            .mod_date => @intToEnum(c.enum__cairo_pdf_metadata, c.CAIRO_PDF_METADATA_MOD_DATE),
+            .title => c.CAIRO_PDF_METADATA_TITLE,
+            .author => c.CAIRO_PDF_METADATA_AUTHOR,
+            .subject => c.CAIRO_PDF_METADATA_SUBJECT,
+            .keywords => c.CAIRO_PDF_METADATA_KEYWORDS,
+            .creator => c.CAIRO_PDF_METADATA_CREATOR,
+            .create_date => c.CAIRO_PDF_METADATA_CREATE_DATE,
+            .mod_date => c.CAIRO_PDF_METADATA_MOD_DATE,
         };
     }
 };
 
 /// https://www.cairographics.org/manual/cairo-Script-Surfaces.html#cairo-script-mode-t
-pub const ScriptMode = enum {
+pub const ScriptMode = enum(u1) {
     ascii = c.CAIRO_SCRIPT_MODE_ASCII,
     binary = c.CAIRO_SCRIPT_MODE_BINARY,
 
-    pub fn fromCairoEnum(c_enum: anytype) ScriptMode {
-        const c_integer = @enumToInt(c_enum);
+    pub fn fromCairoEnum(c_integer: c_uint) ScriptMode {
+    // pub fn fromCairoEnum(c_enum: anytype) ScriptMode {
+        // const c_integer = @enumToInt(c_enum);
         return switch (c_integer) {
             0 => ScriptMode.ascii,
             1 => ScriptMode.binary,
@@ -478,7 +489,7 @@ pub const ScriptMode = enum {
 };
 
 /// https://www.cairographics.org/manual/cairo-cairo-surface-t.html#cairo-surface-type-t
-pub const SurfaceType = enum {
+pub const SurfaceType = enum(u5) {
     image = c.CAIRO_SURFACE_TYPE_IMAGE,
     pdf = c.CAIRO_SURFACE_TYPE_PDF,
     ps = c.CAIRO_SURFACE_TYPE_PS,
@@ -505,8 +516,9 @@ pub const SurfaceType = enum {
     subsurface = c.CAIRO_SURFACE_TYPE_SUBSURFACE,
     cogl = c.CAIRO_SURFACE_TYPE_COGL,
 
-    pub fn fromCairoEnum(c_enum: c.enum__cairo_surface_type) SurfaceType {
-        const c_integer = @enumToInt(c_enum);
+    pub fn fromCairoEnum(c_integer: c_uint) SurfaceType {
+    // pub fn fromCairoEnum(c_enum: c.enum__cairo_surface_type) SurfaceType {
+        // const c_integer = @enumToInt(c_enum);
         return switch (c_integer) {
             c.CAIRO_SURFACE_TYPE_IMAGE => SurfaceType.image,
             c.CAIRO_SURFACE_TYPE_PDF => SurfaceType.pdf,
@@ -539,7 +551,7 @@ pub const SurfaceType = enum {
 };
 
 /// https://www.cairographics.org/manual/cairo-SVG-Surfaces.html#cairo-svg-unit-t
-pub const Unit = enum {
+pub const Unit = enum(u4) {
     user = c.CAIRO_SVG_UNIT_USER,
     em = c.CAIRO_SVG_UNIT_EM,
     ex = c.CAIRO_SVG_UNIT_EX,
@@ -551,8 +563,9 @@ pub const Unit = enum {
     pc = c.CAIRO_SVG_UNIT_PC,
     percent = c.CAIRO_SVG_UNIT_PERCENT,
 
-    pub fn fromCairoEnum(c_enum: anytype) Unit { // there is no c.enum__cairo_unit
-        const c_integer = @enumToInt(c_enum);
+    pub fn fromCairoEnum(c_integer: c_uint) Unit { // there is no c.enum__cairo_unit
+    // pub fn fromCairoEnum(c_enum: anytype) Unit { // there is no c.enum__cairo_unit
+        // const c_integer = @enumToInt(c_enum);
         return switch (c_integer) {
             c.CAIRO_SVG_UNIT_USER => Unit.user,
             c.CAIRO_SVG_UNIT_EM => Unit.em,
