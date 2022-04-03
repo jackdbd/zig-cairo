@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    name: ${{ matrix.build-mode }} build on ${{ matrix.host }}
+    runs-on: ${{ matrix.host }}
+    strategy:
+      fail-fast: true
+      matrix:
+        host: [ubuntu-18.04, ubuntu-20.04]
+        build-mode: [release-safe, release-small]
+        zig-version: [0.9.1]
+    # env:
+    #   ZIG_DIR: $HOME/zig
+    #   ZIG_VERSION: 0.9.1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Zig
+        uses: goto-bus-stop/setup-zig@v1.3.0
+        with:
+          version: ${{ matrix.zig-version }}
+      # - name: Debug zig version
+      #   run: which zig && zig version
+      - name: Install dependencies
+        run: ./scripts/install-dependencies.sh
+      - name: Build arc example in ${{ matrix.build-mode }} mode
+        run: zig build -D${{ matrix.build-mode }} arc
+      - name: Build surface_pdf example in ${{ matrix.build-mode }} mode
+        run: zig build -D${{ matrix.build-mode }} surface_pdf
+      - name: Build surface_xcb example in ${{ matrix.build-mode }} mode with XVFB
+        run: xvfb-run --server-args="-screen 0 1024x768x24" zig build -D${{ matrix.build-mode }} surface_xcb
+      - name: Run tests (in all 4 zig modes)
+        run: zig build test
