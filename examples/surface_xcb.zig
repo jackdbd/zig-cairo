@@ -22,9 +22,12 @@ pub fn main() !void {
     const mask = 0;
     const values = null;
 
-    _ = conn.createWindow(depth, window_id, s.root, x, y, window_width, window_height, border_width, win_class, s.root_visual, mask, values);
-    _ = conn.mapWindow(window_id);
-    _ = conn.flush();
+    var xcb_cookie = conn.createWindow(depth, window_id, s.root, x, y, window_width, window_height, border_width, win_class, s.root_visual, mask, values);
+    std.log.debug("xcb_cookie after conn.createWindow {}", .{xcb_cookie});
+    xcb_cookie = conn.mapWindow(window_id);
+    std.log.debug("xcb_cookie after conn.mapWindow {}", .{xcb_cookie});
+    const c_integer = conn.flush();
+    std.log.debug("c_integer {}", .{c_integer});
     const vis = xcb.lookup_visual(s, s.root_visual);
 
     var surface = try cairo.Surface.xcb(conn.c_ptr, window_id, vis, window_width, window_height);

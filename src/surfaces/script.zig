@@ -44,6 +44,7 @@ pub fn getMode(script: *c.struct__cairo_device) ScriptMode {
 
 /// https://www.cairographics.org/manual/cairo-Script-Surfaces.html#cairo-script-set-mode
 pub fn setMode(script: *c.struct__cairo_device, mode: ScriptMode) void {
+    std.log.debug("script {}", .{script});
     const c_integer = mode.toCInt();
     std.debug.panic("Cannot cast c_int={} to a C enum because cairo_script_mode_t is an unnamed enum.", .{c_integer});
     // TODO: how to get this c_enum to pass to the C function?

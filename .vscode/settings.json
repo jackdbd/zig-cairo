@@ -1,0 +1,11 @@
+{
+  "editor.formatOnSave": false,
+  "files.exclude": {
+    "**/zig-cache/": true
+  },
+  "zigLanguageClient.path": "/home/jack/zls/zls",
+  "zig.buildOnSave": true,
+  "[zig]": {
+    "editor.defaultFormatter": "tiehuis.zig"
+  }
+}

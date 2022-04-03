@@ -48,16 +48,17 @@ pub const Xcb = struct {
 
     /// In XCB, a Graphics Context is, as a window, characterized by an Id.
     /// https://xcb.freedesktop.org/tutorial/basicwindowsanddrawing/
-    pub fn createWindow(self: *Self, depth: u8, window_id: u32, root: u32, x: i16, y: i16, width: u16, height: u16, border_width: u16, win_class: u16, root_visual: u32, mask: comptime u32, values: anytype) void {
-        const win = c.xcb_create_window(self.c_ptr, depth, window_id, root, x, y, width, height, border_width, win_class, root_visual, mask, values);
+    pub fn createWindow(self: *Self, depth: u8, window_id: u32, root: u32, x: i16, y: i16, width: u16, height: u16, border_width: u16, win_class: u16, root_visual: u32, mask: u32, values: anytype) c.xcb_void_cookie_t {
+        return c.xcb_create_window(self.c_ptr, depth, window_id, root, x, y, width, height, border_width, win_class, root_visual, mask, values);
+        // orelse @panic("could not create a window");
     }
 
-    pub fn mapWindow(self: *Self, window_id: u32) void {
-        const x = c.xcb_map_window(self.c_ptr, window_id);
+    pub fn mapWindow(self: *Self, window_id: u32) c.xcb_void_cookie_t {
+        return c.xcb_map_window(self.c_ptr, window_id);
     }
 
-    pub fn flush(self: *Self) void {
-        const x = c.xcb_flush(self.c_ptr);
+    pub fn flush(self: *Self) c_int {
+        return c.xcb_flush(self.c_ptr);
     }
 
     pub fn waitForEvent(self: *Self) *c.xcb_generic_event_t {

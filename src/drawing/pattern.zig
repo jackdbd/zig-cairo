@@ -33,7 +33,7 @@ pub const Pattern = struct {
     }
 
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-mesh-pattern-begin-patch
-    pub fn beginPatch(self: *Self) !void {
+    pub fn beginPatch(_: *Self) !void {
         @panic("TODO: to be implemented");
     }
 
@@ -103,7 +103,7 @@ pub const Pattern = struct {
     }
 
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-mesh-pattern-curve-to
-    pub fn curveTo(self: *Self) !void {
+    pub fn curveTo(_: *Self) !void {
         @panic("TODO: to be implemented");
     }
 
@@ -115,7 +115,7 @@ pub const Pattern = struct {
     }
 
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-mesh-pattern-end-patch
-    pub fn endPatch(self: *Self) !void {
+    pub fn endPatch(_: *Self) !void {
         @panic("TODO: to be implemented");
     }
 
@@ -126,8 +126,7 @@ pub const Pattern = struct {
     pub fn getColorStopCount(self: *Self) !usize {
         var count: usize = 0;
         var c_ptr = @ptrCast([*c]c_int, &count);
-        const c_enum = c.cairo_pattern_get_color_stop_count(self.c_ptr, c_ptr);
-        const c_integer = @enumToInt(c_enum);
+        const c_integer = c.cairo_pattern_get_color_stop_count(self.c_ptr, c_ptr);
         return switch (c_integer) {
             c.CAIRO_STATUS_SUCCESS => count,
             c.CAIRO_STATUS_INVALID_INDEX => Error.InvalidIndex,
@@ -141,8 +140,7 @@ pub const Pattern = struct {
     /// is an error.
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-get-color-stop-rgba
     pub fn getColorStopRgba(self: *Self, index: usize, offset: *f64, red: *f64, green: *f64, blue: *f64, alpha: *f64) !void {
-        const c_enum = c.cairo_pattern_get_color_stop_rgba(self.c_ptr, @intCast(c_int, index), offset, red, green, blue, alpha);
-        const c_integer = @enumToInt(c_enum);
+        const c_integer = c.cairo_pattern_get_color_stop_rgba(self.c_ptr, @intCast(c_int, index), offset, red, green, blue, alpha);
         return switch (c_integer) {
             c.CAIRO_STATUS_SUCCESS => {},
             c.CAIRO_STATUS_INVALID_INDEX => Error.InvalidIndex,
@@ -152,12 +150,12 @@ pub const Pattern = struct {
     }
 
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-mesh-pattern-get-control-point
-    pub fn getControlPoint(self: *Self) !void {
+    pub fn getControlPoint(_: *Self) !void {
         @panic("TODO: to be implemented");
     }
 
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-mesh-pattern-get-corner-color-rgba
-    pub fn getCornerColorRgba(self: *Self) !void {
+    pub fn getCornerColorRgba(_: *Self) !void {
         @panic("TODO: to be implemented");
     }
 
@@ -167,14 +165,13 @@ pub const Pattern = struct {
     }
 
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-get-filter
-    pub fn getFilter(self: *Self) !void {
+    pub fn getFilter(_: *Self) !void {
         @panic("TODO: to be implemented");
     }
 
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-get-linear-points
     pub fn getLinearPoints(self: *Self, x0: *f64, y0: *f64, x1: *f64, y1: *f64) !void {
-        const c_enum = c.cairo_pattern_get_linear_points(self.c_ptr, x0, y0, x1, y1);
-        const c_integer = @enumToInt(c_enum);
+        const c_integer = c.cairo_pattern_get_linear_points(self.c_ptr, x0, y0, x1, y1);
         return switch (c_integer) {
             c.CAIRO_STATUS_SUCCESS => {},
             c.CAIRO_STATUS_PATTERN_TYPE_MISMATCH => Error.PatternTypeMismatch,
@@ -189,19 +186,18 @@ pub const Pattern = struct {
     }
 
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-mesh-pattern-get-patch-count
-    pub fn getPatchCount(self: *Self) !void {
+    pub fn getPatchCount(_: *Self) !void {
         @panic("TODO: to be implemented");
     }
 
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-mesh-pattern-get-path
-    pub fn getPath(self: *Self) !void {
+    pub fn getPath(_: *Self) !void {
         @panic("TODO: to be implemented");
     }
 
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-get-radial-circles
     pub fn getRadialCircles(self: *Self, x0: *f64, y0: *f64, r0: *f64, x1: *f64, y1: *f64, r1: *f64) !void {
-        const c_enum = c.cairo_pattern_get_radial_circles(self.c_ptr, x0, y0, r0, x1, y1, r1);
-        const c_integer = @enumToInt(c_enum);
+        const c_integer = c.cairo_pattern_get_radial_circles(self.c_ptr, x0, y0, r0, x1, y1, r1);
         return switch (c_integer) {
             c.CAIRO_STATUS_SUCCESS => {},
             c.CAIRO_STATUS_PATTERN_TYPE_MISMATCH => Error.PatternTypeMismatch,
@@ -220,8 +216,7 @@ pub const Pattern = struct {
     /// error.
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-get-rgba
     pub fn getRgba(self: *Self, red: *f64, green: *f64, blue: *f64, alpha: *f64) !void {
-        const c_enum = c.cairo_pattern_get_rgba(self.c_ptr, red, green, blue, alpha);
-        const c_integer = @enumToInt(c_enum);
+        const c_integer = c.cairo_pattern_get_rgba(self.c_ptr, red, green, blue, alpha);
         return switch (c_integer) {
             c.CAIRO_STATUS_SUCCESS => {},
             c.CAIRO_STATUS_PATTERN_TYPE_MISMATCH => Error.PatternTypeMismatch,
@@ -235,8 +230,7 @@ pub const Pattern = struct {
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-get-surface
     pub fn getSurface(self: *Self, surface: *Surface) !void {
         const c_ptr = @ptrCast([*c]?*c.struct__cairo_surface, &surface.c_ptr);
-        const c_enum = c.cairo_pattern_get_surface(self.c_ptr, c_ptr);
-        const c_integer = @enumToInt(c_enum);
+        const c_integer = c.cairo_pattern_get_surface(self.c_ptr, c_ptr);
         return switch (c_integer) {
             c.CAIRO_STATUS_SUCCESS => {},
             c.CAIRO_STATUS_PATTERN_TYPE_MISMATCH => Error.PatternTypeMismatch,
@@ -251,17 +245,17 @@ pub const Pattern = struct {
     }
 
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-get-user-data
-    pub fn getUserData(self: *Self) !void {
+    pub fn getUserData(_: *Self) !void {
         @panic("TODO: to be implemented");
     }
 
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-mesh-pattern-line-to
-    pub fn lineTo(self: *Self) !void {
+    pub fn lineTo(_: *Self) !void {
         @panic("TODO: to be implemented");
     }
 
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-mesh-pattern-move-to
-    pub fn moveTo(self: *Self) !void {
+    pub fn moveTo(_: *Self) !void {
         @panic("TODO: to be implemented");
     }
 
@@ -274,17 +268,17 @@ pub const Pattern = struct {
     }
 
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-mesh-pattern-set-control-point
-    pub fn setControlPoint(self: *Self) !void {
+    pub fn setControlPoint(_: *Self) !void {
         @panic("TODO: to be implemented");
     }
 
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-mesh-pattern-set-corner-color-rgb
-    pub fn setCornerColorRgb(self: *Self) !void {
+    pub fn setCornerColorRgb(_: *Self) !void {
         @panic("TODO: to be implemented");
     }
 
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-mesh-pattern-set-corner-color-rgba
-    pub fn setCornerColorRgba(self: *Self) !void {
+    pub fn setCornerColorRgba(_: *Self) !void {
         @panic("TODO: to be implemented");
     }
 
@@ -294,7 +288,7 @@ pub const Pattern = struct {
     }
 
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-set-filter
-    pub fn setFilter(self: *Self) !void {
+    pub fn setFilter(_: *Self) !void {
         @panic("TODO: to be implemented");
     }
 
@@ -305,14 +299,14 @@ pub const Pattern = struct {
     }
 
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-set-user-data
-    pub fn setUserData(self: *Self) !void {
+    pub fn setUserData(_: *Self) !void {
         @panic("TODO: to be implemented");
     }
 
     /// Check whether an error has previously occurred for this pattern.
     /// https://cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-status
     pub fn status(c_ptr: ?*c.struct__cairo_pattern) !void {
-        const c_integer = @enumToInt(c.cairo_pattern_status(c_ptr));
+        const c_integer = c.cairo_pattern_status(c_ptr);
         return switch (c_integer) {
             c.CAIRO_STATUS_SUCCESS => {}, // nothing to do if successful
             c.CAIRO_STATUS_NO_MEMORY => Error.NoMemory,
@@ -334,36 +328,36 @@ test "Pattern.status() returns no error" {
     defer pattern.destroy();
 
     var errored = false;
-    _ = Pattern.status(pattern.c_ptr) catch |err| {
+    _ = Pattern.status(pattern.c_ptr) catch {
         errored = true;
     };
-    expectEqual(false, errored);
+    try expectEqual(false, errored);
 }
 
 test "reference() and destroy() modify the reference count as expected" {
     var pattern = try Pattern.createRgb(1, 0, 0);
 
-    expectEqual(@as(c_uint, 1), pattern.getReferenceCount());
+    try expectEqual(@as(c_uint, 1), pattern.getReferenceCount());
     _ = pattern.reference();
-    expectEqual(@as(c_uint, 2), pattern.getReferenceCount());
+    try expectEqual(@as(c_uint, 2), pattern.getReferenceCount());
     pattern.destroy();
-    expectEqual(@as(c_uint, 1), pattern.getReferenceCount());
+    try expectEqual(@as(c_uint, 1), pattern.getReferenceCount());
     pattern.destroy();
-    expectEqual(@as(c_uint, 0), pattern.getReferenceCount());
+    try expectEqual(@as(c_uint, 0), pattern.getReferenceCount());
 }
 
 test "addColorStopRgb() returns the expected error when the pattern is not a gradient pattern" {
     var pattern = try Pattern.createRgb(1, 0, 0);
     defer pattern.destroy();
 
-    expectError(error.PatternTypeMismatch, pattern.addColorStopRgb(0, 1, 0, 0));
+    try expectError(error.PatternTypeMismatch, pattern.addColorStopRgb(0, 1, 0, 0));
 }
 
 test "addColorStopRgba() returns the expected error when the pattern is not a gradient pattern" {
     var pattern = try Pattern.createRgb(1, 0, 0);
     defer pattern.destroy();
 
-    expectError(error.PatternTypeMismatch, pattern.addColorStopRgba(0, 1, 0, 0, 1));
+    try expectError(error.PatternTypeMismatch, pattern.addColorStopRgba(0, 1, 0, 0, 1));
 }
 
 test "getColorStopCount() returns the expected color stops of a linear gradient" {
@@ -371,16 +365,16 @@ test "getColorStopCount() returns the expected color stops of a linear gradient"
     defer pattern.destroy();
 
     const n0 = try pattern.getColorStopCount();
-    expectEqual(@as(usize, 0), n0);
+    try expectEqual(@as(usize, 0), n0);
 
     const offset: f64 = 0.0;
     try pattern.addColorStopRgb(offset, 1, 0, 0);
     const n1 = try pattern.getColorStopCount();
-    expectEqual(@as(usize, 1), n1);
+    try expectEqual(@as(usize, 1), n1);
 
     try pattern.addColorStopRgb(offset, 0, 1, 0);
     const n2 = try pattern.getColorStopCount();
-    expectEqual(@as(usize, 2), n2);
+    try expectEqual(@as(usize, 2), n2);
 }
 
 test "getColorStopCount() returns the expected color stops of a radial gradient" {
@@ -388,16 +382,16 @@ test "getColorStopCount() returns the expected color stops of a radial gradient"
     defer pattern.destroy();
 
     const n0 = try pattern.getColorStopCount();
-    expectEqual(@as(usize, 0), n0);
+    try expectEqual(@as(usize, 0), n0);
 
     const offset: f64 = 0.0;
     try pattern.addColorStopRgb(offset, 1, 0, 0);
     const n1 = try pattern.getColorStopCount();
-    expectEqual(@as(usize, 1), n1);
+    try expectEqual(@as(usize, 1), n1);
 
     try pattern.addColorStopRgb(offset, 0, 1, 0);
     const n2 = try pattern.getColorStopCount();
-    expectEqual(@as(usize, 2), n2);
+    try expectEqual(@as(usize, 2), n2);
 }
 
 test "getColorStopRgba() sets offset, RGB, alpha with the expected values" {
@@ -414,21 +408,21 @@ test "getColorStopRgba() sets offset, RGB, alpha with the expected values" {
 
     var index: usize = 0;
     _ = try pattern.getColorStopRgba(index, &offset, &red, &green, &blue, &alpha);
-    expectEqual(@as(f64, 0.1), offset);
-    expectEqual(@as(f64, 1), red);
-    expectEqual(@as(f64, 0.75), green);
-    expectEqual(@as(f64, 0.5), blue);
-    expectEqual(@as(f64, 0.95), alpha);
+    try expectEqual(@as(f64, 0.1), offset);
+    try expectEqual(@as(f64, 1), red);
+    try expectEqual(@as(f64, 0.75), green);
+    try expectEqual(@as(f64, 0.5), blue);
+    try expectEqual(@as(f64, 0.95), alpha);
 
     try pattern.addColorStopRgba(0.2, 0.5, 0.6, 0.7, 1.0); // offset,r,g,b,a
 
     index = 1;
     _ = try pattern.getColorStopRgba(index, &offset, &red, &green, &blue, &alpha);
-    expectEqual(@as(f64, 0.2), offset);
-    expectEqual(@as(f64, 0.5), red);
-    expectEqual(@as(f64, 0.6), green);
-    expectEqual(@as(f64, 0.7), blue);
-    expectEqual(@as(f64, 1.0), alpha);
+    try expectEqual(@as(f64, 0.2), offset);
+    try expectEqual(@as(f64, 0.5), red);
+    try expectEqual(@as(f64, 0.6), green);
+    try expectEqual(@as(f64, 0.7), blue);
+    try expectEqual(@as(f64, 1.0), alpha);
 }
 
 test "getColorStopRgba() returns a PatternTypeMismatch error for non-gradial patterns" {
@@ -453,10 +447,10 @@ test "getColorStopRgba() returns a PatternTypeMismatch error for non-gradial pat
     var blue: f64 = undefined;
     var alpha: f64 = undefined;
 
-    expectError(error.PatternTypeMismatch, pattern_rgb.getColorStopRgba(index, &offset, &red, &green, &blue, &alpha));
-    expectError(error.PatternTypeMismatch, pattern_rgba.getColorStopRgba(index, &offset, &red, &green, &blue, &alpha));
-    expectError(error.PatternTypeMismatch, pattern_surface.getColorStopRgba(index, &offset, &red, &green, &blue, &alpha));
-    expectError(error.PatternTypeMismatch, pattern_mesh.getColorStopRgba(index, &offset, &red, &green, &blue, &alpha));
+    try expectError(error.PatternTypeMismatch, pattern_rgb.getColorStopRgba(index, &offset, &red, &green, &blue, &alpha));
+    try expectError(error.PatternTypeMismatch, pattern_rgba.getColorStopRgba(index, &offset, &red, &green, &blue, &alpha));
+    try expectError(error.PatternTypeMismatch, pattern_surface.getColorStopRgba(index, &offset, &red, &green, &blue, &alpha));
+    try expectError(error.PatternTypeMismatch, pattern_mesh.getColorStopRgba(index, &offset, &red, &green, &blue, &alpha));
 }
 
 test "getColorStopRgba() returns a InvalidIndex error for gradial patterns with not enough color stops" {
@@ -470,7 +464,7 @@ test "getColorStopRgba() returns a InvalidIndex error for gradial patterns with 
     var blue: f64 = undefined;
     var alpha: f64 = undefined;
 
-    expectError(error.InvalidIndex, pattern.getColorStopRgba(index, &offset, &red, &green, &blue, &alpha));
+    try expectError(error.InvalidIndex, pattern.getColorStopRgba(index, &offset, &red, &green, &blue, &alpha));
 
     // add a color stop => no errors if we pick the color whose index is 0
     try pattern.addColorStopRgb(0, 1, 0, 0);
@@ -478,7 +472,7 @@ test "getColorStopRgba() returns a InvalidIndex error for gradial patterns with 
 
     // since we added a single color stop, we still have errors for indexes > 0
     index = 1;
-    expectError(error.InvalidIndex, pattern.getColorStopRgba(index, &offset, &red, &green, &blue, &alpha));
+    try expectError(error.InvalidIndex, pattern.getColorStopRgba(index, &offset, &red, &green, &blue, &alpha));
 }
 
 test "getExtend() returns Extend.pad for gradient patterns" {
@@ -491,10 +485,10 @@ test "getExtend() returns Extend.pad for gradient patterns" {
     var pattern_radial = try Pattern.createRadial(128, 128, 64, 128, 128, 128);
     defer pattern_radial.destroy();
 
-    expectEqual(Extend.pad, pattern_rgb.getExtend());
-    expectEqual(Extend.pad, pattern_rgba.getExtend());
-    expectEqual(Extend.pad, pattern_linear.getExtend());
-    expectEqual(Extend.pad, pattern_radial.getExtend());
+    try expectEqual(Extend.pad, pattern_rgb.getExtend());
+    try expectEqual(Extend.pad, pattern_rgba.getExtend());
+    try expectEqual(Extend.pad, pattern_linear.getExtend());
+    try expectEqual(Extend.pad, pattern_radial.getExtend());
 }
 
 test "getExtend() returns Extend.none for surface patterns" {
@@ -503,7 +497,7 @@ test "getExtend() returns Extend.none for surface patterns" {
     var pattern = try Pattern.createForSurface(&surface);
     defer pattern.destroy();
 
-    expectEqual(Extend.none, pattern.getExtend());
+    try expectEqual(Extend.none, pattern.getExtend());
 }
 
 test "getLinearPoints() returns a PatternTypeMismatch error for a non linear pattern" {
@@ -514,7 +508,7 @@ test "getLinearPoints() returns a PatternTypeMismatch error for a non linear pat
     var y0: f64 = undefined;
     var x1: f64 = undefined;
     var y1: f64 = undefined;
-    expectError(error.PatternTypeMismatch, pattern.getLinearPoints(&x0, &y0, &x1, &y1));
+    try expectError(error.PatternTypeMismatch, pattern.getLinearPoints(&x0, &y0, &x1, &y1));
 }
 
 test "getLinearPoints() sets x0, y0, x1, y0 to the expected values" {
@@ -527,10 +521,10 @@ test "getLinearPoints() sets x0, y0, x1, y0 to the expected values" {
     var y1: f64 = undefined;
     _ = try pattern.getLinearPoints(&x0, &y0, &x1, &y1);
 
-    expectEqual(@as(f64, 1), x0);
-    expectEqual(@as(f64, 2), y0);
-    expectEqual(@as(f64, 10), x1);
-    expectEqual(@as(f64, 20), y1);
+    try expectEqual(@as(f64, 1), x0);
+    try expectEqual(@as(f64, 2), y0);
+    try expectEqual(@as(f64, 10), x1);
+    try expectEqual(@as(f64, 20), y1);
 }
 
 test "getRadialCircles() returns a PatternTypeMismatch error for a non radial pattern" {
@@ -543,7 +537,7 @@ test "getRadialCircles() returns a PatternTypeMismatch error for a non radial pa
     var x1: f64 = undefined;
     var y1: f64 = undefined;
     var r1: f64 = undefined;
-    expectError(error.PatternTypeMismatch, pattern.getRadialCircles(&x0, &y0, &r0, &x1, &y1, &r1));
+    try expectError(error.PatternTypeMismatch, pattern.getRadialCircles(&x0, &y0, &r0, &x1, &y1, &r1));
 }
 
 test "getRgba() returns a PatternTypeMismatch error for a pattern which is not a solid color pattern" {
@@ -566,10 +560,10 @@ test "getRgba() returns a PatternTypeMismatch error for a pattern which is not a
     var blue: f64 = undefined;
     var alpha: f64 = undefined;
 
-    expectError(error.PatternTypeMismatch, pattern_surface.getRgba(&red, &green, &blue, &alpha));
-    expectError(error.PatternTypeMismatch, pattern_linear.getRgba(&red, &green, &blue, &alpha));
-    expectError(error.PatternTypeMismatch, pattern_radial.getRgba(&red, &green, &blue, &alpha));
-    expectError(error.PatternTypeMismatch, pattern_mesh.getRgba(&red, &green, &blue, &alpha));
+    try expectError(error.PatternTypeMismatch, pattern_surface.getRgba(&red, &green, &blue, &alpha));
+    try expectError(error.PatternTypeMismatch, pattern_linear.getRgba(&red, &green, &blue, &alpha));
+    try expectError(error.PatternTypeMismatch, pattern_radial.getRgba(&red, &green, &blue, &alpha));
+    try expectError(error.PatternTypeMismatch, pattern_mesh.getRgba(&red, &green, &blue, &alpha));
 }
 
 test "getRgba() sets a RGB and alpha with the expected values" {
@@ -585,16 +579,16 @@ test "getRgba() sets a RGB and alpha with the expected values" {
     var alpha: f64 = undefined;
 
     _ = try pattern_rgb.getRgba(&red, &green, &blue, &alpha);
-    expectEqual(@as(f64, 1.0), red);
-    expectEqual(@as(f64, 0.75), green);
-    expectEqual(@as(f64, 0.5), blue);
-    expectEqual(@as(f64, 1.0), alpha);
+    try expectEqual(@as(f64, 1.0), red);
+    try expectEqual(@as(f64, 0.75), green);
+    try expectEqual(@as(f64, 0.5), blue);
+    try expectEqual(@as(f64, 1.0), alpha);
 
     _ = try pattern_rgba.getRgba(&red, &green, &blue, &alpha);
-    expectEqual(@as(f64, 0.1), red);
-    expectEqual(@as(f64, 0.2), green);
-    expectEqual(@as(f64, 0.3), blue);
-    expectEqual(@as(f64, 0.95), alpha);
+    try expectEqual(@as(f64, 0.1), red);
+    try expectEqual(@as(f64, 0.2), green);
+    try expectEqual(@as(f64, 0.3), blue);
+    try expectEqual(@as(f64, 0.95), alpha);
 }
 
 test "getSurface() returns a PatternTypeMismatch error for non-surface patterns" {
@@ -616,30 +610,30 @@ test "getSurface() returns a PatternTypeMismatch error for non-surface patterns"
     var pattern_mesh = try Pattern.createMesh();
     defer pattern_mesh.destroy();
 
-    expectError(error.PatternTypeMismatch, pattern_rgb.getSurface(&surface));
-    expectError(error.PatternTypeMismatch, pattern_rgba.getSurface(&surface));
-    expectError(error.PatternTypeMismatch, pattern_linear.getSurface(&surface));
-    expectError(error.PatternTypeMismatch, pattern_radial.getSurface(&surface));
-    expectError(error.PatternTypeMismatch, pattern_mesh.getSurface(&surface));
+    try expectError(error.PatternTypeMismatch, pattern_rgb.getSurface(&surface));
+    try expectError(error.PatternTypeMismatch, pattern_rgba.getSurface(&surface));
+    try expectError(error.PatternTypeMismatch, pattern_linear.getSurface(&surface));
+    try expectError(error.PatternTypeMismatch, pattern_radial.getSurface(&surface));
+    try expectError(error.PatternTypeMismatch, pattern_mesh.getSurface(&surface));
 }
 
 test "getSurface() does not increase the reference count of the surface" {
     var surface = try Surface.image(20, 10);
-    expectEqual(@as(c_uint, 1), surface.getReferenceCount());
+    try expectEqual(@as(c_uint, 1), surface.getReferenceCount());
 
     var pattern = try Pattern.createForSurface(&surface); // refcount+1
-    expectEqual(@as(c_uint, 2), surface.getReferenceCount());
+    try expectEqual(@as(c_uint, 2), surface.getReferenceCount());
 
     _ = try pattern.getSurface(&surface); // does not increase refcount
-    expectEqual(@as(c_uint, 2), surface.getReferenceCount());
+    try expectEqual(@as(c_uint, 2), surface.getReferenceCount());
 
     // surface is a resource associated to pattern, so when pattern is destroyed
     // the refcount of surface decreases by 1
     pattern.destroy();
-    expectEqual(@as(c_uint, 1), surface.getReferenceCount());
+    try expectEqual(@as(c_uint, 1), surface.getReferenceCount());
 
     surface.destroy();
-    expectEqual(@as(c_uint, 0), surface.getReferenceCount());
+    try expectEqual(@as(c_uint, 0), surface.getReferenceCount());
 }
 
 test "getType() returns the expected pattern type" {
@@ -663,28 +657,28 @@ test "getType() returns the expected pattern type" {
     var pattern_mesh = try Pattern.createMesh();
     defer pattern_mesh.destroy();
 
-    expectEqual(PatternType.solid, pattern_rgb.getType());
-    expectEqual(PatternType.solid, pattern_rgba.getType());
-    expectEqual(PatternType.surface, pattern_surface.getType());
-    expectEqual(PatternType.linear, pattern_linear.getType());
-    expectEqual(PatternType.radial, pattern_radial.getType());
-    expectEqual(PatternType.mesh, pattern_mesh.getType());
+    try expectEqual(PatternType.solid, pattern_rgb.getType());
+    try expectEqual(PatternType.solid, pattern_rgba.getType());
+    try expectEqual(PatternType.surface, pattern_surface.getType());
+    try expectEqual(PatternType.linear, pattern_linear.getType());
+    try expectEqual(PatternType.radial, pattern_radial.getType());
+    try expectEqual(PatternType.mesh, pattern_mesh.getType());
     // TODO: how to build a cairo_pattern_t whose type is PatternType.raster_source?
-    // expectEqual(PatternType.raster_source, pattern_raster_source.getType());
+    // try expectEqual(PatternType.raster_source, pattern_raster_source.getType());
 }
 
 test "setExtend() sets the expected Extend" {
     var pattern = try Pattern.createRgb(1, 0, 0);
     defer pattern.destroy();
 
-    expectEqual(Extend.pad, pattern.getExtend());
+    try expectEqual(Extend.pad, pattern.getExtend());
 
     pattern.setExtend(Extend.none);
-    expectEqual(Extend.none, pattern.getExtend());
+    try expectEqual(Extend.none, pattern.getExtend());
 
     pattern.setExtend(Extend.repeat);
-    expectEqual(Extend.repeat, pattern.getExtend());
+    try expectEqual(Extend.repeat, pattern.getExtend());
 
     pattern.setExtend(Extend.reflect);
-    expectEqual(Extend.reflect, pattern.getExtend());
+    try expectEqual(Extend.reflect, pattern.getExtend());
 }

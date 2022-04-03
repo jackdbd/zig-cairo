@@ -1,14 +1,34 @@
 # zig-cairo
 
-[![Build Status](https://travis-ci.com/jackdbd/zig-cairo.svg?branch=main)](https://travis-ci.com/jackdbd/zig-cairo)
+[![CI](https://github.com/jackdbd/zig-cairo/actions/workflows/ci.yaml/badge.svg)](https://github.com/jackdbd/zig-cairo/actions/workflows/ci.yaml)
 
 Thin wrapper for the [cairo](https://github.com/freedesktop/cairo) 2D graphics library.
+
+Tested on Zig version **0.9.1**.
 
 🚧 Very much a work in progress... 🚧
 
 ## Naming convention
 
 As suggested in the [cairo Appendix](https://www.cairographics.org/manual/language-bindings.html), the type names and method names of the original C library were changed to follow the [Zig Style Guide](https://ziglang.org/documentation/0.7.1/#Names). For example, a method like `cairo_set_source(cr, source)` in cairo becomes `cr.setSource(source)` in zig-cairo.
+
+## Installation
+
+Clone the repo and jump into it:
+
+```sh
+git clone git@github.com:jackdbd/zig-cairo.git
+cd zig-cairo
+```
+
+In order to use this library and run the examples you will need zig version **0.9.1**. You can get it using [zigup](https://github.com/marler8997/zigup):
+
+```sh
+zigup fetch 0.9.1
+zigup 0.9.1
+```
+
+You will also need [cairo](https://www.cairographics.org/), [pango](https://gitlab.gnome.org/GNOME/pango), [pangocairo](https://docs.gtk.org/PangoCairo/), [xcb](https://xcb.freedesktop.org/), and [xvfb](https://www.x.org/releases/X11R7.6/doc/man/man1/Xvfb.1.xhtml) if you want to run some tests/examples in a virtual framebuffer. See [this script](./scripts/install-dependencies.sh).
 
 ## Examples
 
@@ -34,6 +54,12 @@ Some other examples don't generate any image file. This one opens a window and r
 zig build surface_xcb
 ```
 
+If you installed [XVFB](https://www.x.org/releases/X11R7.6/doc/man/man1/Xvfb.1.xhtml) you can also run this example in a virtual framebuffer:
+
+```sh
+xvfb-run --server-args="-screen 0 1024x768x24" zig build surface_xcb
+```
+
 ## Tests
 
 ```sh
@@ -43,9 +69,3 @@ zig build test
 # run all tests, only in debug mode
 zig build test-debug
 ```
-
-Tested against these zig compiler versions on [Travis CI](https://travis-ci.com/github/jackdbd/zig-cairo) and using [zigup](https://github.com/marler8997/zigup) on my machine:
-
-- 0.7.0 (not working, see [#2](https://github.com/jackdbd/zig-cairo/issues/2))
-- 0.7.1 (not working, see [#2](https://github.com/jackdbd/zig-cairo/issues/2))
-- 0.8.0-dev.1032+8098b3f84

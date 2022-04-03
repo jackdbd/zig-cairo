@@ -3,7 +3,7 @@ const cairo = @import("cairo");
 const setBackground = @import("utils.zig").setBackground;
 
 /// https://www.cairographics.org/samples/curve_to/
-fn curveTo(cr: *cairo.Context, width: usize, height: usize) void {
+fn curveTo(cr: *cairo.Context, _: usize, _: usize) void {
     const x: f64 = 25.6;
     const y: f64 = 128.0;
 

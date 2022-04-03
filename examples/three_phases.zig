@@ -40,7 +40,7 @@ fn point(x: f64, offset: f64) Point {
     };
 }
 
-fn drawCosine(cr: *cairo.Context, color: coloror, offset: f64) void {
+fn drawCosine(cr: *cairo.Context, color: Color, offset: f64) void {
     cr.setSourceRgb(color.r, color.g, color.b);
     var x: f64 = 0;
     const p0 = point(x, offset);

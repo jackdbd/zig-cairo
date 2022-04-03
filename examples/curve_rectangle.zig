@@ -3,7 +3,7 @@ const cairo = @import("cairo");
 const setBackground = @import("utils.zig").setBackground;
 
 /// https://www.cairographics.org/samples/curve_rectangle/
-fn curveRectangle(cr: *cairo.Context, width: usize, height: usize) void {
+fn curveRectangle(cr: *cairo.Context, _: usize, _: usize) void {
     const x0: f64 = 25.6;
     const y0: f64 = 25.6;
     const rect_width: f64 = 204.8;

@@ -28,7 +28,7 @@ fn triangle(cr: *cairo.Context, size: f64) void {
 
 /// Zig porting of this example in C.
 /// https://github.com/freedesktop/cairo/blob/master/perf/micro/sierpinski.c
-fn drawSierpinski(cr: *cairo.Context, width: f64, height: f64) void {
+fn drawSierpinski(cr: *cairo.Context, _: f64, height: f64) void {
     const t_height = height / 2.0;
     const t_width = t_height / m_1_sqrt_3;
 

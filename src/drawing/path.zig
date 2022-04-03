@@ -67,7 +67,7 @@ pub const Path = struct {
     /// Check whether an error has previously occurred for this path.
     /// https://cairographics.org/manual/cairo-cairo-t.html#cairo-status
     pub fn status(c_ptr: *c.struct_cairo_path) !void {
-        const c_integer = @enumToInt(c_ptr.status);
+        const c_integer = c_ptr.status;
         return switch (c_integer) {
             c.CAIRO_STATUS_SUCCESS => {}, // nothing to do if successful
             c.CAIRO_STATUS_NO_MEMORY => Error.NoMemory,

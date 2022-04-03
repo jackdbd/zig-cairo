@@ -60,7 +60,7 @@ pub const Device = struct {
         return DeviceType.fromCairoEnum(c.cairo_device_get_type(self.c_ptr));
     }
 
-    pub fn getUserData(self: *Self) void {
+    pub fn getUserData(_: *Self) void {
         @panic("TODO: to be implemented");
     }
 
@@ -87,7 +87,7 @@ pub const Device = struct {
         return c.cairo_device_observer_paint_elapsed(self.c_ptr);
     }
 
-    pub fn observerPrint(self: *Self) void {
+    pub fn observerPrint(_: *Self) void {
         @panic("TODO: to be implemented");
     }
 
@@ -110,7 +110,7 @@ pub const Device = struct {
         c.cairo_device_release(self.c_ptr);
     }
 
-    pub fn setUserData(self: *Self) void {
+    pub fn setUserData(_: *Self) void {
         @panic("TODO: to be implemented");
     }
 
@@ -137,31 +137,31 @@ fn testDevice(filename: []const u8) !Device {
 test "reference() and destroy() modify the reference count as expected" {
     var device = try testDevice(OUTPUT_DEVICE_FILENAME);
 
-    expectEqual(@as(c_uint, 1), device.getReferenceCount());
+    try expectEqual(@as(c_uint, 1), device.getReferenceCount());
 
     _ = device.reference();
-    expectEqual(@as(c_uint, 2), device.getReferenceCount());
+    try expectEqual(@as(c_uint, 2), device.getReferenceCount());
 
     device.destroy();
-    expectEqual(@as(c_uint, 1), device.getReferenceCount());
+    try expectEqual(@as(c_uint, 1), device.getReferenceCount());
 
     // calling destroy() again does NOT give a refcount of 0. Why? Is it a bug in Cairo?
     // device.destroy();
-    // expectEqual(@as(c_uint, 0), device.getReferenceCount());
+    // try expectEqual(@as(c_uint, 0), device.getReferenceCount());
 }
 
 test "getType() returns the expected device type" {
     var device = try testDevice(OUTPUT_DEVICE_FILENAME);
     defer device.destroy();
 
-    expectEqual(DeviceType.script, device.getType());
+    try expectEqual(DeviceType.script, device.getType());
 }
 
 test "the script surface has the expected mode (ASCII)" {
     var device = try testDevice(OUTPUT_DEVICE_FILENAME);
     defer device.destroy();
 
-    expectEqual(ScriptMode.ascii, script_surface.getMode(device.c_ptr));
+    try expectEqual(ScriptMode.ascii, script_surface.getMode(device.c_ptr));
 }
 
 test "acquire() after finish() returns the expected error" {
@@ -172,20 +172,20 @@ test "acquire() after finish() returns the expected error" {
     device.finish();
 
     // acquire() after finish() is not
-    expectError(Error.DeviceFinished, device.acquire());
-    expectEqual(@as(c_uint, 1), device.getReferenceCount());
+    try expectError(Error.DeviceFinished, device.acquire());
+    try expectEqual(@as(c_uint, 1), device.getReferenceCount());
 
     var errored = false;
     _ = device.status() catch |err| {
         errored = true;
-        expectEqual(Error.DeviceFinished, err);
+        try expectEqual(Error.DeviceFinished, err);
     };
-    expectEqual(true, errored);
+    try expectEqual(true, errored);
 }
 
 test "acquire() a device after destroy() returns the expected error" {
     var device = try testDevice(OUTPUT_DEVICE_FILENAME);
     device.destroy();
 
-    expectError(Error.DeviceFinished, device.acquire());
+    try expectError(Error.DeviceFinished, device.acquire());
 }

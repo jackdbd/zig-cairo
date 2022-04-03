@@ -6,7 +6,7 @@ const c = @import("../c.zig");
 const Error = @import("../utilities/error_handling.zig").Error;
 const enums = @import("../enums.zig");
 
-const Status = enum {
+const Status = enum(u1) {
     Success = c.CAIRO_STATUS_SUCCESS, // 0
 };
 
@@ -53,14 +53,14 @@ pub const FontOptions = struct {
 };
 
 /// https://cairographics.org/manual/cairo-cairo-font-options-t.html#cairo-hint-metrics-t
-pub const HintMetrics = enum {
+pub const HintMetrics = enum(u2) {
     Default = c.CAIRO_HINT_METRICS_DEFAULT,
     Off = c.CAIRO_HINT_METRICS_OFF,
     On = c.CAIRO_HINT_METRICS_ON,
 };
 
 /// https://cairographics.org/manual/cairo-cairo-font-options-t.html#cairo-hint-style-t
-pub const HintStyle = enum {
+pub const HintStyle = enum(u3) {
     Default = c.CAIRO_HINT_STYLE_DEFAULT,
     None = c.CAIRO_HINT_STYLE_NONE,
     Slight = c.CAIRO_HINT_STYLE_SLIGHT,
