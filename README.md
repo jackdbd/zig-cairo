@@ -32,6 +32,21 @@ You will also need [cairo](https://www.cairographics.org/), [pango](https://gitl
 
 ## Examples
 
+You can find many examples in the [examples directory](./examples/README.md).
+
+![arc.zig](./examples/generated/arc.png)
+![arc_negative.zig](./examples/generated/arc_negative.png)
+![curve_to.zig](./examples/generated/curve_to.png)
+![fill_style.zig](./examples/generated/fill_style.png)
+![gradient.zig](./examples/generated/gradient.png)
+![image.zig](./examples/generated/image.png)
+![spiral.zig](./examples/generated/spiral.png)
+![spirograph.zig](./examples/generated/spirograph.png)
+
+![compositing.zig](./examples/generated/compositing.png)
+![pango_simple.zig](./examples/generated/pango_simple.png)
+
+
 Run `zig build --help` to see all the compilation targets.
 
 Most examples generate a PNG. Here I use [feh](https://feh.finalrewind.org/) to view the generated file:
